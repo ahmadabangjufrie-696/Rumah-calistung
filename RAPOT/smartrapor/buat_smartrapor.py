@@ -429,7 +429,7 @@ def buat_ekskul(wb):
         ('"Aktif mengikuti kegiatan,Aktif mengikuti kegiatan dan perlu berlatih lebih giat,'
          'Aktif mengikuti kegiatan dan tingkatkan lagi untuk percaya diri,Kurang aktif mengikuti kegiatan"',
          [f'{c}{EKS1}:{c}{akhir}' for c in KE['ket']]),
-        ('"-,Naik ke kelas VIII,Naik ke kelas IX,LULUS,Tinggal di kelas"', [f'P{EKS1}:P{akhir}']),
+        ('"-,naik kelas VIII,naik kelas IX,LULUS,belum bisa naik kelas"', [f'P{EKS1}:P{akhir}']),
     ]
     for rumus, rngs in daftar:
         dv = DataValidation(type='list', formula1=rumus, showErrorMessage=False, allow_blank=True)
@@ -558,10 +558,14 @@ def kartu_cetak(ws):
     isi(ws, 'H26', 'Urutan', size=8, warna='6C757D', h='right')
     isi(ws, 'I26', f'="Siswa ke-"&J25&" dari "&COUNTA(SISWA!$D${SISWA1}:$D${SISWA1 + MAKS - 1})', size=9,
         bold=True, warna=HIJAU)
-    isi(ws, 'H27', 'Lalu buka halaman', size=8, warna='6C757D', h='right')
-    isi(ws, 'I27', 'COVER · KETERANGAN DIRI · RAPOR SEKOLAH', size=8, bold=True, warna='495057')
-    isi(ws, 'H28', 'Cetak', size=8, warna='6C757D', h='right')
-    isi(ws, 'I28', 'File › Cetak (atau Unduh › PDF)', size=8, bold=True, warna='495057')
+    # baris 28 dan 30: tempat tombol (dipasang Apps Script: menu SmartRapor › Pasang tombol)
+    isi(ws, 'H27', 'Pindah siswa', size=8, bold=True, warna='6C757D')
+    ws.row_dimensions[28].height = 34
+    isi(ws, 'H29', 'Cetak menjadi PDF', size=8, bold=True, warna='6C757D')
+    ws.row_dimensions[30].height = 40
+    isi(ws, 'H32', 'Tanpa tombol: buka halaman COVER / KETERANGAN DIRI / RAPOR SEKOLAH,', size=7,
+        warna='ADB5BD')
+    isi(ws, 'H33', 'lalu File › Cetak.', size=7, warna='ADB5BD')
     dv = DataValidation(type='list', formula1=f'SISWA!$AB${SISWA1}:$AB${SISWA1 + MAKS - 1}',
                         showErrorMessage=True, error='Pilih nama dari daftar.')
     ws.add_data_validation(dv)
@@ -711,7 +715,7 @@ def buat_cover(wb):
     idx = pemilih(ws, 'J')
     lebar(ws, {'A': 4, 'B': 10, 'C': 14, 'D': 14, 'E': 14, 'F': 14, 'G': 10, 'H': 4})
     for r in range(1, 46):
-        ws.row_dimensions[r].height = 18
+        ws.row_dimensions[r].height = 16.5
     putus = Side(style='dashDot', color='000000')
     for r in range(2, 45):
         ws[f'A{r}'].border = Border(left=putus)
@@ -896,7 +900,7 @@ def isi_contoh(wb):
         e[f'L{r}'], e[f'M{r}'], e[f'N{r}'] = rnd.randint(0, 3), rnd.randint(0, 2), 0
         e[f'O{r}'] = ('Selamat atas prestasi baik yang ananda raih di semester ini. Pertahankan semangat belajar '
                       'dan terus menjadi pribadi yang lebih baik.')
-        e[f'P{r}'] = 'Naik ke kelas IX' if i != 9 else 'LULUS'
+        e[f'P{r}'] = 'naik kelas IX' if i != 9 else 'LULUS'
 
 
 # ---------------------------------------------------------------- utama
