@@ -233,6 +233,11 @@ def buat_siswa(wb):
         isi(ws, f'A{r}', i + 1, size=9, h='center', border=KOTAK)
         for j in range(1, len(KOLOM_SISWA)):
             isi(ws, f'{gl(j + 1)}{r}', size=9, latar=KUNING if j == 3 else None, border=KOTAK)
+    # daftar pilihan "No - Nama" untuk BERANDA (kolom AB disembunyikan)
+    for i in range(MAKS):
+        r = SISWA1 + i
+        ws[f'AB{r}'] = f'=IF(D{r}="","",A{r}&" - "&D{r})'
+    ws.column_dimensions['AB'].hidden = True
     ws.freeze_panes = f'E{SISWA1}'
     ws.sheet_properties.tabColor = EMAS
 
@@ -531,7 +536,7 @@ def baris_progres(ws, r, tab, nama, kol, jml):
 
 
 # ---------------------------------------------------------------- halaman cetak
-PILIH = 'BERANDA!$I$25'   # nomor siswa yang dicetak (dipilih di BERANDA)
+PILIH = 'BERANDA!$J$25'   # nomor siswa yang dicetak (dari pilihan nama di BERANDA!I25)
 
 
 def pemilih(ws, kol=None):
@@ -542,19 +547,23 @@ def pemilih(ws, kol=None):
 def kartu_cetak(ws):
     """kotak pilihan siswa untuk dicetak, di BERANDA"""
     isi(ws, 'H23', 'CETAK RAPORT', size=11, bold=True, warna=HIJAU)
-    isi(ws, 'H24', 'Nomor siswa yang akan dicetak:', size=8, warna='495057')
-    isi(ws, 'H25', 'NOMOR SISWA ➜', size=9, bold=True, warna=PUTIH, latar=HIJAU, h='center')
-    isi(ws, 'I25', 1, size=18, bold=True, warna=HIJAU, latar=KUNING, h='center',
+    isi(ws, 'H24', 'Klik kotak kuning, lalu pilih nama siswa:', size=8, warna='495057')
+    isi(ws, 'H25', 'SISWA ➜', size=9, bold=True, warna=PUTIH, latar=HIJAU, h='center')
+    isi(ws, 'I25', f'=SISWA!$AB${SISWA1}', size=12, bold=True, warna=HIJAU, latar=KUNING, h='center',
         border=Border(left=tebal, right=tebal, top=tebal, bottom=tebal))
     ws.row_dimensions[25].height = 30
-    isi(ws, 'H26', 'Nama', size=8, warna='6C757D', h='right')
-    isi(ws, 'I26', f'={siswa("Nama Peserta Didik", "$I$25")}', size=10, bold=True, warna=HIJAU)
+    # nomor siswa dari pilihan "4 - NAMA" (kolom J disembunyikan)
+    isi(ws, 'J25', '=IFERROR(VALUE(LEFT(I25,FIND(" ",I25)-1)),1)', size=8, warna=PUTIH)
+    ws.column_dimensions['J'].hidden = True
+    isi(ws, 'H26', 'Urutan', size=8, warna='6C757D', h='right')
+    isi(ws, 'I26', f'="Siswa ke-"&J25&" dari "&COUNTA(SISWA!$D${SISWA1}:$D${SISWA1 + MAKS - 1})', size=9,
+        bold=True, warna=HIJAU)
     isi(ws, 'H27', 'Lalu buka halaman', size=8, warna='6C757D', h='right')
     isi(ws, 'I27', 'COVER · KETERANGAN DIRI · RAPOR SEKOLAH', size=8, bold=True, warna='495057')
     isi(ws, 'H28', 'Cetak', size=8, warna='6C757D', h='right')
     isi(ws, 'I28', 'File › Cetak (atau Unduh › PDF)', size=8, bold=True, warna='495057')
-    dv = DataValidation(type='whole', operator='between', formula1='1', formula2=str(MAKS),
-                        showErrorMessage=True, error=f'Isi nomor siswa 1 sampai {MAKS}.')
+    dv = DataValidation(type='list', formula1=f'SISWA!$AB${SISWA1}:$AB${SISWA1 + MAKS - 1}',
+                        showErrorMessage=True, error='Pilih nama dari daftar.')
     ws.add_data_validation(dv)
     dv.add('I25')
 
