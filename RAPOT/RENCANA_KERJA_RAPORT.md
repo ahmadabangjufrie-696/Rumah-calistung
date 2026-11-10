@@ -127,3 +127,15 @@ Pilihan tambahan (lewat Command Prompt):
 - `python isi_raport.py RAPORT.xlsm --tes` mengganti daftar siswa dengan nama dari Google Sheet. Hanya untuk file raport contoh.
 
 Untuk kelas lain, ganti `SHEET_ID` di baris atas `gsdata.py` dengan ID Google Sheet kelas tersebut.
+
+## 9. Cara utama untuk wali kelas: tombol "Ambil Nilai" di dalam raport
+
+Supaya bisa dibagikan ke banyak wali kelas (SD, SMP, MA) tanpa memasang Python dan tanpa PC yang harus selalu menyala,
+pemindahan nilai juga dibuat sebagai **makro di dalam raport** (`excel/AmbilNilai.bas`).
+Cara memasang dan memakainya ada di `excel/PANDUAN_TOMBOL_AMBIL_NILAI.md`.
+
+- Satu Google Sheet untuk satu kelas, berisi semua mapel (satu tab untuk satu mapel), dengan susunan seperti Sheet VIII B.
+- Raport dan Google Sheet dihubungkan lewat sheet `PETA NILAI` (link di B2 dan daftar tab mapel beserta kolomnya). Untuk SD dan MA, cukup tabel ini yang diubah.
+- Tabel bawaan (12 mapel umum dan 16 mapel pondok) sudah dicocokkan dengan raport asli SMP: setiap kolom tepat di judul mapelnya, dan tidak ada sel rumus di kolom isian.
+- Program Python (`isi_raport.py`) tetap ada sebagai cadangan dan alat uji.
+- **Belum diuji di Excel sungguhan.** Uji dulu di satu kelas sebelum dibagikan.
