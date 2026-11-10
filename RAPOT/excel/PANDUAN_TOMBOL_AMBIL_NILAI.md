@@ -35,7 +35,7 @@ Raport induk siap dibagikan.
 | Mulai baris 5 | Daftar tab mapel: **nama tab di Google Sheet**, **jenis** (UMUM = sheet Ff11, PONDOK = sheet Form Nilai), dan **kolom di raport** |
 
 - Isi bawaannya sudah untuk raport SMP (12 mapel umum dan 16 mapel pondok).
-- Satu mapel boleh punya beberapa nama tab, dipisah garis miring. Contoh: `PKN / PPKN`.
+- Satu mapel boleh punya beberapa nama tab, dipisah garis miring. Contoh: `IMLA / IMLA'`.
 - Tab yang tidak ada di Google Sheet dilewati, tidak membuat salah.
 - Untuk raport SD atau MA yang letak kolomnya berbeda, cukup ubah tabel ini. Kodenya tidak perlu diubah.
 

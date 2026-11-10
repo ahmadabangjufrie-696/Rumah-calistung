@@ -310,7 +310,7 @@ Private Function SiapkanPeta() As Worksheet
 
     baris = Array( _
         "PAI|UMUM|A|Ff11, kolom MAPEL : Pendidikan Agama Islam", _
-        "PKN / PPKN|UMUM|CV|Ff11, Pendidikan Pancasila", _
+        "PKN|UMUM|CV|Ff11, Pendidikan Pancasila", _
         "B. INDO|UMUM|EC|Ff11, Bahasa Indonesia", _
         "MTK|UMUM|FJ|Ff11, Matematika", _
         "IPA|UMUM|GQ|Ff11, Ilmu Pengetahuan Alam", _
@@ -373,7 +373,7 @@ Private Function AmbilSheet(namaSheet As String) As Worksheet
     Set AmbilSheet = ws
 End Function
 
-' Nama tab boleh lebih dari satu, dipisah "/" (misal "PKN / PPKN").
+' Nama tab boleh lebih dari satu, dipisah "/" (misal "IMLA / IMLA'").
 Private Function CariTab(wb As Workbook, daftarNama As String) As Worksheet
     Dim ws As Worksheet, t As Variant
     For Each t In Split(daftarNama, "/")
