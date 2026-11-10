@@ -1,12 +1,30 @@
-"""Copy grades from the Google Sheet data into the raport .xlsm by editing the
-sheet XML directly (keeps macros, buttons and shapes intact)."""
-import sys, re, zipfile, shutil
+"""Memindahkan nilai dari Google Sheet ke file raport .xlsm dengan mengubah XML
+sheet secara langsung (makro, tombol, dan bentuk tetap utuh).
+
+Pemakaian:
+  python isi_raport.py RAPORT_ASLI.xlsm [RAPORT_TERISI.xlsm] [--offline] [--tes]
+
+  --offline  pakai salinan CSV di folder data_gs (tanpa internet)
+  --tes      timpa daftar siswa di sheet "siswa" dengan nama dari Google Sheet
+             (hanya untuk file raport contoh, JANGAN untuk raport asli)
+"""
+import sys, os, re, zipfile, argparse, difflib
 from lxml import etree
 from openpyxl.utils import column_index_from_string as ci, get_column_letter as gl
-sys.path.insert(0, sys.argv[3])
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 import gsdata as G
 
-SRC, DST = sys.argv[1], sys.argv[2]
+ap = argparse.ArgumentParser()
+ap.add_argument('asli')
+ap.add_argument('hasil', nargs='?')
+ap.add_argument('--offline', action='store_true')
+ap.add_argument('--tes', action='store_true')
+A = ap.parse_args()
+SRC = A.asli
+DST = A.hasil or os.path.splitext(SRC)[0] + '_TERISI.xlsm'
+if os.path.abspath(SRC) == os.path.abspath(DST):
+    sys.exit('File hasil harus berbeda dari file raport asli.')
 NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
 N = '{%s}' % NS
 zin = zipfile.ZipFile(SRC)
@@ -82,53 +100,75 @@ def num(s):
     except ValueError: return None
     return int(f) if f == int(f) else f
 
-students = G.STUDENTS
+def nilai_sel(sname, ref):
+    """Isi sel (teks atau angka) seperti tersimpan di file."""
+    for c in sheet(sname).iter(N + 'c'):
+        if c.get('r') == ref:
+            t = c.get('t')
+            if t == 'inlineStr':
+                return ''.join(c.find(N + 'is').itertext())
+            v = c.find(N + 'v')
+            if v is None: return ''
+            if t == 's': return shared[int(v.text)]
+            return v.text or ''
+    return ''
+
+try:
+    sst = etree.fromstring(read('xl/sharedStrings.xml'))
+    shared = [''.join(si.itertext()) for si in sst.iter(N + 'si')]
+except KeyError:
+    shared = []
+
 MAXN = 40
+print('Mengambil nilai dari Google Sheet ...')
+GS = G.ambil_semua(os.path.join(HERE, 'data_gs'), offline=A.offline)
 
-# 1) student list (sheet "siswa", rows 7..46)
-for i in range(MAXN):
-    r = 7 + i
-    for c in range(2, 31):  # B..AD constants cleared
-        setc('siswa', f'{gl(c)}{r}', None)
-    if i < len(students):
-        setc('siswa', f'D{r}', students[i])
-        setc('siswa', f'F{r}', 'L')
-        setc('siswa', f'I{r}', 'Islam')
+# 1) daftar siswa
+if A.tes:
+    # hanya untuk raport contoh: ganti daftar siswa dengan nama dari tab PKN
+    students = [asli for asli, _ in GS['PKN'].values()][:MAXN]
+    for i in range(MAXN):
+        r = 7 + i
+        for c in range(2, 31):  # B..AD dikosongkan
+            setc('siswa', f'{gl(c)}{r}', None)
+        if i < len(students):
+            setc('siswa', f'D{r}', students[i])
+            setc('siswa', f'F{r}', 'L')
+            setc('siswa', f'I{r}', 'Islam')
+else:
+    # raport asli: daftar siswa dibaca dari sheet "siswa", tidak diubah
+    students = [nilai_sel('siswa', f'D{7 + i}').strip() for i in range(MAXN)]
+    while students and not students[-1]: students.pop()
+kunci = [G.nama_baku(n) for n in students]
 
-# 2) mapel umum -> Ff11
+def isi_blok(tab, sname, baris1, kolom, force_dari=None):
+    data = GS[tab]
+    terisi, kosong = 0, []
+    for i in range(MAXN):
+        vals = data.get(kunci[i], (None, None))[1] if i < len(kunci) and kunci[i] else None
+        got = False
+        for j, (c, k) in enumerate(kolom):
+            v = num(vals[k]) if vals and k < len(vals) else None
+            setc(sname, f'{gl(c)}{baris1 + i}', v,
+                 force=force_dari is not None and j >= force_dari)
+            got = got or v is not None
+        terisi += got
+        if i < len(students) and students[i] and not got:
+            kosong.append(students[i])
+    return terisi, kosong
+
 summary = {}
-for tab, (mcol, txt) in G.UMUM.items():
-    data = G.parse(txt) if txt else {}
+# 2) mapel umum -> Ff11 (Sumatif 1-8, Non Tes, Tes)
+for tab, mcol in G.UMUM.items():
     no = ci(mcol) + 1
     cols = [no + 4 + j for j in range(8)] + [no + 14, no + 15]
     idx = list(range(8)) + [10, 11]
-    filled = 0
-    for i in range(MAXN):
-        vals = data.get(students[i]) if i < len(students) else None
-        row = 388 + i
-        got = False
-        for c, k in zip(cols, idx):
-            v = num(vals[k]) if vals and k < len(vals) else None
-            setc('Ff11', f'{gl(c)}{row}', v)
-            got = got or v is not None
-        filled += got
-    summary[tab] = filled
+    summary[tab] = isi_blok(tab, 'Ff11', 388, list(zip(cols, idx)))
 
-# 3) mapel pondok -> Form Nilai
-for tab, (scol, txt) in G.PONDOK.items():
-    data = G.parse(txt) if txt else {}
+# 3) mapel pondok -> Form Nilai (10 kolom; 2 kolom Nilai Raport boleh menimpa rumus)
+for tab, scol in G.PONDOK.items():
     s = ci(scol)
-    filled = 0
-    for i in range(MAXN):
-        vals = data.get(students[i]) if i < len(students) else None
-        row = 9 + i
-        got = False
-        for j in range(10):
-            v = num(vals[j]) if vals and j < len(vals) else None
-            setc('Form Nilai', f'{gl(s + j)}{row}', v, force=j >= 8)
-            got = got or v is not None
-        filled += got
-    summary[tab] = filled
+    summary[tab] = isi_blok(tab, 'Form Nilai', 9, [(s + j, j) for j in range(10)], force_dari=8)
 
 # 4) force Excel to recalculate every formula on open
 cp = wbx.find(N + 'calcPr')
@@ -152,5 +192,33 @@ for info in zin.infolist():
         data = read(info.filename)
     out.writestr(info, data)
 out.close()
-for k, v in summary.items(): print(f'{k:15s} {v:2d} siswa terisi')
-print('\n'.join(log) or 'tidak ada sel rumus yang tertimpa')
+print(f'\nHasil disimpan: {DST}\n')
+print('NILAI PER MAPEL')
+for k, (n, kosong) in summary.items():
+    ket = 'tab masih kosong di Google Sheet' if n == 0 else f'{n:2d} siswa terisi'
+    print(f'  {k:15s} {ket}')
+    if n and kosong:
+        print(f'  {"":15s} belum ada nilai: ' + ', '.join(kosong))
+
+# nama yang tidak cocok antara Google Sheet dan raport
+semua_gs = {}
+for data in GS.values():
+    for b, (asli, _) in data.items(): semua_gs.setdefault(b, asli)
+tak_ada_di_raport = [asli for b, asli in semua_gs.items() if b not in kunci]
+tak_ada_di_gs = [n for n, b in zip(students, kunci) if n and b not in semua_gs]
+print('\nPENCOCOKAN NAMA')
+if not tak_ada_di_raport and not tak_ada_di_gs:
+    print('  Semua nama cocok.')
+for n in tak_ada_di_raport:
+    mirip = difflib.get_close_matches(G.nama_baku(n), [k for k in kunci if k], 1, 0.6)
+    saran = f' (mungkin: {students[kunci.index(mirip[0])]})' if mirip else ''
+    print(f'  Ada di Google Sheet, tidak ada di raport: {n}{saran}')
+for n in tak_ada_di_gs:
+    print(f'  Ada di raport, tidak ada di Google Sheet: {n}')
+
+print('\nSEL RUMUS')
+ganti = [x.split(' ', 4)[-1] for x in log if x.startswith('rumus diganti')]
+lewat = [x.split(' ', 2)[-1] for x in log if x.startswith('LEWATI')]
+if ganti: print(f'  {len(ganti)} rumus Nilai Raport pondok diganti nilai Google Sheet: ' + ', '.join(ganti))
+if lewat: print(f'  {len(lewat)} sel rumus dilewati (tidak ditimpa): ' + ', '.join(lewat))
+if not log: print('  tidak ada sel rumus yang tertimpa')

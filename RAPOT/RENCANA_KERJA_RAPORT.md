@@ -19,7 +19,9 @@ Setelah semua nilai masuk, wali kelas menyalin nilai itu satu per satu ke aplika
 | Tes mengisi raport contoh dengan nilai VIII B | ✅ Berhasil: 286 nilai dicek, semuanya sama dengan Google Sheet |
 | Makro dan tombol menu aplikasi raport tetap utuh setelah diisi | ✅ Teruji |
 | Menyambungkan Claude ke PC agar file raport dibaca langsung dari folder | ⏳ Belum. Dipindah ke Claude Code |
-| Mengambil nilai Google Sheet langsung lewat internet (sekarang datanya masih diketik ke `gsdata.py`) | ⏳ Belum, ini langkah berikutnya |
+| Mengambil nilai Google Sheet langsung lewat internet | ✅ Selesai: `gsdata.py` mengunduh 20 tab sebagai CSV (salinan di `data_gs/`) |
+| Daftar siswa dibaca dari raport asli + laporan nama yang tidak cocok | ✅ Selesai: diuji dengan raport tiruan |
+| Hasil script baru dibandingkan dengan script lama (data sama) | ✅ Sama persis |
 | Menjalankan dengan file raport kelas yang sebenarnya (data siswa asli) | ⏳ Menunggu file raport yang benar |
 
 Catatan: file raport yang dipakai untuk tes hanyalah contoh. Isinya data kelas IX dengan siswa yang berbeda.
@@ -110,3 +112,18 @@ Mapel pondok di raport yang tidak ada di Google Sheet: Bahasa Arab, Tajwid, Gawa
 6. Kalau sudah lancar, jadikan satu perintah atau satu klik yang bisa dipakai setiap semester.
 
 Kebutuhan di PC: Python 3, lalu `pip install lxml openpyxl requests`.
+
+## 8. Cara pakai (versi sekarang)
+
+1. Pasang Python 3, lalu buka Command Prompt di folder RAPOT dan jalankan: `pip install -r requirements.txt`
+2. Taruh file raport kelas yang asli di folder RAPOT.
+3. Seret file raport `.xlsm` ke `JALANKAN.bat` (atau klik dua kali lalu ketik nama filenya).
+4. Hasilnya tersimpan sebagai file baru `<nama raport>_TERISI.xlsm`. File asli tidak diubah.
+5. Baca laporan di layar: mapel yang masih kosong, siswa yang belum punya nilai, dan nama yang ejaannya berbeda.
+   Kalau ada nama berbeda, samakan ejaannya (di Google Sheet atau di sheet `siswa`), lalu jalankan lagi.
+
+Pilihan tambahan (lewat Command Prompt):
+- `python isi_raport.py RAPORT.xlsm --offline` memakai salinan CSV terakhir di `data_gs/` tanpa internet.
+- `python isi_raport.py RAPORT.xlsm --tes` mengganti daftar siswa dengan nama dari Google Sheet. Hanya untuk file raport contoh.
+
+Untuk kelas lain, ganti `SHEET_ID` di baris atas `gsdata.py` dengan ID Google Sheet kelas tersebut.
