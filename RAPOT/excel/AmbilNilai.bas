@@ -619,7 +619,7 @@ End Sub
 '  PENGATURAN (daftar tab mapel; disembunyikan)
 ' ---------------------------------------------------------------------
 Private Function SiapkanPengaturan() As Worksheet
-    Dim ws As Worksheet, baris As Variant, i As Long
+    Dim ws As Worksheet, r As Long
     On Error Resume Next
     Set ws = ThisWorkbook.Worksheets(ATUR)
     On Error GoTo 0
@@ -635,38 +635,35 @@ Private Function SiapkanPengaturan() As Worksheet
     ws.Range("A4:D4").Value = Array("Nama tab di Google Sheet", "Jenis", "Kolom di raport", "Nama mapel")
     ws.Range("A4:D4").Font.Bold = True
 
-    baris = Array( _
-        "PAI|UMUM|A|Pendidikan Agama Islam", _
-        "PKN|UMUM|CV|Pendidikan Pancasila", _
-        "B. INDO|UMUM|EC|Bahasa Indonesia", _
-        "MTK|UMUM|FJ|Matematika", _
-        "IPA|UMUM|GQ|Ilmu Pengetahuan Alam", _
-        "IPS|UMUM|HX|Ilmu Pengetahuan Sosial", _
-        "B. INGGRIS|UMUM|JE|Bahasa Inggris", _
-        "SENI BUDAYA|UMUM|KL|Seni Budaya", _
-        "PJOK|UMUM|LS|PJOK", _
-        "INFORMATIKA|UMUM|MZ|Informatika", _
-        "PRAKARYA|UMUM|OG|Prakarya", _
-        "MULOK|UMUM|QV|Muatan Lokal", _
-        "HADIST|PONDOK|C|Qur'an Hadist", _
-        "BAHASA ARAB|PONDOK|P|Bahasa Arab", _
-        "FIQIH|PONDOK|AC|Fiqih", _
-        "TAUHID|PONDOK|AP|Tauhid", _
-        "NAHWU|PONDOK|BC|Nahwu", _
-        "SHOROF|PONDOK|BQ|Shorof", _
-        "TAFSIR|PONDOK|CD|Tafsir", _
-        "TARIKH|PONDOK|CQ|Tarikh", _
-        "TASRIF|PONDOK|DD|Tasrif", _
-        "TAJWID|PONDOK|DQ|Tajwid", _
-        "S. ALKHAIRAAT|PONDOK|HQ|Sejarah Al Khairaat", _
-        "MUHADATSAH|PONDOK|ID|Insya' / Muhadatsah", _
-        "AL ANGHAAM|PONDOK|IQ|Al Anghaam", _
-        "MAHFUZATH|PONDOK|JD|Mahfuzat", _
-        "MUFRADAT|PONDOK|JQ|Mufradat", _
-        "IMLA / IMLA'|PONDOK|KD|Imla")
-    For i = 0 To UBound(baris)
-        ws.Range(ws.Cells(5 + i, 1), ws.Cells(5 + i, 4)).Value = Split(baris(i), "|")
-    Next i
+    r = 5
+    IsiPeta ws, r, "PAI|UMUM|A|Pendidikan Agama Islam"
+    IsiPeta ws, r, "PKN|UMUM|CV|Pendidikan Pancasila"
+    IsiPeta ws, r, "B. INDO|UMUM|EC|Bahasa Indonesia"
+    IsiPeta ws, r, "MTK|UMUM|FJ|Matematika"
+    IsiPeta ws, r, "IPA|UMUM|GQ|Ilmu Pengetahuan Alam"
+    IsiPeta ws, r, "IPS|UMUM|HX|Ilmu Pengetahuan Sosial"
+    IsiPeta ws, r, "B. INGGRIS|UMUM|JE|Bahasa Inggris"
+    IsiPeta ws, r, "SENI BUDAYA|UMUM|KL|Seni Budaya"
+    IsiPeta ws, r, "PJOK|UMUM|LS|PJOK"
+    IsiPeta ws, r, "INFORMATIKA|UMUM|MZ|Informatika"
+    IsiPeta ws, r, "PRAKARYA|UMUM|OG|Prakarya"
+    IsiPeta ws, r, "MULOK|UMUM|QV|Muatan Lokal"
+    IsiPeta ws, r, "HADIST|PONDOK|C|Qur'an Hadist"
+    IsiPeta ws, r, "BAHASA ARAB|PONDOK|P|Bahasa Arab"
+    IsiPeta ws, r, "FIQIH|PONDOK|AC|Fiqih"
+    IsiPeta ws, r, "TAUHID|PONDOK|AP|Tauhid"
+    IsiPeta ws, r, "NAHWU|PONDOK|BC|Nahwu"
+    IsiPeta ws, r, "SHOROF|PONDOK|BQ|Shorof"
+    IsiPeta ws, r, "TAFSIR|PONDOK|CD|Tafsir"
+    IsiPeta ws, r, "TARIKH|PONDOK|CQ|Tarikh"
+    IsiPeta ws, r, "TASRIF|PONDOK|DD|Tasrif"
+    IsiPeta ws, r, "TAJWID|PONDOK|DQ|Tajwid"
+    IsiPeta ws, r, "S. ALKHAIRAAT|PONDOK|HQ|Sejarah Al Khairaat"
+    IsiPeta ws, r, "MUHADATSAH|PONDOK|ID|Insya' / Muhadatsah"
+    IsiPeta ws, r, "AL ANGHAAM|PONDOK|IQ|Al Anghaam"
+    IsiPeta ws, r, "MAHFUZATH|PONDOK|JD|Mahfuzat"
+    IsiPeta ws, r, "MUFRADAT|PONDOK|JQ|Mufradat"
+    IsiPeta ws, r, "IMLA / IMLA'|PONDOK|KD|Imla"
     ws.Columns("A:D").AutoFit
     On Error Resume Next
     ws.Tab.Color = RGB(166, 166, 166)
@@ -674,6 +671,12 @@ Private Function SiapkanPengaturan() As Worksheet
     ws.Visible = xlSheetHidden
     Set SiapkanPengaturan = ws
 End Function
+
+' Satu baris di sheet PENGATURAN: "tab|jenis|kolom|nama mapel"
+Private Sub IsiPeta(ws As Worksheet, r As Long, teks As String)
+    ws.Range(ws.Cells(r, 1), ws.Cells(r, 4)).Value = Split(teks, "|")
+    r = r + 1
+End Sub
 
 ' ---------------------------------------------------------------------
 '  ALAT BANTU
