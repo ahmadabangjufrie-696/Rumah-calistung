@@ -128,14 +128,17 @@ Pilihan tambahan (lewat Command Prompt):
 
 Untuk kelas lain, ganti `SHEET_ID` di baris atas `gsdata.py` dengan ID Google Sheet kelas tersebut.
 
-## 9. Cara utama untuk wali kelas: tombol "Ambil Nilai" di dalam raport
+## 9. Cara utama: Google Sheet per kelas + halaman BERANDA di raport Excel
 
-Supaya bisa dibagikan ke banyak wali kelas (SD, SMP, MA) tanpa memasang Python dan tanpa PC yang harus selalu menyala,
-pemindahan nilai juga dibuat sebagai **makro di dalam raport** (`excel/AmbilNilai.bas`).
-Cara memasang dan memakainya ada di `excel/PANDUAN_TOMBOL_AMBIL_NILAI.md`.
+Panduan lengkap untuk TU, wali kelas, dan guru ada di `PANDUAN.md`.
 
-- Satu Google Sheet untuk satu kelas, berisi semua mapel (satu tab untuk satu mapel), dengan susunan seperti Sheet VIII B.
-- Raport dan Google Sheet dihubungkan lewat sheet `PETA NILAI` (link di B2 dan daftar tab mapel beserta kolomnya). Untuk SD dan MA, cukup tabel ini yang diubah.
-- Tabel bawaan (12 mapel umum dan 16 mapel pondok) sudah dicocokkan dengan raport asli SMP: setiap kolom tepat di judul mapelnya, dan tidak ada sel rumus di kolom isian.
-- Program Python (`isi_raport.py`) tetap ada sebagai cadangan dan alat uji.
-- **Belum diuji di Excel sungguhan.** Uji dulu di satu kelas sebelum dibagikan.
+- **Satu Google Sheet untuk satu kelas**, disimpan di **Drive sekolah** (dikelola TU), bukan Drive pribadi.
+  Contohnya `contoh_google_sheet/CONTOH_NILAI_KELAS.xlsx` (dibuat oleh `buat_contoh.py`). Isinya:
+  tab PETUNJUK, tab SISWA (nama diisi sekali), dan 28 tab mapel dengan kotak kuning untuk diisi, peringatan merah/oranye,
+  serta kolom Status. Rumusnya sudah dicocokkan dengan Sheet VIII B: 198 nilai sama.
+- **Raport Excel** mendapat halaman **BERANDA** (`excel/AmbilNilai.bas`, dipasang dengan Alt+F8 → BuatBeranda):
+  4 langkah, tombol AMBIL NILAI, daftar status mapel berwarna, tombol cetak raport SMP/Pondok.
+  Bentuk raport yang dicetak tidak diubah.
+- Letak 28 mapel sudah dicocokkan dengan raport SMP asli. Uji dari awal sampai akhir (contoh Google Sheet → raport asli)
+  sudah berhasil lewat program Python, yang memakai aturan kolom yang sama.
+- **Kode tombol belum diuji di Excel sungguhan.** Uji dulu di satu kelas sebelum dibagikan.
