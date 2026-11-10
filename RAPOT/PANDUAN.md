@@ -39,12 +39,20 @@ Lakukan juga untuk tab **SISWA**, cukup untuk wali kelas.
 
 ## 2. TU: memasang halaman BERANDA di raport induk (sekali saja)
 
-1. **Buat cadangan** raport induk (salin file `.xlsm`-nya).
-2. Buka raport induk. Kalau muncul pita kuning, klik **Enable Content / Aktifkan Konten**.
-3. Tekan **Alt + F11**, lalu pilih menu **File → Import File...** dan pilih **AmbilNilai.bas**. Tutup jendela itu.
-4. Tekan **Alt + F8**, pilih **BuatBeranda**, lalu klik **Run / Jalankan**.
-5. Halaman **BERANDA** muncul paling depan. Tekan **Ctrl + S** untuk menyimpan.
-6. Bagikan raport induk ini ke setiap wali kelas, seperti biasa.
+**Cara termudah:** kirim file raport induk (`.xlsm`) ke admin. Admin memasangkan BERANDA dengan alat `alat/pasang_beranda.py`,
+lalu mengembalikan file baru bernama `... - BERANDA.xlsm`. Tidak perlu membuka jendela kode apa pun.
+
+Saat file itu dibuka:
+1. Klik **Enable Content / Aktifkan Konten** pada pita kuning.
+   Kalau ada pita merah **"Microsoft telah memblokir makro"**: tutup file, klik kanan file, pilih **Properties**,
+   centang **Unblock** di bagian bawah, klik **OK**, lalu buka lagi.
+2. Halaman **BERANDA** dibuat dan dibuka otomatis.
+3. Tekan **Ctrl + S**. Raport siap dibagikan ke wali kelas.
+
+Setiap kali raport dibuka, halaman BERANDA langsung tampil.
+
+**Cara manual** (kalau tidak memakai alat tadi): buka raport → **Alt + F11** → **File → Import File...** → pilih
+`excel/AmbilNilai.bas` → tutup jendela → **Alt + F8** → pilih **BuatBeranda** → **Run** → **Ctrl + S**.
 
 ![Contoh halaman BERANDA](gambar/contoh_beranda.png)
 

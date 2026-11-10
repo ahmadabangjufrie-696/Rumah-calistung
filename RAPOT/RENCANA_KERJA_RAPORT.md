@@ -141,4 +141,9 @@ Panduan lengkap untuk TU, wali kelas, dan guru ada di `PANDUAN.md`.
   Bentuk raport yang dicetak tidak diubah.
 - Letak 28 mapel sudah dicocokkan dengan raport SMP asli. Uji dari awal sampai akhir (contoh Google Sheet → raport asli)
   sudah berhasil lewat program Python, yang memakai aturan kolom yang sama.
-- **Kode tombol belum diuji di Excel sungguhan.** Uji dulu di satu kelas sebelum dibagikan.
+- `alat/pasang_beranda.py` memasang modul ke file .xlsm tanpa Excel (menulis ulang vbaProject.bin sesuai MS-OVBA/MS-CFB,
+  dengan _VBA_PROJECT versi 0xFFFF agar Excel menyusun ulang dari teks sumber) dan menambah Workbook_Open yang membuka BERANDA.
+  Diperiksa dengan oletools dan LibreOffice: semua makro lama utuh, modul baru terbaca, hanya vbaProject.bin yang berubah.
+- Dijalankan di LibreOffice (mode VBA): BERANDA terbentuk, AMBIL NILAI mengisi Ff11/Form Nilai dengan benar, status dan rincian
+  tertulis, Ff11 dikunci lagi. Yang tidak bisa diuji di sana: tombol (Shapes), tampilan jendela, unduhan (MSXML/ADODB).
+- **Belum dicoba di Excel sungguhan.** Uji dulu di satu kelas sebelum dibagikan.

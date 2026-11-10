@@ -3,6 +3,8 @@ Attribute VB_Name = "AmbilNilaiGS"
 '  AMBIL NILAI DARI GOOGLE SHEET  +  HALAMAN BERANDA
 '
 '  Dipasang sekali oleh admin/TU:  Alt+F8  ->  BuatBeranda  ->  Run
+'  (atau otomatis lewat alat/pasang_beranda.py, yang juga membuat raport
+'   membuka BERANDA setiap kali dibuka)
 '
 '  Sheet yang dibuat:
 '   BERANDA        halaman utama wali kelas (link, tombol, status mapel)
@@ -123,11 +125,10 @@ Public Sub AmbilNilai()
     Set wbGS = Nothing
     On Error Resume Next
     Kill fileSementara
-    On Error GoTo 0
-
     Application.Calculation = kalk
     Application.CalculateFull
     Application.EnableEvents = True
+    On Error GoTo 0
 
     TulisHasil hasil, nama, kunci, jmlSiswa, namaGS
     Application.ScreenUpdating = True
@@ -170,6 +171,24 @@ Public Sub BuatBeranda()
     MsgBox "Halaman BERANDA sudah dibuat." & vbCrLf & vbCrLf & _
            "Simpan raport sekarang (Ctrl+S) saat halaman BERANDA terbuka," & vbCrLf & _
            "supaya raport selalu terbuka di halaman ini.", vbInformation, "Selesai"
+End Sub
+
+' Dipanggil otomatis saat raport dibuka: membuat BERANDA bila belum ada, lalu membukanya.
+Public Sub BukaBeranda()
+    Dim ws As Worksheet
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets(BERANDA)
+    On Error GoTo Gagal
+    If ws Is Nothing Then
+        SiapkanPengaturan
+        Set ws = SiapkanBeranda()
+    End If
+    ws.Activate
+    ws.Range("A1").Select
+    Exit Sub
+Gagal:
+    MsgBox "Halaman BERANDA belum bisa dibuat: " & Err.Description & vbCrLf & _
+           "Mohon foto pesan ini dan kirim ke admin.", vbExclamation, "BERANDA"
 End Sub
 
 Public Sub KeBeranda()
@@ -447,7 +466,9 @@ Private Function SiapkanBeranda() As Worksheet
 
     Set ws = ThisWorkbook.Worksheets.Add(Before:=ThisWorkbook.Worksheets(1))
     ws.Name = BERANDA
+    On Error Resume Next
     ws.Tab.Color = HIJAU
+    On Error GoTo 0
     With ws.Cells
         .Font.Name = FONT_UTAMA
         .Font.Size = 11
@@ -527,10 +548,12 @@ Private Function SiapkanBeranda() As Worksheet
     ws.Range("G6").Font.Italic = True
     ws.Range("G6").Font.Color = RGB(127, 127, 127)
 
+    On Error Resume Next
     ws.Activate
     ActiveWindow.DisplayGridlines = False
     ActiveWindow.DisplayHeadings = False
     ActiveWindow.Zoom = 100
+    On Error GoTo 0
     KunciBeranda ws
     Set SiapkanBeranda = ws
 End Function
@@ -579,14 +602,16 @@ Private Sub BuatTombol(ws As Worksheet, tempat As Range, teks As String, makro A
     t.Fill.ForeColor.RGB = warna
     t.Line.Visible = False
     t.Placement = 1                              ' ikut ukuran sel
-    With t.TextFrame2
-        .VerticalAnchor = 3                      ' tengah
-        .TextRange.Text = teks
-        .TextRange.ParagraphFormat.Alignment = 2 ' tengah
-        .TextRange.Font.Bold = True
-        .TextRange.Font.Size = ukuran
-        .TextRange.Font.Name = FONT_UTAMA
-        .TextRange.Font.Fill.ForeColor.RGB = RGB(255, 255, 255)
+    With t.TextFrame
+        .Characters.Text = teks
+        .HorizontalAlignment = xlHAlignCenter
+        .VerticalAlignment = xlVAlignCenter
+        With .Characters.Font
+            .Bold = True
+            .Size = ukuran
+            .Name = FONT_UTAMA
+            .Color = RGB(255, 255, 255)
+        End With
     End With
 End Sub
 
@@ -643,7 +668,9 @@ Private Function SiapkanPengaturan() As Worksheet
         ws.Range(ws.Cells(5 + i, 1), ws.Cells(5 + i, 4)).Value = Split(baris(i), "|")
     Next i
     ws.Columns("A:D").AutoFit
+    On Error Resume Next
     ws.Tab.Color = RGB(166, 166, 166)
+    On Error GoTo 0
     ws.Visible = xlSheetHidden
     Set SiapkanPengaturan = ws
 End Function
@@ -659,7 +686,9 @@ Private Function AmbilSheet(namaSheet As String) As Worksheet
     If ws Is Nothing Then
         Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.Count))
         ws.Name = namaSheet
+        On Error Resume Next
         ws.Tab.Color = RGB(166, 166, 166)
+        On Error GoTo 0
     End If
     Set AmbilSheet = ws
 End Function
@@ -732,7 +761,7 @@ Private Function AdalahNomor(v As Variant) As Boolean
     If VarType(v) = vbDouble Then
         AdalahNomor = (v = Int(v) And v > 0)
     ElseIf VarType(v) = vbString Then
-        AdalahNomor = (Trim(v) Like "#*" And Not Trim(v) Like "*[!0-9]*")
+        AdalahNomor = (Trim(v) Like "#*") And Not (Trim(v) Like "*[!0-9]*")
     End If
 End Function
 
@@ -746,7 +775,7 @@ Private Function AmbilAngka(v As Variant) As Variant
             AmbilAngka = CDbl(v)
         Case vbString
             s = Replace(Trim(v), ",", ".")
-            If s <> "" And s <> "." And Not s Like "*[!0-9.]*" Then
+            If s <> "" And s <> "." And Not (s Like "*[!0-9.]*") Then
                 If Len(s) - Len(Replace(s, ".", "")) <= 1 Then AmbilAngka = Val(s)
             End If
     End Select
