@@ -51,6 +51,9 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   (11 Nov 00:35, dari file lama) — tampaknya pernah berhasil, tetapi **belum dikonfirmasi** Ustadz untuk file terbaru.
 - 11 Nov: langkah 5 di BERANDA (I15) diganti "Pilih siswa & centang di kanan bawah, lalu klik tombol CETAK." (langsung di file + perakit).
   Belum ada PDF baru sesudah raport pondok diperbesar (01:13) → masih menunggu Ustadz mencoba cetak.
+- 11 Nov: atas permintaan Ustadz, **semua tulisan raport pondok memakai huruf Amiri** (seperti judul تقرير...),
+  kecuali 2 baris kop Latin (Arial). Baris mapel 19–34 ditinggikan ke 25 px. Langsung di file + perakit.
+  Uji lokal: Amiri bisa dipasang dari npm `@fontsource/amiri` (woff2 → ttf dengan fontTools ke ~/.fonts).
 
 ## Yang perlu dikonfirmasi Ustadz
 1. Batas predikat pondok (DATA ARAB): ≥90 ممتازة, ≥75 جيد بالفعل, ≥60 جيد بما فيه الكفاية, <60 ليست جيدة بما فيه الكفاية.

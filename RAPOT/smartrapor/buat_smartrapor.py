@@ -1043,18 +1043,16 @@ def buat_rapor_pondok(wb):
     for no, tab in enumerate(URUT_PONDOK, 1):
         teori = f'INDEX({rentang_siswa(tab, "K")},{idx})'
         praktik = f'INDEX({rentang_siswa(tab, "L")},{idx})'
-        tulis_arab(ws, f'G{r}', ''.join(ANGKA_ARAB[int(d)] for d in str(no)), h='center', size=11, font='Arial')
-        tulis_arab(ws, f'F{r}', arab_nama[tab], size=11, font='Arial')
-        tulis_arab(ws, f'E{r}', f'=IF({teori}="","-",{arab(teori)})', h='center', size=11, font='Arial')
-        tulis_arab(ws, f'D{r}', f'=IF({teori}="","-",VLOOKUP(ROUND({teori},0),{terbilang},2,FALSE))', size=11,
-                   font='Arial')
-        tulis_arab(ws, f'C{r}', f'=IF({praktik}="","-",{arab(praktik)})', h='center', size=11, font='Arial')
-        tulis_arab(ws, f'B{r}', f'=IF({praktik}="","-",VLOOKUP(ROUND({praktik},0),{terbilang},2,FALSE))', size=11,
-                   font='Arial')
+        tulis_arab(ws, f'G{r}', ''.join(ANGKA_ARAB[int(d)] for d in str(no)), h='center', size=11)
+        tulis_arab(ws, f'F{r}', arab_nama[tab], size=11)
+        tulis_arab(ws, f'E{r}', f'=IF({teori}="","-",{arab(teori)})', h='center', size=11)
+        tulis_arab(ws, f'D{r}', f'=IF({teori}="","-",VLOOKUP(ROUND({teori},0),{terbilang},2,FALSE))', size=11)
+        tulis_arab(ws, f'C{r}', f'=IF({praktik}="","-",{arab(praktik)})', h='center', size=11)
+        tulis_arab(ws, f'B{r}', f'=IF({praktik}="","-",VLOOKUP(ROUND({praktik},0),{terbilang},2,FALSE))', size=11)
         tulis_arab(ws, f'A{r}', f'=IF(COUNT({teori},{praktik})=0,"-",VLOOKUP(AVERAGE({teori},{praktik}),'
-                                f'{predikat},2,TRUE))', size=11, h='center', font='Arial')
+                                f'{predikat},2,TRUE))', size=11, h='center')
         kotak_rentang(ws, f'A{r}:G{r}')
-        ws.row_dimensions[r].height = 16.5
+        ws.row_dimensions[r].height = 18.75
         r += 1
     # jumlah, rata-rata, peringkat
     ws.merge_cells(f'F{r}:G{r}')
@@ -1079,11 +1077,11 @@ def buat_rapor_pondok(wb):
     for k in range(2):
         for nomor, (kn, kt) in ((k + 1, ('G', 'D{0}:F{0}')), (k + 3, ('C', 'A{0}:B{0}'))):
             kol = 'CDEF'[nomor - 1]
-            tulis_arab(ws, f'{kn}{r}', ANGKA_ARAB[nomor], h='center', size=11, font='Arial')
+            tulis_arab(ws, f'{kn}{r}', ANGKA_ARAB[nomor], h='center', size=11)
             rr = kt.format(r)
             ws.merge_cells(rr)
             tulis_arab(ws, rr.split(':')[0], f'=IF({cp(kol, idx)}="",{q(CP)}!${kol}$8,{cp(kol, idx)})', size=11,
-                       bungkus=True, font='Arial')
+                       bungkus=True)
         kotak_rentang(ws, f'A{r}:G{r}')
         ws.row_dimensions[r].height = 30
         r += 1
@@ -1092,7 +1090,7 @@ def buat_rapor_pondok(wb):
     ws.merge_cells(f'A{r}:G{r}')
     rata = cp('J', idx)
     tulis_arab(ws, f'A{r}', f'=IF({cp("G", idx)}<>"",{cp("G", idx)},IF({rata}="","",'
-                            f'VLOOKUP({rata},{q(DATA)}!$E$13:$F$16,2,TRUE)))', bungkus=True, size=11, font='Arial')
+                            f'VLOOKUP({rata},{q(DATA)}!$E$13:$F$16,2,TRUE)))', bungkus=True, size=11)
     kotak_rentang(ws, f'A{r}:G{r}')
     ws.row_dimensions[r].height = 30
     r += 1
