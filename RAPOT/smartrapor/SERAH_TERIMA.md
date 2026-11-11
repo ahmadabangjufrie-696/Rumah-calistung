@@ -13,7 +13,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 - Google Drive Ustadz, folder **SmartRapor (pengembangan)** (id `1eNMWSH69RC5ysRpjgDNyMhxcmrMnsO-p`):
   - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
     (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
-  - Panduan TU (Google Doc dari `PANDUAN_TU.md`): **PANDUAN TU SmartRapor** id `132gP0h_7fEIdgCZfWc9fqpTapTEil4uVMVjTLg065dg`.
+  - Panduan TU (Google Doc dari `PANDUAN_TU.md`): **PANDUAN TU SmartRapor** id `1yvdlVF4SOPSDFnv7aRzJAGkOJmKR1pEpBKVYQgYMwSM`.
   - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1aWFzHXSX5fhf-2K0F-JGYQRpb0PXwWqNGJCId3Kw3SE` (diperbarui 11 Nov: lembar guru + nomor WA;
     dokumen lama dibuang ke sampah. Selalu beri Ustadz LINK langsung ke dokumen ini, Ustadz bingung memilih di Drive).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
