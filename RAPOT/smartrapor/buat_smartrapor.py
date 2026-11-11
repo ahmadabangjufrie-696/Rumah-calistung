@@ -511,7 +511,7 @@ def buat_beranda(wb):
                ('2', 'Isi data SISWA', 'Cukup sekali, nama muncul di semua tab.'),
                ('3', 'Bagikan link ke guru', 'Guru mengisi kotak kuning di tab mapelnya.'),
                ('4', 'Isi EKSKUL & CATATAN', 'Ekskul, prestasi, catatan, keputusan.'),
-               ('5', 'Cetak', 'Buka halaman RAPOR, pilih nomor siswa, unduh PDF.')]
+               ('5', 'Cetak', 'Pilih siswa & centang di kanan bawah, lalu klik tombol CETAK.')]
     r = 11
     for no, judul, ket in langkah:
         isi(ws, f'H{r}', f'{no}.  {judul}', size=10, bold=True, warna=HIJAU, latar=PUTIH)

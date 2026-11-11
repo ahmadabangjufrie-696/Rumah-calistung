@@ -47,7 +47,10 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 ## Status terakhir
 - Selesai & sudah dicoba Ustadz: tombol, cetak siswa ini (PDF berhasil).
 - Raport pondok baru saja diperbesar agar memenuhi 1 halaman A4 (perubahan langsung di file). **Menunggu Ustadz mencoba cetak.**
-- Cetak sekelas: sudah diperbaiki (pembungkus fungsi biasa), **belum dikonfirmasi** Ustadz.
+- Cetak sekelas: sudah diperbaiki (pembungkus fungsi biasa). Di folder Drive `PDF SmartRapor` ada "Raport sekelas ...pdf"
+  (11 Nov 00:35, dari file lama) — tampaknya pernah berhasil, tetapi **belum dikonfirmasi** Ustadz untuk file terbaru.
+- 11 Nov: langkah 5 di BERANDA (I15) diganti "Pilih siswa & centang di kanan bawah, lalu klik tombol CETAK." (langsung di file + perakit).
+  Belum ada PDF baru sesudah raport pondok diperbesar (01:13) → masih menunggu Ustadz mencoba cetak.
 
 ## Yang perlu dikonfirmasi Ustadz
 1. Batas predikat pondok (DATA ARAB): ≥90 ممتازة, ≥75 جيد بالفعل, ≥60 جيد بما فيه الكفاية, <60 ليست جيدة بما فيه الكفاية.
