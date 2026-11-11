@@ -93,6 +93,11 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
     Cek: contoh.guru@gmail.com → RM6C-39YR. Kode Gmail Ustadz sudah ditulis di PENGATURAN C46 file contoh.
   - Disarankan ke Ustadz: jadikan repo GitHub **private** (kode produk terbuka untuk umum).
   - Ustadz **harus menempel kode baru** (dokumen KODE 1qpt…). Belum dicoba di Google.
+  - **File MASTER untuk pembeli**: `SmartRapor - MASTER (untuk pembeli)` id `1Bk2KeCI_4pHnkAt9RrHkD3XKrOB3dslgFoplwXcJis0`
+    (kosong, dibagikan "siapa saja dengan link: pelihat"; kelas/wali dikosongkan; kotak centang BERANDA sudah dipasang).
+    Link untuk pembeli: https://docs.google.com/spreadsheets/d/1Bk2KeCI_4pHnkAt9RrHkD3XKrOB3dslgFoplwXcJis0/copy
+    Ustadz harus menempel kode tombol ke MASTER sekali (salinan pembeli ikut membawa kode). Pembeli: buka link → Buat salinan →
+    menu SmartRapor › Pasang tombol → izinkan → Aktivasi → tempel kode di PENGATURAN.
 
 ## Yang perlu dikonfirmasi Ustadz
 1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).
