@@ -60,14 +60,16 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   Uji lokal: Amiri bisa dipasang dari npm `@fontsource/amiri` (woff2 → ttf dengan fontTools ke ~/.fonts).
 
 ## Yang perlu dikonfirmasi Ustadz
-1. Batas predikat pondok (DATA ARAB): ≥90 ممتازة, ≥75 جيد بالفعل, ≥60 جيد بما فيه الكفاية, <60 ليست جيدة بما فيه الكفاية.
-2. Tanggal Hijriah (PENGATURAN) masih contoh `٥ مُحَرَّم ١٤٤٨`.
-3. Peringkat raport pondok disembunyikan (PENGATURAN: YA/TIDAK).
+1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).
+2. ~~Tanggal Hijriah~~ → `٤ رَجَب ١٤٤٦` (11 Nov, dipasang di file + perakit).
+3. ~~Peringkat raport pondok~~ → **ditampilkan** (PENGATURAN = YA, file + perakit).
 4. "Tulisan yang salah" di raport pondok: Ustadz belum menunjuk kata mana; minta foto/lingkari.
+5. **Belum diuji Ustadz**: halaman isi nilai guru (12 mapel umum + 16 pondok), cetak sekelas, raport P5, cover,
+   identitas, keterangan diri. Ustadz akan menguji dengan mencetak di kertas.
 
 ## Rencana berikutnya
 - Rapikan BERANDA (tabel progres & panel cetak), uji cetak sekelas.
-- Raport SD dan MA (minta contoh raport).
+- Raport SD dan MA (minta contoh raport) — Ustadz: "nanti".
 - Lisensi untuk penjualan, verifikasi aplikasi Google (hilangkan peringatan "tidak aman"), panduan TU.
 
 ## Folder lain di `RAPOT/`

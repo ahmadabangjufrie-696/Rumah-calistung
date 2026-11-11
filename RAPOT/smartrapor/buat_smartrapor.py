@@ -128,8 +128,8 @@ PENGATURAN = [  # kunci, label, nilai bawaan
     ('wali_arab', 'Wali kelas (tulisan Arab)', 'أحمد الجفري'),
     ('kelas_angka', 'Kelas (angka, untuk raport Arab)', 9),
     ('tempat_arab', 'Tempat (tulisan Arab)', 'تانجونج سيلور'),
-    ('hijriah', 'Tanggal Hijriah (tulisan Arab)', '٥ مُحَرَّم ١٤٤٨'),
-    ('peringkat_pondok', 'Tampilkan peringkat di raport pondok (YA/TIDAK)', 'TIDAK'),
+    ('hijriah', 'Tanggal Hijriah (tulisan Arab)', '٤ رَجَب ١٤٤٦'),
+    ('peringkat_pondok', 'Tampilkan peringkat di raport pondok (YA/TIDAK)', 'YA'),
     ('keputusan', 'Kalimat keputusan (akhir catatan)',
      'Berdasarkan putusan rapat dewan guru serta memperhatikan capaian pembelajaran semester ganjil dan '
      'semester genap, maka siswa dinyatakan {keputusan}.'),
