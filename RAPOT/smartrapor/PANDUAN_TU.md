@@ -94,8 +94,14 @@ Di **BERANDA**, panel kanan bawah:
 
 ## H. Semester berikutnya
 
-Buat salinan baru dari file kelas semester lalu (**File → Buat salinan**), lalu ganti semester, tahun, dan tanggal
-di PENGATURAN. Kosongkan nilai di tab mapel. Data siswa tidak perlu diketik ulang.
+Tidak perlu membeli lagi: kode aktivasi berlaku selamanya.
+
+1. Buka file semester lalu, pilih **File → Buat salinan**, beri nama baru (misalnya `... Genap`). File lama tetap utuh untuk arsip.
+2. Di file salinan, pilih menu:
+   - **SmartRapor → Mulai semester baru (siswa tetap)** bila siswanya sama, atau
+   - **SmartRapor → Mulai kelas baru (siswa baru)** bila memegang kelas lain.
+3. Nilai, ekskul, catatan, dan P5 dikosongkan; semester otomatis berganti. Periksa tanggal raport dan tanggal Hijriah di PENGATURAN.
+4. Pilih **SmartRapor → Kirim lembar nilai ke guru** untuk semester ini.
 
 ## I. Aktivasi (sekali saja)
 

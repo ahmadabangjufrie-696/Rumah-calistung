@@ -48,6 +48,9 @@ function onOpen() {
     .addSeparator()
     .addItem('Rapikan tinggi baris raport', 'rapikanTinggi')
     .addItem('Aktivasi (lihat Gmail & status)', 'cekAktivasi')
+    .addSeparator()
+    .addItem('Mulai semester baru (siswa tetap)', 'mulaiSemesterBaru')
+    .addItem('Mulai kelas baru (siswa baru)', 'mulaiKelasBaru')
     .addItem('Pasang tombol di BERANDA', 'pasangTombol')
     .addToUi();
 }
@@ -560,6 +563,60 @@ function tampilkanDaftarGuru_(hasil, gagal, kelas) {
     '<p style="font-size:11px;color:#6c757d">Nilai dari guru masuk ke file ini otomatis tiap 1 jam.</p></div>')
     .setWidth(440).setHeight(Math.min(560, 150 + hasil.length * 82));
   SpreadsheetApp.getUi().showModalDialog(html, 'Lembar guru');
+}
+
+// ------------------------------------------------------------------ semester / kelas baru
+// Dipakai pada SALINAN file (File › Buat salinan), supaya file semester lama tetap utuh untuk arsip.
+function mulaiSemesterBaru() { mulaiBaru_(false); }
+function mulaiKelasBaru() { mulaiBaru_(true); }
+
+function mulaiBaru_(siswaBaru) {
+  var ui = SpreadsheetApp.getUi(), ss = SpreadsheetApp.getActive();
+  var jawab = ui.alert('SmartRapor',
+    'Pastikan ini SALINAN file (File › Buat salinan), bukan file semester lama.\n\n' +
+    'Yang dikosongkan: semua nilai & materi guru, ekskul, catatan, kehadiran, catatan pondok, P5' +
+    (siswaBaru ? ', dan DATA SISWA.' : '. Data siswa tetap.') +
+    '\nYang tetap: pengaturan sekolah, daftar guru & nomor WA, kode aktivasi.\n\nLanjutkan?',
+    ui.ButtonSet.YES_NO);
+  if (jawab !== ui.Button.YES) return;
+  var a = SR.BARIS1, z = SR.BARIS1 + SR.MAKS - 1;
+  var kosongkan = function (nama, rentang) {
+    var sh = ss.getSheetByName(nama);
+    if (sh) rentang.forEach(function (r) { sh.getRange(r).clearContent(); });
+  };
+  daftarGuru_().forEach(function (m) {
+    var sh = ss.getSheetByName(m.tab);
+    if (!sh) return;
+    kosongkan(m.tab, jenisTab_(sh) === 'umum' ? ['C8:J8', 'C' + a + ':J' + z, 'M' + a + ':N' + z] : ['C' + a + ':J' + z]);
+  });
+  kosongkan('EKSKUL & CATATAN', ['C7:P' + (7 + SR.MAKS - 1)]);
+  kosongkan('CATATAN PONDOK', ['C' + a + ':G' + z]);
+  [1, 2, 3].forEach(function (n) { kosongkan('P5 PROYEK ' + n, ['C4', 'C5', 'C7:I8', 'C' + a + ':J' + z]); });
+  if (siswaBaru) kosongkan(SR.SISWA, ['B' + SR.SISWA1 + ':AA' + (SR.SISWA1 + SR.MAKS - 1)]);
+  // putuskan lembar guru lama: semester baru memakai lembar baru
+  var props = PropertiesService.getDocumentProperties();
+  Object.keys(props.getProperties()).forEach(function (k) { if (k.indexOf('lembar_') === 0) props.deleteProperty(k); });
+  var shGuru = ss.getSheetByName(SR.GURU);
+  if (shGuru) { shGuru.getRange(SR.GURU1, 6, SR.JML_MAPEL, 2).clearContent(); shGuru.getRange('F4').clearContent(); }
+  // semester berikutnya: Ganjil -> Genap; Genap -> Ganjil tahun berikutnya
+  var p = ss.getSheetByName('PENGATURAN'), info = '';
+  var sem = p && p.createTextFinder('Semester').matchEntireCell(true).findNext();
+  var thn = p && p.createTextFinder('Tahun pelajaran').matchEntireCell(true).findNext();
+  if (sem) {
+    var lama = sem.offset(0, 1).getDisplayValue();
+    if (lama === 'Ganjil') sem.offset(0, 1).setValue('Genap');
+    else if (lama === 'Genap') {
+      sem.offset(0, 1).setValue('Ganjil');
+      var t = thn && thn.offset(0, 1).getDisplayValue().match(/^(\d{4})\s*\/\s*(\d{4})$/);
+      if (t) thn.offset(0, 1).setValue((+t[1] + 1) + '/' + (+t[2] + 1));
+    }
+    info = 'Semester sekarang: ' + sem.offset(0, 1).getDisplayValue() +
+      (thn ? ', tahun pelajaran ' + thn.offset(0, 1).getDisplayValue() : '') + '.\n';
+  }
+  ss.getSheetByName(siswaBaru ? SR.SISWA : 'PENGATURAN').activate();
+  pesan_('Selesai. ' + info + '\nPeriksa di PENGATURAN: kelas, tanggal raport, dan tanggal Hijriah.' +
+    (siswaBaru ? '\nLalu isi data siswa baru di halaman SISWA.' : '') +
+    '\nSesudah itu pilih menu SmartRapor › Kirim lembar nilai ke guru untuk semester ini.');
 }
 
 // ------------------------------------------------------------------ aktivasi

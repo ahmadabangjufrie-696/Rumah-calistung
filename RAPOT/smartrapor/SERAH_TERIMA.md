@@ -14,7 +14,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
   - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
     (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
   - Panduan TU (Google Doc dari `PANDUAN_TU.md`): **PANDUAN TU SmartRapor** id `1yvdlVF4SOPSDFnv7aRzJAGkOJmKR1pEpBKVYQgYMwSM`.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1qpt_QJ2hhE7NvjvAj8PxsFvNRXuHEwsL9rO6wGFI4aM` (versi aktivasi, 11 Nov) (diperbarui 11 Nov: lembar guru + nomor WA;
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1OAb9Me4gVNV-X6wkApd3tbNAg6ro0cDEuMagM-1BS6k` (versi aktivasi + semester baru, 11 Nov) (diperbarui 11 Nov: lembar guru + nomor WA;
     dokumen lama dibuang ke sampah. Selalu beri Ustadz LINK langsung ke dokumen ini, Ustadz bingung memilih di Drive).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
@@ -92,7 +92,11 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   - Alat pembuat kode untuk HP Ustadz (artifact pribadi, berisi kunci): https://claude.ai/artifact/52CGQTzF9KLGW693Fx7ofS
     Cek: contoh.guru@gmail.com → RM6C-39YR. Kode Gmail Ustadz sudah ditulis di PENGATURAN C46 file contoh.
   - Disarankan ke Ustadz: jadikan repo GitHub **private** (kode produk terbuka untuk umum).
-  - Ustadz **harus menempel kode baru** (dokumen KODE 1qpt…). Belum dicoba di Google.
+  - Ustadz **harus menempel kode baru** (dokumen KODE 1OAb…) ke file contoh DAN ke MASTER. Belum dicoba di Google.
+- 11 Nov: menu **Mulai semester baru (siswa tetap)** / **Mulai kelas baru (siswa baru)** — dipakai pada salinan file:
+  kosongkan nilai+materi (tab mapel dari GURU), EKSKUL C7:P46, CATATAN PONDOK C9:G48, P5 (C4,C5,C7:I8,C9:J48),
+  [kelas baru: SISWA B5:AA44]; hapus properti lembar_* + GURU F:G; Ganjil→Genap, Genap→Ganjil + tahun ajaran +1.
+  Kode aktivasi berlaku selamanya (tidak perlu beli lagi tiap semester).
   - **File MASTER untuk pembeli**: `SmartRapor - MASTER (untuk pembeli)` id `1Bk2KeCI_4pHnkAt9RrHkD3XKrOB3dslgFoplwXcJis0`
     (kosong, dibagikan "siapa saja dengan link: pelihat"; kelas/wali dikosongkan; kotak centang BERANDA sudah dipasang).
     Link untuk pembeli: https://docs.google.com/spreadsheets/d/1Bk2KeCI_4pHnkAt9RrHkD3XKrOB3dslgFoplwXcJis0/copy
