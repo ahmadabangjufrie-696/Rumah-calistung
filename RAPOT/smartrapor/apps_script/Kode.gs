@@ -132,7 +132,15 @@ function cetakSiswaIni() {
   tampilkanLink_('PDF raport <b>' + nama + '</b> sudah jadi.', file.getUrl(), 'Buka PDF');
 }
 
-async function cetakSekelas() {
+// Tombol dan menu tidak bisa memanggil fungsi async secara langsung,
+// jadi tombol memanggil fungsi biasa ini, lalu proses bertahapnya berjalan di dalam.
+function cetakSekelas() {
+  cetakSekelasProses_().catch(function (e) {
+    pesan_('Cetak sekelas gagal: ' + e.message + '\n\nFoto pesan ini dan kirim ke admin.');
+  });
+}
+
+async function cetakSekelasProses_() {
   var ss = SpreadsheetApp.getActive();
   var daftar = daftarSiswa_();
   if (!daftar.length) { pesan_('Data siswa masih kosong. Isi dulu halaman SISWA.'); return; }
