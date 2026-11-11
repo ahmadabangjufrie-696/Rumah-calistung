@@ -990,36 +990,36 @@ def buat_rapor_pondok(wb):
                                  ext=XDRPositiveSize2D(pixels_to_EMU(w), pixels_to_EMU(h)))
         ws.add_image(g)
     for r in range(1, 9):
-        ws.row_dimensions[r].height = 15
-    gabung(ws, 'A9:G9', f'={SEL["kop1"]}', font='Arial', size=11, bold=True, h='center', warna='000000')
+        ws.row_dimensions[r].height = 16
+    gabung(ws, 'A9:G9', f'={SEL["kop1"]}', font='Arial', size=12, bold=True, h='center', warna='000000')
     gabung(ws, 'A10:G10', f'={SEL["kop2"]}', font='Arial', size=8, bold=True, h='center', warna='000000')
-    ws.row_dimensions[9].height = 15
-    ws.row_dimensions[10].height = 12
+    ws.row_dimensions[9].height = 17
+    ws.row_dimensions[10].height = 13
     for c in 'ABCDEFG':
         ws[f'{c}10'].border = Border(bottom=Side(style='double', color='000000'))
-    ws.row_dimensions[11].height = 4
-    gabung(ws, 'A12:G12', 'تقرير عن نتائج تعلم الطالب', font='Amiri', size=14, bold=True, h='center',
+    ws.row_dimensions[11].height = 3
+    gabung(ws, 'A12:G12', 'تقرير عن نتائج تعلم الطالب', font='Amiri', size=16, bold=True, h='center',
            warna='000000')
-    ws.row_dimensions[12].height = 22
+    ws.row_dimensions[12].height = 26
     ws.row_dimensions[13].height = 3
-    ws.row_dimensions[14].height = 17
-    ws.row_dimensions[15].height = 17
-    ws.row_dimensions[16].height = 4
+    ws.row_dimensions[14].height = 20
+    ws.row_dimensions[15].height = 20
+    ws.row_dimensions[16].height = 3
     ws.row_dimensions[17].height = 18
-    ws.row_dimensions[18].height = 26
+    ws.row_dimensions[18].height = 28
     nama_arab = siswa('Nama (tulisan Arab)', idx)
     ws.merge_cells('D14:G14')
     tulis_arab(ws, 'D14', f'="أسم الطالب :   "&IF({nama_arab}="",{siswa("Nama Peserta Didik", idx)},{nama_arab})',
-               bold=True)
+               bold=True, size=13)
     ws.merge_cells('A14:C14')
     tulis_arab(ws, 'A14', f'="الفَصلُ/الفصل الدراسي :   "&{arab(SEL["kelas_angka"])}&" / "&'
-                          f'IF({SEL["semester"]}="Ganjil","الأول","الثاني")', bold=True)
+                          f'IF({SEL["semester"]}="Ganjil","الأول","الثاني")', bold=True, size=13)
     ws.merge_cells('D15:G15')
-    tulis_arab(ws, 'D15', f'="رقم التسجيل :   "&{arab(siswa("NIS", idx))}', bold=True)
+    tulis_arab(ws, 'D15', f'="رقم التسجيل :   "&{arab(siswa("NIS", idx))}', bold=True, size=13)
     ws.merge_cells('A15:C15')
-    tulis_arab(ws, 'A15', f'="العَامُ الدِرَاسِى :   "&{arab(f'SUBSTITUTE({SEL["tahun"]},"/"," / ")')}', bold=True)
+    tulis_arab(ws, 'A15', f'="العَامُ الدِرَاسِى :   "&{arab(f'SUBSTITUTE({SEL["tahun"]},"/"," / ")')}', bold=True, size=13)
     # kepala tabel
-    def kepala(rng, t, size=12):
+    def kepala(rng, t, size=13):
         a_, b_ = rng.split(':')
         if a_ != b_:
             ws.merge_cells(rng)
@@ -1031,10 +1031,10 @@ def buat_rapor_pondok(wb):
     kepala('G17:G18', 'رقم')
     kepala('F17:F18', 'مجال الدراسة')
     kepala('B17:E17', 'قيمة المعرفة')
-    kepala('E18:E18', 'قيمة تيوري', 10)
-    kepala('D18:D18', 'درجات الرسالة', 10)
-    kepala('C18:C18', 'مارس/ شفهي', 10)
-    kepala('B18:B18', 'درجات الرسالة', 10)
+    kepala('E18:E18', 'قيمة تيوري', 11)
+    kepala('D18:D18', 'درجات الرسالة', 11)
+    kepala('C18:C18', 'مارس/ شفهي', 11)
+    kepala('B18:B18', 'درجات الرسالة', 11)
     kepala('A17:A18', 'وصف تقدم التعلم')
     terbilang = f"{q(DATA)}!$B$6:$C$106"
     predikat = f"{q(DATA)}!$E$6:$F$9"
@@ -1043,18 +1043,18 @@ def buat_rapor_pondok(wb):
     for no, tab in enumerate(URUT_PONDOK, 1):
         teori = f'INDEX({rentang_siswa(tab, "K")},{idx})'
         praktik = f'INDEX({rentang_siswa(tab, "L")},{idx})'
-        tulis_arab(ws, f'G{r}', ''.join(ANGKA_ARAB[int(d)] for d in str(no)), h='center', size=10, font='Arial')
-        tulis_arab(ws, f'F{r}', arab_nama[tab], size=10, font='Arial')
-        tulis_arab(ws, f'E{r}', f'=IF({teori}="","-",{arab(teori)})', h='center', size=10, font='Arial')
-        tulis_arab(ws, f'D{r}', f'=IF({teori}="","-",VLOOKUP(ROUND({teori},0),{terbilang},2,FALSE))', size=10,
+        tulis_arab(ws, f'G{r}', ''.join(ANGKA_ARAB[int(d)] for d in str(no)), h='center', size=11, font='Arial')
+        tulis_arab(ws, f'F{r}', arab_nama[tab], size=11, font='Arial')
+        tulis_arab(ws, f'E{r}', f'=IF({teori}="","-",{arab(teori)})', h='center', size=11, font='Arial')
+        tulis_arab(ws, f'D{r}', f'=IF({teori}="","-",VLOOKUP(ROUND({teori},0),{terbilang},2,FALSE))', size=11,
                    font='Arial')
-        tulis_arab(ws, f'C{r}', f'=IF({praktik}="","-",{arab(praktik)})', h='center', size=10, font='Arial')
-        tulis_arab(ws, f'B{r}', f'=IF({praktik}="","-",VLOOKUP(ROUND({praktik},0),{terbilang},2,FALSE))', size=10,
+        tulis_arab(ws, f'C{r}', f'=IF({praktik}="","-",{arab(praktik)})', h='center', size=11, font='Arial')
+        tulis_arab(ws, f'B{r}', f'=IF({praktik}="","-",VLOOKUP(ROUND({praktik},0),{terbilang},2,FALSE))', size=11,
                    font='Arial')
         tulis_arab(ws, f'A{r}', f'=IF(COUNT({teori},{praktik})=0,"-",VLOOKUP(AVERAGE({teori},{praktik}),'
-                                f'{predikat},2,TRUE))', size=10, h='center', font='Arial')
+                                f'{predikat},2,TRUE))', size=11, h='center', font='Arial')
         kotak_rentang(ws, f'A{r}:G{r}')
-        ws.row_dimensions[r].height = 15
+        ws.row_dimensions[r].height = 16.5
         r += 1
     # jumlah, rata-rata, peringkat
     ws.merge_cells(f'F{r}:G{r}')
@@ -1066,58 +1066,61 @@ def buat_rapor_pondok(wb):
     tulis_arab(ws, f'A{r}', f'=IF(OR({SEL["peringkat_pondok"]}<>"YA",{cp("K", idx)}=""),"",{arab(cp("K", idx))})',
                h='center', bold=True)
     kotak_rentang(ws, f'A{r}:G{r}')
-    ws.row_dimensions[r].height = 20
+    ws.row_dimensions[r].height = 22
     r += 1
-    ws.row_dimensions[r].height = 6
+    ws.row_dimensions[r].height = 5
     r += 1
     ws.merge_cells(f'A{r}:G{r}')
-    tulis_arab(ws, f'A{r}', 'التعود على الذات', bold=True, h='center')
-    ws.row_dimensions[r].height = 17
+    tulis_arab(ws, f'A{r}', 'التعود على الذات', bold=True, h='center', size=13)
+    ws.row_dimensions[r].height = 18
     ws[f'A{r}'].fill = PatternFill('solid', fgColor='E7E6E6')
     kotak_rentang(ws, f'A{r}:G{r}')
     r += 1
     for k in range(2):
         for nomor, (kn, kt) in ((k + 1, ('G', 'D{0}:F{0}')), (k + 3, ('C', 'A{0}:B{0}'))):
             kol = 'CDEF'[nomor - 1]
-            tulis_arab(ws, f'{kn}{r}', ANGKA_ARAB[nomor], h='center', size=10, font='Arial')
+            tulis_arab(ws, f'{kn}{r}', ANGKA_ARAB[nomor], h='center', size=11, font='Arial')
             rr = kt.format(r)
             ws.merge_cells(rr)
-            tulis_arab(ws, rr.split(':')[0], f'=IF({cp(kol, idx)}="",{q(CP)}!${kol}$8,{cp(kol, idx)})', size=10,
+            tulis_arab(ws, rr.split(':')[0], f'=IF({cp(kol, idx)}="",{q(CP)}!${kol}$8,{cp(kol, idx)})', size=11,
                        bungkus=True, font='Arial')
         kotak_rentang(ws, f'A{r}:G{r}')
-        ws.row_dimensions[r].height = 28
+        ws.row_dimensions[r].height = 30
         r += 1
     ws.row_dimensions[r].height = 4
     r += 1
     ws.merge_cells(f'A{r}:G{r}')
     rata = cp('J', idx)
     tulis_arab(ws, f'A{r}', f'=IF({cp("G", idx)}<>"",{cp("G", idx)},IF({rata}="","",'
-                            f'VLOOKUP({rata},{q(DATA)}!$E$13:$F$16,2,TRUE)))', bungkus=True, size=10, font='Arial')
+                            f'VLOOKUP({rata},{q(DATA)}!$E$13:$F$16,2,TRUE)))', bungkus=True, size=11, font='Arial')
     kotak_rentang(ws, f'A{r}:G{r}')
-    ws.row_dimensions[r].height = 26
+    ws.row_dimensions[r].height = 30
     r += 1
     ws.row_dimensions[r].height = 4
     r += 1
     ws.merge_cells(f'E{r}:G{r}')
-    tulis_arab(ws, f'E{r}', f'={SEL["tempat_arab"]}&"   "&{SEL["hijriah"]}', bold=True)
+    tulis_arab(ws, f'E{r}', f'={SEL["tempat_arab"]}&"   "&{SEL["hijriah"]}', bold=True, size=13)
+    ws.row_dimensions[r].height = 18
     r += 1
     ws.merge_cells(f'E{r}:G{r}')
     ws.merge_cells(f'C{r}:D{r}')
     ws.merge_cells(f'A{r}:B{r}')
-    tulis_arab(ws, f'E{r}', 'مدير المعهد', bold=True)
-    tulis_arab(ws, f'C{r}', 'وَلِيُّ الفَصل', bold=True, h='center')
-    tulis_arab(ws, f'A{r}', 'ولي الطالب', bold=True, h='center')
+    tulis_arab(ws, f'E{r}', 'مدير المعهد', bold=True, size=13)
+    tulis_arab(ws, f'C{r}', 'وَلِيُّ الفَصل', bold=True, h='center', size=13)
+    tulis_arab(ws, f'A{r}', 'ولي الطالب', bold=True, h='center', size=13)
+    ws.row_dimensions[r].height = 18
     for k in range(1, 4):
-        ws.row_dimensions[r + k].height = 10
+        ws.row_dimensions[r + k].height = 9
     r += 4
     ws.merge_cells(f'E{r}:G{r}')
     ws.merge_cells(f'C{r}:D{r}')
     ws.merge_cells(f'A{r}:B{r}')
-    tulis_arab(ws, f'E{r}', f'={SEL["pimpinan_arab"]}', bold=True, underline='single')
-    tulis_arab(ws, f'C{r}', f'={SEL["wali_arab"]}', bold=True, h='center', underline='single')
+    tulis_arab(ws, f'E{r}', f'={SEL["pimpinan_arab"]}', bold=True, underline='single', size=13)
+    ws.row_dimensions[r].height = 18
+    tulis_arab(ws, f'C{r}', f'={SEL["wali_arab"]}', bold=True, h='center', underline='single', size=13)
     ayah = siswa('Nama Ayah (Arab)', idx)
     tulis_arab(ws, f'A{r}', f'=IF({ayah}="",{siswa("Nama Ayah", idx)},{ayah})', bold=True, h='center',
-               underline='single')
+               underline='single', size=13)
     siapkan_cetak(ws, f'A1:G{r}', satu_halaman=True)
 
 
