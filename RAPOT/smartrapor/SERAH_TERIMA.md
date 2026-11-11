@@ -46,6 +46,8 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   kode tombol (`node --check`, lalu tiruan layanan). Apps Script tidak bisa dijalankan dari server; Ustadz yang mencoba.
 - **Locale file = id_ID**: rumus lewat Sheets API (update_values / formulaValue) harus memakai pemisah `;`
   (dengan `,` hasilnya #ERROR!). Di Apps Script hindari menulis rumus baru; pakai nilai / RichText.
+- Judul tab pondok "NAMA   عربي" (B2) harus diberi arah kiri-ke-kanan (textDirection LEFT_TO_RIGHT / readingOrder=1),
+  kalau tidak Google menampilkan Arab di depan. Sudah diperbaiki di file kelas + 11 lembar guru pondok (11 Nov).
 - Pelajaran: fungsi `async` tidak bisa dipanggil langsung dari tombol/menu (pakai fungsi biasa pembungkus).
   Sel gabungan tidak menyesuaikan tinggi sendiri (tinggi diatur skrip `rapikanTinggi_`). Huruf Amiri tidak ada di
   LibreOffice server (tampil kotak), di Google normal.
@@ -73,6 +75,10 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 - 11 Nov: mapel bergantian guru putra/putri (mis. Informatika: Hendrawan putra, Febryangki putri) — dibahas,
   **Ustadz memutuskan: lupakan putri, urus kelas putra/laki saja**. Satu mapel = satu guru per file kelas. Jangan buat fitur
   pembagian per L/P kecuali diminta lagi. Nama guru asli belum ada (tidak ada di Drive); tunggu daftar dari Ustadz.
+
+- 11 Nov: Ustadz sudah mengisi guru asli di GURU dan menjalankan "Kirim lembar nilai ke guru": folder
+  `Lembar Guru - SmartRapor - Kelas IX B (contoh)` berisi 19 lembar (sebagian sisa percobaan: "Ustadz Contoh", nama berupa nomor,
+  WAHYUDI dua kali). TAJWID belum punya lembar.
 
 ## Yang perlu dikonfirmasi Ustadz
 1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).

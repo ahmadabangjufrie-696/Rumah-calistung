@@ -375,6 +375,7 @@ def buat_mapel_umum(wb, tab, nama):
 def buat_mapel_pondok(wb, tab, nama, arab):
     ws = wb.create_sheet(tab)
     kepala_mapel(ws, f'{nama.upper()}   {arab}', 'Mapel pondok  ·  Tugas, lisan/praktik, dan semester', 'M', tab)
+    ws['B2'].alignment = Alignment(horizontal='left', vertical='center', readingOrder=1)   # kiri-ke-kanan: latin dulu
     grup = [('C7:F7', 'Nilai Pengetahuan (Tugas)'), ('G7:I7', 'Nilai Lisan / Praktik'),
             ('J7:J7', 'Semester'), ('K7:L7', 'Nilai Raport')]
     for rng, t in grup:
