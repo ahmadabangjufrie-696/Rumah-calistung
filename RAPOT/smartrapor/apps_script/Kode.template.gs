@@ -6,16 +6,13 @@ var SR = {
   BERANDA: 'BERANDA',
   SISWA: 'SISWA',
   PILIH: 'I25',                 // kotak pilihan "No - Nama" di BERANDA
-  PILIH_CETAK: 'I29',           // kotak "Yang dicetak" di BERANDA
+  CENTANG: 'H31:H34',           // kotak centang "Yang dicetak" di BERANDA
   SISWA1: 5,                    // baris siswa pertama di SISWA
   MAKS: 40,
-  // isi PDF menurut pilihan "Yang dicetak" (cover cukup sekali, di awal kelas VII)
-  CETAK: {
-    'Raport saja': ['RAPOR SEKOLAH'],
-    'Cover + Keterangan diri + Raport': ['COVER', 'KETERANGAN DIRI', 'RAPOR SEKOLAH'],
-    'Cover + Keterangan diri saja': ['COVER', 'KETERANGAN DIRI']
-  },
+  // halaman untuk tiap kotak centang (urutan sama dengan H31:H34)
+  CETAK: [['COVER', 'IDENTITAS SEKOLAH', 'KETERANGAN DIRI'], ['RAPOR SEKOLAH'], ['RAPOR PONDOK'], ['RAPOR P5']],
   RAPOR: 'RAPOR SEKOLAH',
+  P5: 'RAPOR P5',
   FOLDER_PDF: 'PDF SmartRapor',
   PDFLIB: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'
 };
@@ -23,8 +20,8 @@ var SR = {
 var TOMBOL = {
   NAIK: { gambar: '__TOMBOL_NAIK__', sel: 'H28', fungsi: 'siswaSebelumnya', w: 170, h: 30 },
   TURUN: { gambar: '__TOMBOL_TURUN__', sel: 'I28', fungsi: 'siswaBerikutnya', w: 170, h: 30 },
-  CETAK1: { gambar: '__TOMBOL_CETAK1__', sel: 'H30', fungsi: 'cetakSiswaIni', w: 170, h: 36 },
-  CETAKSEMUA: { gambar: '__TOMBOL_CETAKSEMUA__', sel: 'I30', fungsi: 'cetakSekelas', w: 170, h: 36 }
+  CETAK1: { gambar: '__TOMBOL_CETAK1__', sel: 'H36', fungsi: 'cetakSiswaIni', w: 170, h: 36 },
+  CETAKSEMUA: { gambar: '__TOMBOL_CETAKSEMUA__', sel: 'I36', fungsi: 'cetakSekelas', w: 170, h: 36 }
 };
 
 // ------------------------------------------------------------------ menu
@@ -75,8 +72,10 @@ function pilihanSekarang_() {
 }
 
 function halamanCetak_() {
-  var p = SpreadsheetApp.getActive().getSheetByName(SR.BERANDA).getRange(SR.PILIH_CETAK).getDisplayValue();
-  return SR.CETAK[p] || SR.CETAK['Raport saja'];
+  var v = SpreadsheetApp.getActive().getSheetByName(SR.BERANDA).getRange(SR.CENTANG).getValues();
+  var hasil = [];
+  v.forEach(function (r, i) { if (r[0] === true) hasil = hasil.concat(SR.CETAK[i]); });
+  return hasil;
 }
 
 function pilih_(teks) {
@@ -112,6 +111,26 @@ function rapikanTinggi_() {
       break;
     }
   }
+  rapikanP5_();
+}
+
+// RAPOR P5: kolom G berisi penanda baris (H judul projek, D dimensi, S sub-elemen, C catatan).
+// Aspek yang tidak diisi dirapatkan supaya tidak menyisakan ruang kosong.
+function rapikanP5_() {
+  var sh = SpreadsheetApp.getActive().getSheetByName(SR.P5);
+  if (!sh) return;
+  var n = sh.getLastRow();
+  var data = sh.getRange(1, 2, n, 6).getDisplayValues();       // B..G
+  for (var i = 0; i < n; i++) {
+    var tanda = data[i][5], teks = data[i][0];
+    if (!tanda) continue;
+    var h;
+    if (!teks) h = 2;
+    else if (tanda === 'D') h = 18;
+    else if (tanda === 'S') h = Math.max(30, jumlahBaris_(teks, 85) * 14 + 8);
+    else h = Math.max(20, jumlahBaris_(teks, 115) * 14 + 8);
+    sh.setRowHeight(i + 1, h);
+  }
 }
 
 // ------------------------------------------------------------------ cetak
@@ -119,6 +138,7 @@ function cetakSiswaIni() {
   var ss = SpreadsheetApp.getActive();
   var nama = pilihanSekarang_();
   if (!nama) { pesan_('Pilih dulu siswa di BERANDA.'); return; }
+  if (!halamanCetak_().length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
   toast_('Membuat PDF ' + nama + ' ...');
   rapikanTinggi_();
   var keadaan = sembunyikanSelainCetak_();
@@ -144,6 +164,7 @@ async function cetakSekelasProses_() {
   var ss = SpreadsheetApp.getActive();
   var daftar = daftarSiswa_();
   if (!daftar.length) { pesan_('Data siswa masih kosong. Isi dulu halaman SISWA.'); return; }
+  if (!halamanCetak_().length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
   var awal = pilihanSekarang_();
   var blobs = [];
   var keadaan = sembunyikanSelainCetak_();

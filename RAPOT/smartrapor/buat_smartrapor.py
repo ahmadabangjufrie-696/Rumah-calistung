@@ -121,6 +121,15 @@ PENGATURAN = [  # kunci, label, nilai bawaan
     ('wali', 'Wali kelas', 'Ahmad Jufri'),
     ('nip_wali', 'NIP wali kelas', ''),
     ('kktp', 'KKTP bawaan (nilai tuntas)', 70),
+    ('_', 'PONDOK PESANTREN (raport pondok)', None),
+    ('kop1', 'Kop baris 1', 'KABUPATEN BULUNGAN KALIMANTAN UTARA'),
+    ('kop2', 'Kop baris 2', 'Jln. Jelarai Tanjung Selor Timur Kabupaten Bulungan Kalimantan Utara Telp.(0552) 23155'),
+    ('pimpinan_arab', 'Pimpinan pondok (tulisan Arab)', 'مطهر الجفري . ماجيستر'),
+    ('wali_arab', 'Wali kelas (tulisan Arab)', 'أحمد الجفري'),
+    ('kelas_angka', 'Kelas (angka, untuk raport Arab)', 9),
+    ('tempat_arab', 'Tempat (tulisan Arab)', 'تانجونج سيلور'),
+    ('hijriah', 'Tanggal Hijriah (tulisan Arab)', '٥ مُحَرَّم ١٤٤٨'),
+    ('peringkat_pondok', 'Tampilkan peringkat di raport pondok (YA/TIDAK)', 'TIDAK'),
     ('keputusan', 'Kalimat keputusan (akhir catatan)',
      'Berdasarkan putusan rapat dewan guru serta memperhatikan capaian pembelajaran semester ganjil dan '
      'semester genap, maka siswa dinyatakan {keputusan}.'),
@@ -532,11 +541,10 @@ def baris_progres(ws, r, tab, nama, kol, jml):
         size=9, warna=HIJAU2, latar=PUTIH, border=Border(bottom=tipis))
     isi(ws, f'F{r}', f'=IF({jml}=0,"-",IF({terisi}=0,"KOSONG",IF({terisi}>={jml},"LENGKAP","BELUM LENGKAP")))',
         size=8, bold=True, h='center', latar=PUTIH, border=Border(bottom=tipis))
-    ws.row_dimensions[r].height = 19
+    ws.row_dimensions[r].height = 22
 
 
 # ---------------------------------------------------------------- halaman cetak
-PILIHAN_CETAK = ['Raport saja', 'Cover + Keterangan diri + Raport', 'Cover + Keterangan diri saja']
 PILIH = 'BERANDA!$J$25'   # nomor siswa yang dicetak (dari pilihan nama di BERANDA!I25)
 
 
@@ -545,34 +553,33 @@ def pemilih(ws, kol=None):
     return PILIH
 
 
+CENTANG = [('H31', 'Cover, Identitas & Keterangan diri', False, 'hanya kelas VII semester 1'),
+           ('H32', 'Raport Sekolah', True, ''),
+           ('H33', 'Raport Pondok', True, ''),
+           ('H34', 'Raport P5', False, '')]
+
+
 def kartu_cetak(ws):
-    """kotak pilihan siswa untuk dicetak, di BERANDA"""
+    """kotak pilihan siswa dan isi cetakan, di BERANDA (tombol dipasang Apps Script)"""
     isi(ws, 'H23', 'CETAK RAPORT', size=11, bold=True, warna=HIJAU)
     isi(ws, 'H24', 'Klik kotak kuning, lalu pilih nama siswa:', size=8, warna='495057')
     isi(ws, 'H25', 'SISWA ➜', size=9, bold=True, warna=PUTIH, latar=HIJAU, h='center')
-    isi(ws, 'I25', f'=SISWA!$AB${SISWA1}', size=12, bold=True, warna=HIJAU, latar=KUNING, h='center',
+    isi(ws, 'I25', f'=SISWA!$AB${SISWA1}', size=11, bold=True, warna=HIJAU, latar=KUNING, h='center',
         border=Border(left=tebal, right=tebal, top=tebal, bottom=tebal))
-    ws.row_dimensions[25].height = 30
     # nomor siswa dari pilihan "4 - NAMA" (kolom J disembunyikan)
     isi(ws, 'J25', '=IFERROR(VALUE(LEFT(I25,FIND(" ",I25)-1)),1)', size=8, warna=PUTIH)
     ws.column_dimensions['J'].hidden = True
     isi(ws, 'H26', 'Urutan', size=8, warna='6C757D', h='right')
     isi(ws, 'I26', f'="Siswa ke-"&J25&" dari "&COUNTA(SISWA!$D${SISWA1}:$D${SISWA1 + MAKS - 1})', size=9,
         bold=True, warna=HIJAU)
-    # baris 28 dan 30: tempat tombol (dipasang Apps Script: menu SmartRapor › Pasang tombol)
     isi(ws, 'H27', 'Pindah siswa', size=8, bold=True, warna='6C757D')
-    ws.row_dimensions[28].height = 34
-    isi(ws, 'H29', 'Yang dicetak  ➜', size=8, bold=True, warna='6C757D', h='right')
-    isi(ws, 'I29', 'Raport saja', size=9, bold=True, warna=HIJAU, latar=KUNING,
-        border=Border(left=tipis, right=tipis, top=tipis, bottom=tipis))
-    dv2 = DataValidation(type='list', formula1=f'"{",".join(PILIHAN_CETAK)}"', showErrorMessage=True,
-                         error='Pilih dari daftar.')
-    ws.add_data_validation(dv2)
-    dv2.add('I29')
-    ws.row_dimensions[30].height = 40
-    isi(ws, 'H32', 'Tanpa tombol: buka halaman COVER / KETERANGAN DIRI / RAPOR SEKOLAH,', size=7,
-        warna='ADB5BD')
-    isi(ws, 'H33', 'lalu File › Cetak.', size=7, warna='ADB5BD')
+    isi(ws, 'H30', 'Yang dicetak (centang):', size=8, bold=True, warna='6C757D')
+    for sel, teks, nilai, ket in CENTANG:
+        ws[sel] = nilai
+        ws[sel].alignment = Alignment(horizontal='right', vertical='center')
+        baris = sel[1:]
+        isi(ws, f'I{baris}', teks + (f'   ({ket})' if ket else ''), size=9, bold=not ket, warna='212529')
+    isi(ws, 'H38', 'Tanpa tombol: buka halaman RAPOR yang dimaksud, lalu File › Cetak.', size=7, warna='ADB5BD')
     dv = DataValidation(type='list', formula1=f'SISWA!$AB${SISWA1}:$AB${SISWA1 + MAKS - 1}',
                         showErrorMessage=True, error='Pilih nama dari daftar.')
     ws.add_data_validation(dv)
@@ -831,6 +838,398 @@ def buat_keterangan_diri(wb):
     siapkan_cetak(ws, f'A1:F{r + 7}')
 
 
+# ---------------------------------------------------------------- tahap 2: pondok & P5
+ANGKA_ARAB = '٠١٢٣٤٥٦٧٨٩'
+SATUAN = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة']
+BELASAN = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر',
+           'ثمانية عشر', 'تسعة عشر']
+PULUHAN = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون']
+
+
+def terbilang_arab(n):
+    if n == 0:
+        return 'صفر'
+    if n == 100:
+        return 'مائة'
+    if n < 10:
+        return SATUAN[n]
+    if n < 20:
+        return BELASAN[n - 10]
+    p, s_ = divmod(n, 10)
+    return PULUHAN[p] if s_ == 0 else f'{SATUAN[s_]} و{PULUHAN[p]}'
+
+
+def arab(expr):
+    """rumus: ubah angka/teks ke angka Arab-Hindi"""
+    f = f'({expr})&""'
+    for d in range(10):
+        f = f'SUBSTITUTE({f},"{d}","{ANGKA_ARAB[d]}")'
+    return f
+
+
+PREDIKAT = [(0, 'ليست جيدة بما فيه الكفاية'), (60, 'جيد بما فيه الكفاية'), (75, 'جيد بالفعل'), (90, 'ممتازة')]
+CATATAN_ARAB = [
+    (0, 'لا تستسلم واستمر في تحسين أدائك التعليمي لتحقيق أهدافك في المستقبل.'),
+    (65, 'زيادة الدافع للتعلم لأن الإنجازات الجيدة يمكن أن تقودك إلى تحقيق أهدافك في المستقبل.'),
+    (75, 'استمر في زيادة دافع التعلم الخاص بك حتى تتمكن من أن تصبح طالبا متميزا وتجعل والديك فخورين.'),
+    (85, 'تهانينا على الإنجازات الجيدة التي حققتها في هذا الفصل الدراسي، ونأمل في المستقبل أن تحافظ على '
+         'إنجازاتك وعملك الجاد وشغفك وأن تصبح شخصا أفضل.'),
+]
+PEMBIASAAN = [
+    'نشيطون ومعتادون على صلاة الفرائض جماعة في المسجد والسنة',
+    'اعتاد على دراسة الكتب والمجاهدة وحفظ القرآن والسور القصيرة والعديد من الأحاديث النبوية',
+    'حافظ دائما على نظافة البيئة والمهاجع والنظام والأناقة',
+    'نشيطون ومعتادون على المشاركة في جمعية تكليم',
+]
+PERLU_BIMBINGAN_ARAB = 'ما زال يحتاج إلى مزيد من التوجيه والتعويد'
+URUT_PONDOK = ['HADIST', 'BAHASA ARAB', 'FIQIH', 'TAUHID', 'NAHWU', 'SHOROF', 'TAFSIR', 'TAJWID',
+               'S. ALKHAIRAAT', 'TARIKH', 'TASRIF', 'MUFRADAT', 'MUHADATSAH', 'AL ANGHAAM', 'MAHFUZATH', 'IMLA']
+DATA = 'DATA ARAB'
+CP = 'CATATAN PONDOK'
+P5_TINGKAT = {'BB': 'Belum Berkembang ( BB )', 'MB': 'Mulai Berkembang ( MB )',
+              'BSH': 'Berkembang Sesuai Harapan ( BSH )', 'SB': 'Sangat Berkembang ( SB )'}
+P5_ASPEK = 7
+
+
+def buat_data_arab(wb):
+    ws = wb.create_sheet(DATA)
+    pita_judul(ws, 'Data Arab', 'Terbilang, predikat, dan catatan raport pondok. Batas nilai boleh diubah.', 'F')
+    isi(ws, 'B5', 'Angka', size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center')
+    isi(ws, 'C5', 'Terbilang', size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center')
+    for n in range(101):
+        ws[f'B{6 + n}'] = n
+        ws[f'C{6 + n}'] = terbilang_arab(n)
+        ws[f'C{6 + n}'].font = Font(name='Amiri', size=11)
+    isi(ws, 'E5', 'Nilai mulai', size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center')
+    isi(ws, 'F5', 'Predikat mapel (وصف تقدم التعلم)', size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center')
+    for i, (n, t) in enumerate(PREDIKAT):
+        isi(ws, f'E{6 + i}', n, size=10, latar=KUNING, h='center', border=KOTAK)
+        isi(ws, f'F{6 + i}', t, font='Amiri', size=12, latar=KUNING, border=KOTAK, h='right')
+    isi(ws, 'E12', 'Rata-rata mulai', size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center')
+    isi(ws, 'F12', 'Catatan otomatis (bila tidak diisi wali kelas)', size=9, bold=True, warna=PUTIH,
+        latar=HIJAU2, h='center')
+    for i, (n, t) in enumerate(CATATAN_ARAB):
+        isi(ws, f'E{13 + i}', n, size=10, latar=KUNING, h='center', border=KOTAK)
+        isi(ws, f'F{13 + i}', t, font='Amiri', size=12, latar=KUNING, border=KOTAK, h='right', bungkus=True)
+        ws.row_dimensions[13 + i].height = 36
+    lebar(ws, {'A': 2, 'B': 8, 'C': 22, 'D': 3, 'E': 14, 'F': 70})
+    ws.sheet_properties.tabColor = 'ADB5BD'
+
+
+def buat_catatan_pondok(wb):
+    ws = wb.create_sheet(CP)
+    pita_judul(ws, 'Catatan Pondok', 'Pembiasaan diri dan catatan raport pondok. Kosong = memakai kalimat bawaan.', 'K')
+    isi(ws, 'A5', 'Kalimat bawaan (baris kuning muda) dipakai bila kotak siswa dikosongkan. Pilih "' +
+        PERLU_BIMBINGAN_ARAB + '" bila siswa masih perlu bimbingan.', size=8, warna='6C757D')
+    for i, t in enumerate(['Pembiasaan 1', 'Pembiasaan 2', 'Pembiasaan 3', 'Pembiasaan 4', 'Catatan wali kelas',
+                           'Jumlah nilai', 'Jumlah mapel', 'Rata-rata', 'Peringkat']):
+        isi(ws, f'{gl(3 + i)}7', t, size=8, bold=True, warna=PUTIH, latar=HIJAU2, h='center', bungkus=True,
+            border=KOTAK)
+    isi(ws, 'A7', 'No', size=8, bold=True, warna=PUTIH, latar=HIJAU2, h='center', border=KOTAK)
+    isi(ws, 'B7', 'Nama Santri', size=8, bold=True, warna=PUTIH, latar=HIJAU2, h='center', border=KOTAK)
+    gabung(ws, 'A8:B8', 'Kalimat bawaan  ➜', size=8, bold=True, warna=HIJAU, h='right')
+    for i, t in enumerate(PEMBIASAAN):
+        isi(ws, f'{gl(3 + i)}8', t, font='Amiri', size=11, latar=KREM, h='right', bungkus=True, border=KOTAK)
+    isi(ws, 'G8', '(otomatis menurut rata-rata, lihat DATA ARAB)', size=8, italic=True, warna='6C757D', bungkus=True)
+    ws.row_dimensions[8].height = 60
+    akhir = BARIS1 + MAKS - 1
+    for i in range(MAKS):
+        r = BARIS1 + i
+        isi(ws, f'A{r}', i + 1, size=9, h='center', border=KOTAK)
+        isi(ws, f'B{r}', f'=IF({siswa("Nama Peserta Didik", i + 1)}="","",{siswa("Nama Peserta Didik", i + 1)})',
+            size=9, border=KOTAK)
+        for col in 'CDEFG':
+            isi(ws, f'{col}{r}', font='Amiri', size=11, latar=KUNING, border=KOTAK, h='right')
+        sel = [f'{q(t)}!K{r}' for t in URUT_PONDOK]
+        ws[f'H{r}'] = f'=IF(COUNT({",".join(sel)})=0,"",SUM({",".join(sel)}))'
+        ws[f'I{r}'] = f'=COUNT({",".join(sel)})'
+        ws[f'J{r}'] = f'=IF(I{r}=0,"",ROUND(H{r}/I{r},0))'
+        ws[f'K{r}'] = f'=IF(J{r}="","",RANK(J{r},$J${BARIS1}:$J${akhir}))'
+        for col in 'HIJK':
+            isi(ws, f'{col}{r}', size=9, latar=ABU, h='center', border=KOTAK)
+    for k, col in enumerate('CDEF'):
+        dv = DataValidation(type='list', formula1=f'"{PERLU_BIMBINGAN_ARAB}"', showErrorMessage=False)
+        ws.add_data_validation(dv)
+        dv.add(f'{col}{BARIS1}:{col}{akhir}')
+    dv = DataValidation(type='list', formula1=f"{q(DATA)}!$F$13:$F$16", showErrorMessage=False)
+    ws.add_data_validation(dv)
+    dv.add(f'G{BARIS1}:G{akhir}')
+    lebar(ws, {'A': 5, 'B': 26, 'C': 30, 'D': 30, 'E': 30, 'F': 30, 'G': 40, 'H': 9, 'I': 8, 'J': 9, 'K': 9})
+    ws.freeze_panes = f'C{BARIS1}'
+    ws.sheet_properties.tabColor = HIJAU2
+
+
+def cp(kol, idx):
+    return f'INDEX({q(CP)}!${kol}${BARIS1}:${kol}${BARIS1 + MAKS - 1},{idx})'
+
+
+def tulis_arab(ws, ref, nilai, size=12, bold=False, h='right', bungkus=False, underline=None):
+    return isi(ws, ref, nilai, font='Amiri', size=size, bold=bold, h=h, bungkus=bungkus, warna='000000',
+               underline=underline)
+
+
+def buat_rapor_pondok(wb):
+    ws = wb.create_sheet('RAPOR PONDOK')
+    idx = pemilih(ws)
+    # kolom kiri->kanan (cermin dari raport Arab yang dibaca kanan->kiri)
+    lebar(ws, {'A': 20, 'B': 17, 'C': 8, 'D': 17, 'E': 8, 'F': 22, 'G': 5})
+    kop = os.path.join(DI_SINI, 'aset', 'kop_pondok.jpg')
+    if os.path.exists(kop):
+        g = Gambar(kop)
+        g.width, g.height = 180, 140
+        ws.add_image(g, 'C1')
+    for r in range(1, 8):
+        ws.row_dimensions[r].height = 15.5
+    gabung(ws, 'A9:G9', f'={SEL["kop1"]}', font='Arial', size=11, bold=True, h='center', warna='000000')
+    gabung(ws, 'A10:G10', f'={SEL["kop2"]}', font='Arial', size=8, bold=True, h='center', warna='000000')
+    for c in 'ABCDEFG':
+        ws[f'{c}10'].border = Border(bottom=Side(style='double', color='000000'))
+    gabung(ws, 'A12:G12', 'تقرير عن نتائج تعلم الطالب', font='Amiri', size=15, bold=True, h='center',
+           warna='000000')
+    nama_arab = siswa('Nama (tulisan Arab)', idx)
+    ws.merge_cells('D14:G14')
+    tulis_arab(ws, 'D14', f'="أسم الطالب :   "&IF({nama_arab}="",{siswa("Nama Peserta Didik", idx)},{nama_arab})',
+               bold=True)
+    ws.merge_cells('A14:C14')
+    tulis_arab(ws, 'A14', f'="الفَصلُ/الفصل الدراسي :   "&{arab(SEL["kelas_angka"])}&" / "&'
+                          f'IF({SEL["semester"]}="Ganjil","الأول","الثاني")', bold=True)
+    ws.merge_cells('D15:G15')
+    tulis_arab(ws, 'D15', f'="رقم التسجيل :   "&{arab(siswa("NIS", idx))}', bold=True)
+    ws.merge_cells('A15:C15')
+    tulis_arab(ws, 'A15', f'="العَامُ الدِرَاسِى :   "&{arab(SEL["tahun"])}', bold=True)
+    # kepala tabel
+    def kepala(rng, t, size=12):
+        a_, b_ = rng.split(':')
+        if a_ != b_:
+            ws.merge_cells(rng)
+        tulis_arab(ws, a_, t, size=size, bold=True, h='center', bungkus=True)
+        kotak_rentang(ws, rng)
+        for baris in ws[rng]:
+            for c in baris:
+                c.fill = PatternFill('solid', fgColor='E7E6E6')
+    kepala('G17:G18', 'رقم')
+    kepala('F17:F18', 'مجال الدراسة')
+    kepala('B17:E17', 'قيمة المعرفة')
+    kepala('E18:E18', 'قيمة تيوري', 10)
+    kepala('D18:D18', 'درجات الرسالة', 10)
+    kepala('C18:C18', 'مارس/ شفهي', 10)
+    kepala('B18:B18', 'درجات الرسالة', 10)
+    kepala('A17:A18', 'وصف تقدم التعلم')
+    terbilang = f"{q(DATA)}!$B$6:$C$106"
+    predikat = f"{q(DATA)}!$E$6:$F$9"
+    arab_nama = {t: a_ for t, _, a_ in PONDOK}
+    r = 19
+    for no, tab in enumerate(URUT_PONDOK, 1):
+        teori = f'INDEX({rentang_siswa(tab, "K")},{idx})'
+        praktik = f'INDEX({rentang_siswa(tab, "L")},{idx})'
+        tulis_arab(ws, f'G{r}', ''.join(ANGKA_ARAB[int(d)] for d in str(no)), h='center')
+        tulis_arab(ws, f'F{r}', arab_nama[tab])
+        tulis_arab(ws, f'E{r}', f'=IF({teori}="","-",{arab(teori)})', h='center')
+        tulis_arab(ws, f'D{r}', f'=IF({teori}="","-",VLOOKUP(ROUND({teori},0),{terbilang},2,FALSE))', size=11)
+        tulis_arab(ws, f'C{r}', f'=IF({praktik}="","-",{arab(praktik)})', h='center')
+        tulis_arab(ws, f'B{r}', f'=IF({praktik}="","-",VLOOKUP(ROUND({praktik},0),{terbilang},2,FALSE))', size=11)
+        tulis_arab(ws, f'A{r}', f'=IF(COUNT({teori},{praktik})=0,"-",VLOOKUP(AVERAGE({teori},{praktik}),'
+                                f'{predikat},2,TRUE))', size=11, h='center')
+        kotak_rentang(ws, f'A{r}:G{r}')
+        ws.row_dimensions[r].height = 19
+        r += 1
+    # jumlah, rata-rata, peringkat
+    ws.merge_cells(f'F{r}:G{r}')
+    tulis_arab(ws, f'F{r}', 'مَجمُوعُ الدَّرَجَات', bold=True)
+    tulis_arab(ws, f'E{r}', f'=IF({cp("H", idx)}="","-",{arab(cp("H", idx))})', h='center', bold=True)
+    tulis_arab(ws, f'D{r}', 'المُعَدِّلُ العَام', bold=True)
+    tulis_arab(ws, f'C{r}', f'=IF({cp("J", idx)}="","-",{arab(cp("J", idx))})', h='center', bold=True)
+    tulis_arab(ws, f'B{r}', 'التَرتِيبُ العِلمِيُّ', bold=True)
+    tulis_arab(ws, f'A{r}', f'=IF(OR({SEL["peringkat_pondok"]}<>"YA",{cp("K", idx)}=""),"",{arab(cp("K", idx))})',
+               h='center', bold=True)
+    kotak_rentang(ws, f'A{r}:G{r}')
+    ws.row_dimensions[r].height = 22
+    r += 2
+    ws.merge_cells(f'A{r}:G{r}')
+    tulis_arab(ws, f'A{r}', 'التعود على الذات', bold=True, h='center')
+    ws[f'A{r}'].fill = PatternFill('solid', fgColor='E7E6E6')
+    kotak_rentang(ws, f'A{r}:G{r}')
+    r += 1
+    for k in range(2):
+        for nomor, (kn, kt) in ((k + 1, ('G', 'D{0}:F{0}')), (k + 3, ('C', 'A{0}:B{0}'))):
+            kol = 'CDEF'[nomor - 1]
+            tulis_arab(ws, f'{kn}{r}', ANGKA_ARAB[nomor], h='center')
+            rr = kt.format(r)
+            ws.merge_cells(rr)
+            tulis_arab(ws, rr.split(':')[0], f'=IF({cp(kol, idx)}="",{q(CP)}!${kol}$8,{cp(kol, idx)})', size=11,
+                       bungkus=True)
+        kotak_rentang(ws, f'A{r}:G{r}')
+        ws.row_dimensions[r].height = 40
+        r += 1
+    r += 1
+    ws.merge_cells(f'A{r}:G{r}')
+    rata = cp('J', idx)
+    tulis_arab(ws, f'A{r}', f'=IF({cp("G", idx)}<>"",{cp("G", idx)},IF({rata}="","",'
+                            f'VLOOKUP({rata},{q(DATA)}!$E$13:$F$16,2,TRUE)))', bungkus=True)
+    kotak_rentang(ws, f'A{r}:G{r}')
+    ws.row_dimensions[r].height = 40
+    r += 2
+    ws.merge_cells(f'E{r}:G{r}')
+    tulis_arab(ws, f'E{r}', f'={SEL["tempat_arab"]}&"   "&{SEL["hijriah"]}', bold=True)
+    r += 1
+    ws.merge_cells(f'E{r}:G{r}')
+    ws.merge_cells(f'C{r}:D{r}')
+    ws.merge_cells(f'A{r}:B{r}')
+    tulis_arab(ws, f'E{r}', 'مدير المعهد', bold=True)
+    tulis_arab(ws, f'C{r}', 'وَلِيُّ الفَصل', bold=True, h='center')
+    tulis_arab(ws, f'A{r}', 'ولي الطالب', bold=True, h='center')
+    r += 4
+    ws.merge_cells(f'E{r}:G{r}')
+    ws.merge_cells(f'C{r}:D{r}')
+    ws.merge_cells(f'A{r}:B{r}')
+    tulis_arab(ws, f'E{r}', f'={SEL["pimpinan_arab"]}', bold=True, underline='single')
+    tulis_arab(ws, f'C{r}', f'={SEL["wali_arab"]}', bold=True, h='center', underline='single')
+    ayah = siswa('Nama Ayah (Arab)', idx)
+    tulis_arab(ws, f'A{r}', f'=IF({ayah}="",{siswa("Nama Ayah", idx)},{ayah})', bold=True, h='center',
+               underline='single')
+    siapkan_cetak(ws, f'A1:G{r}', satu_halaman=True)
+
+
+def buat_p5_input(wb, n):
+    ws = wb.create_sheet(f'P5 PROYEK {n}')
+    pita_judul(ws, f'Projek P5 ke-{n}', 'Isi judul, deskripsi, dan aspek sekali. Lalu pilih BB / MB / BSH / SB '
+               'untuk tiap siswa.', 'J')
+    isi(ws, 'A4', 'Judul projek', size=9, bold=True)
+    ws.merge_cells('C4:J4')
+    isi(ws, 'C4', size=10, bold=True, latar=KUNING, border=KOTAK)
+    isi(ws, 'A5', 'Deskripsi', size=9, bold=True)
+    ws.merge_cells('C5:J5')
+    isi(ws, 'C5', size=9, latar=KUNING, border=KOTAK, bungkus=True, v='top')
+    ws.row_dimensions[5].height = 36
+    isi(ws, 'A6', 'BB = Belum Berkembang · MB = Mulai Berkembang · BSH = Berkembang Sesuai Harapan · '
+        'SB = Sangat Berkembang', size=8, warna='6C757D')
+    gabung(ws, 'A7:B7', 'Dimensi  ➜', size=8, bold=True, warna=HIJAU, h='right')
+    gabung(ws, 'A8:B8', 'Sub-elemen – capaian  ➜', size=8, bold=True, warna=HIJAU, h='right')
+    for k in range(P5_ASPEK):
+        col = gl(3 + k)
+        isi(ws, f'{col}7', size=8, bold=True, latar=KREM, bungkus=True, border=KOTAK)
+        isi(ws, f'{col}8', size=8, latar=KREM, bungkus=True, v='top', border=KOTAK)
+    ws.merge_cells('J7:J8')
+    isi(ws, 'J7', 'Catatan proses', size=8, bold=True, warna=PUTIH, latar=HIJAU2, h='center', border=KOTAK)
+    ws.row_dimensions[7].height = 30
+    ws.row_dimensions[8].height = 90
+    akhir = BARIS1 + MAKS - 1
+    for i in range(MAKS):
+        r = BARIS1 + i
+        isi(ws, f'A{r}', i + 1, size=9, h='center', border=KOTAK)
+        isi(ws, f'B{r}', f'=IF({siswa("Nama Peserta Didik", i + 1)}="","",{siswa("Nama Peserta Didik", i + 1)})',
+            size=9, border=KOTAK)
+        for k in range(P5_ASPEK):
+            isi(ws, f'{gl(3 + k)}{r}', size=9, bold=True, latar=KUNING, h='center', border=KOTAK)
+        isi(ws, f'J{r}', size=8, latar=KUNING, border=KOTAK)
+    dv = DataValidation(type='list', formula1='"BB,MB,BSH,SB"', showErrorMessage=True, error='Pilih BB, MB, BSH, atau SB.')
+    ws.add_data_validation(dv)
+    dv.add(f'C{BARIS1}:I{akhir}')
+    lebar(ws, {'A': 5, 'B': 26, 'J': 40})
+    for k in range(P5_ASPEK):
+        ws.column_dimensions[gl(3 + k)].width = 18
+    ws.freeze_panes = f'C{BARIS1}'
+    ws.sheet_properties.tabColor = '6F42C1'
+
+
+def buat_rapor_p5(wb):
+    ws = wb.create_sheet('RAPOR P5')
+    idx = pemilih(ws)
+    lebar(ws, {'A': 2, 'B': 17, 'C': 38, 'D': 14, 'E': 22, 'F': 2, 'G': 3})
+    for r, t in ((2, 'RAPOR PROYEK PENGUATAN'), (3, 'PROFIL PELAJAR PANCASILA')):
+        gabung(ws, f'B{r}:E{r}', t, font=CETAK, size=12, bold=True, h='center', warna='000000')
+    baris = [(5, 'Nama Sekolah', f'": "&{SEL["sekolah"]}', 'Kelas/Semester', f'": "&{SEL["kelas"]}'),
+             (6, 'Alamat Sekolah', f'": "&{SEL["alamat"]}', 'Fase', f'": "&{SEL["fase"]}'),
+             (8, 'Nama Siswa', f'": "&{siswa("Nama Peserta Didik", idx)}', 'Tahun Ajaran', f'": "&{SEL["tahun"]}'),
+             (9, 'N I S N / N I S', f'": "&{siswa("NISN", idx)}&" / "&{siswa("NIS", idx)}', None, None)]
+    for r, l1, v1, l2, v2 in baris:
+        tulis(ws, f'B{r}', l1, size=10)
+        if r == 6:
+            ws.merge_cells('C6:C7')
+        tulis(ws, f'C{r}', '=' + v1, size=10, bold=r in (8, 9), bungkus=True, v='top' if r == 6 else 'center')
+        if l2:
+            tulis(ws, f'D{r}', l2, size=10)
+            tulis(ws, f'E{r}', '=' + v2, size=10)
+    ws.row_dimensions[6].height = 16
+    ws.row_dimensions[7].height = 16
+    penanda = {}
+    r = 11
+    for n in range(1, 4):
+        sh = q(f'P5 PROYEK {n}')
+        ws.merge_cells(f'B{r}:E{r}')
+        tulis(ws, f'B{r}', f'=IF({sh}!$C$4="","","PROYEK {n}, "&{sh}!$C$4&" : "&{sh}!$C$5)', size=10, bungkus=True)
+        kotak_rentang(ws, f'B{r}:E{r}', Border(left=hitam, right=hitam, top=hitam if n == 1 else Side(style='dashed'),
+                                               bottom=hitam if n == 3 else Side(style='dashed')))
+        ws.row_dimensions[r].height = 32
+        penanda[r] = 'H'
+        r += 1
+    r += 1
+    for n in range(1, 4):
+        sh = q(f'P5 PROYEK {n}')
+        ws.merge_cells(f'B{r}:D{r}')
+        tulis(ws, f'B{r}', f'={sh}!$C$4', size=10, bold=True, h='center')
+        tulis(ws, f'E{r}', 'Tingkat Capaian Pembelajaran', size=10, bold=True, h='center', bungkus=True)
+        for c in 'BCDE':
+            ws[f'{c}{r}'].fill = PatternFill('solid', fgColor='EBF1DE')
+        kotak_rentang(ws, f'B{r}:E{r}')
+        ws.row_dimensions[r].height = 30
+        r += 1
+        for k in range(P5_ASPEK):
+            col = gl(3 + k)
+            ws.merge_cells(f'B{r}:E{r}')
+            tulis(ws, f'B{r}', f'={sh}!${col}$7&""', size=10, bold=True)
+            for c in 'BCDE':
+                ws[f'{c}{r}'].fill = PatternFill('solid', fgColor='F2F2F2')
+            kotak_rentang(ws, f'B{r}:E{r}')
+            penanda[r] = 'D'
+            r += 1
+            ws.merge_cells(f'B{r}:D{r}')
+            tulis(ws, f'B{r}', f'={sh}!${col}$8&""', size=10, bungkus=True)
+            nilai = f'INDEX({sh}!${col}${BARIS1}:${col}${BARIS1 + MAKS - 1},{idx})'
+            tingkat = ','.join(f'IF({nilai}="{k_}","{v}"' for k_, v in P5_TINGKAT.items())
+            tulis(ws, f'E{r}', f'={tingkat},""' + ')' * len(P5_TINGKAT), size=10, h='center', bungkus=True)
+            kotak_rentang(ws, f'B{r}:E{r}')
+            ws.row_dimensions[r].height = 44
+            penanda[r] = 'S'
+            r += 1
+        ws.merge_cells(f'B{r}:E{r}')
+        catatan = f'INDEX({sh}!$J${BARIS1}:$J${BARIS1 + MAKS - 1},{idx})'
+        isi(ws, f'B{r}', f'=IF({catatan}="","","Catatan Proses Proyek {n} : "&{catatan})', font=CETAK, size=10,
+            bold=True, italic=True, h='right', bungkus=True, warna='000000')
+        ws.row_dimensions[r].height = 30
+        penanda[r] = 'C'
+        r += 2
+    isi(ws, f'B{r}', 'KETERANGAN TINGKAT PENCAPAIAN PEMBELAJARAN SISWA', font=CETAK, size=8, bold=True, italic=True,
+        warna='000000')
+    r += 1
+    ket = ['1. Belum Berkembang ( BB ) : Siswa masih membutuhkan bimbingan dalam mengembangkan kemampuan',
+           '2. Mulai Berkembang ( MB ) : Siswa mulai mengembangkan kemampuan namun masih belum ajek',
+           '3. Berkembang sesuai harapan ( BSH ) : Siswa telah mengembangkan kemampuan hingga berada dalam tahap ajek',
+           '4. Sangat Berkembang ( SB ) : Siswa mengembangkan kemampuannya melampaui harapan']
+    for t in ket:
+        isi(ws, f'B{r}', t, font=CETAK, size=8, italic=True, warna='000000')
+        r += 1
+    r += 1
+    ws.merge_cells(f'D{r}:E{r}')
+    tulis(ws, f'D{r}', f'={SEL["tempat"]}&", "&{SEL["tanggal"]}', size=10)
+    r += 1
+    tulis(ws, f'B{r}', 'Orang Tua', size=10, h='center')
+    tulis(ws, f'C{r}', 'Wali Kelas', size=10, h='center')
+    ws.merge_cells(f'D{r}:E{r}')
+    tulis(ws, f'D{r}', 'Kepala Sekolah', size=10)
+    r += 4
+    ortu = f'IF({siswa("Nama Wali", idx)}<>"",{siswa("Nama Wali", idx)},{siswa("Nama Ayah", idx)})'
+    tulis(ws, f'B{r}', f'={ortu}', size=10, bold=True, underline='single', h='center')
+    tulis(ws, f'C{r}', f'={SEL["wali"]}', size=10, bold=True, underline='single', h='center')
+    ws.merge_cells(f'D{r}:E{r}')
+    tulis(ws, f'D{r}', f'={SEL["kepsek"]}', size=10, bold=True, underline='single')
+    # penanda baris untuk Apps Script (kolom G disembunyikan)
+    for rr, t in penanda.items():
+        ws[f'G{rr}'] = t
+    ws.column_dimensions['G'].hidden = True
+    siapkan_cetak(ws, f'A1:F{r}')
+
+
 # ---------------------------------------------------------------- data contoh
 NAMA_CONTOH = ['AHMAD FAUZAN HAKIM', 'BAGAS SATRIA NUGRAHA', 'DAFFA RIZKY RAMADHAN', 'FARHAN ALFARIZI',
                'HAIKAL MUHAMMAD ZIKRI', 'IRFAN MAULANA YUSUF', 'KHALID ABDURRAHMAN', 'MUHAMMAD NAUFAL ARKAN',
@@ -857,6 +1256,44 @@ TP_CONTOH = {
 }
 
 
+NAMA_ARAB_CONTOH = ['أحمد فوزان حكيم', 'باغاس ساتريا نوغراها', 'دافا رزقي رمضان', 'فرحان الفاريزي',
+                    'هيكل محمد ذكري', 'عرفان مولانا يوسف', 'خالد عبد الرحمن', 'محمد نوفل أركان',
+                    'رافي أرديانشاه', 'زكي عبد الله']
+P5_CONTOH = [
+    ('Bangunlah Jiwa dan Raganya', 'Membuat kegiatan-kegiatan dan menyusun kesepakatan antar peserta didik berbasis '
+     'OSIS untuk kesejahteraan (wellbeing) jiwa raga (olah raga, seni, kemanusiaan, agama, dll)',
+     [('Berkebhinekaan Global', 'Berempati kepada orang lain- Memahami perasaan dan sudut pandang orang dan/atau '
+       'kelompok lain yang tidak pernah dikenalnya.'),
+      ('Beriman, Bertakwa Kepada Tuhan Yang Maha Esa, dan Berakhlak Mulia', 'Mengeksplorasi dan membandingkan '
+       'pengetahuan budaya, kepercayaan, serta praktiknya- Memahami dinamika budaya yang mencakup pemahaman, '
+       'kepercayaan, dan praktik keseharian dalam konteks personal dan sosial.'),
+      ('Bergotong-Royong', 'Penetapan tujuan belajar, prestasi, dan pengembangan diri serta rencana strategis '
+       'untuk mencapainya- Merancang strategi yang sesuai untuk menunjang pencapaian tujuan belajar.'),
+      ('Bernalar Kritis', 'Menganalisis dan mengevaluasi penalaran dan prosedurnya- Membuktikan penalaran dengan '
+       'berbagai argumen dalam mengambil suatu simpulan atau keputusan.'),
+      ('Kreatif', 'Menghasilkan karya dan tindakan yang orisinal- Mengeksplorasi dan mengekspresikan pikiran '
+       'dan/atau perasaannya dalam bentuk karya dan/atau tindakan.')],
+     'Aktif melibatkan diri dengan memberikan usulan kepada rekan lainnya'),
+    ('Berekayasa dan Berteknologi untuk Membangun NKRI', 'Menciptakan sistem untuk pemanenan air hujan di '
+     'lingkungan satuan pendidikan untuk pemenuhan kebutuhan sehari-hari',
+     [('Bergotong-Royong', 'Mengutamakan persamaan dengan orang lain dan menghargai perbedaan- Mengenal perspektif '
+       'dan emosi/perasaan dari sudut pandang orang atau kelompok lain.'),
+      ('Berkebhinekaan Global', 'Mempertimbangkan dan menumbuhkan berbagai perspektif- Menjelaskan asumsi-asumsi '
+       'yang mendasari perspektif tertentu.'),
+      ('Kreatif', 'Memiliki keluwesan berpikir dalam mencari alternatif solusi permasalahan- Menghasilkan solusi '
+       'alternatif dengan mengadaptasi berbagai gagasan dan umpan balik.')],
+     'Dalam kelompok masih perlu belajar bekerja sama dengan baik'),
+    ('Gaya Hidup Berkelanjutan', 'Membuat purwarupa sistem pengelolaan sampah di satuan pendidikan.',
+     [('Bergotong-Royong', 'Berpartisipasi dalam proses pengambilan keputusan bersama- Berpartisipasi dalam '
+       'menentukan kriteria dan metode yang disepakati bersama.'),
+      ('Bernalar Kritis', 'Menganalisis dan mengevaluasi penalaran dan prosedurnya- Membuktikan penalaran dengan '
+       'berbagai argumen dalam mengambil suatu simpulan atau keputusan.'),
+      ('Mandiri', 'Penetapan tujuan belajar, prestasi, dan pengembangan diri serta rencana strategis untuk '
+       'mencapainya.')],
+     'Mencoba mengembangkan kemampuannya dalam bekerja dalam kelompok'),
+]
+
+
 def isi_contoh(wb):
     rnd = random.Random(7)
     ws = wb['SISWA']
@@ -873,6 +1310,8 @@ def isi_contoh(wb):
                 'Alamat Orang Tua': f'Jl. Contoh No. {rnd.randint(1, 99)}', 'Telepon Orang Tua': '08xx-xxxx-xxxx',
                 'Pekerjaan Ayah': rnd.choice(['Wiraswasta', 'PNS', 'Petani', 'Pedagang']),
                 'Pekerjaan Ibu': rnd.choice(['Ibu Rumah Tangga', 'Guru', 'Wiraswasta'])}
+        data['Nama (tulisan Arab)'] = NAMA_ARAB_CONTOH[i]
+        data['Nama Ayah (Arab)'] = 'السيد ' + NAMA_ARAB_CONTOH[i].split()[0]
         for k, v in data.items():
             ws[f'{KS[k]}{r}'] = v
     for tab, tps in TP_CONTOH.items():
@@ -896,6 +1335,21 @@ def isi_contoh(wb):
                 if tab == 'TASRIF' and col in 'GHI':
                     continue
                 w[f'{col}{r}'] = rnd.randint(70, 95)
+    for n, (judul, desk, aspek, catatan) in enumerate(P5_CONTOH, 1):
+        w = wb[f'P5 PROYEK {n}']
+        w['C4'], w['C5'] = judul, desk
+        for k, (dim, sub) in enumerate(aspek):
+            w[f'{gl(3 + k)}7'], w[f'{gl(3 + k)}8'] = dim, sub
+        for i in range(len(NAMA_CONTOH)):
+            for k in range(len(aspek)):
+                w[f'{gl(3 + k)}{BARIS1 + i}'] = rnd.choice(['MB', 'BSH', 'BSH', 'SB'])
+            w[f'J{BARIS1 + i}'] = catatan
+    for tab in ('BAHASA ARAB', 'TAUHID', 'TARIKH', 'MAHFUZATH'):
+        w = wb[tab]
+        w['C4'] = 'Ustadz Contoh'
+        for i in range(len(NAMA_CONTOH)):
+            for col in 'CDEFGHIJ':
+                w[f'{col}{BARIS1 + i}'] = rnd.randint(55 if tab == 'TARIKH' else 70, 96)
     e = wb[EKS]
     for i in range(len(NAMA_CONTOH)):
         r = EKS1 + i
@@ -921,10 +1375,16 @@ def buat(tujuan, contoh=False):
     for tab, nama, arab in PONDOK:
         buat_mapel_pondok(wb, tab, nama, arab)
     buat_ekskul(wb)
+    buat_catatan_pondok(wb)
+    for n in range(1, 4):
+        buat_p5_input(wb, n)
     buat_cover(wb)
     buat_identitas(wb)
     buat_keterangan_diri(wb)
     buat_rapor_sekolah(wb)
+    buat_rapor_pondok(wb)
+    buat_rapor_p5(wb)
+    buat_data_arab(wb)
     # urutan lembar: BERANDA, PENGATURAN, SISWA, ...
     wb.move_sheet('BERANDA', offset=-wb.index(wb['BERANDA']))
     if contoh:
