@@ -415,12 +415,14 @@ function kirimLembarGuru() {
       else berkas.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);   // cukup lewat link WA
     } catch (e) { gagal.push(g.nama || g.email); }
     var url = lembar.getUrl();
+    var wa = linkWa_(g, perlu.join(', '), kelas, url);
     g.mapel.forEach(function (m) {              // tautan biasa (tanpa rumus: aman untuk pemisah ; atau ,)
       shGuru.getRange(m.baris, 6).setRichTextValue(SpreadsheetApp.newRichTextValue()
+        .setText('Kirim WA ke ' + (g.nama || g.email)).setLinkUrl(wa).build());
+      shGuru.getRange(m.baris, 7).setRichTextValue(SpreadsheetApp.newRichTextValue()
         .setText('Buka lembar ' + m.tab).setLinkUrl(url).build());
     });
-    hasil.push({ nama: g.nama || g.email, mapel: perlu.join(', '), url: url,
-      wa: g.email.indexOf('@') >= 0 ? '' : g.email });
+    hasil.push({ nama: g.nama || g.email, mapel: perlu.join(', '), url: url, wa: wa });
   });
   pasangAmbilOtomatis_();
   kunciHalamanCetak_();
@@ -524,15 +526,21 @@ function pasangAmbilOtomatis_() {
   if (!ada) ScriptApp.newTrigger('ambilNilaiOtomatis').timeBased().everyHours(1).create();
 }
 
+// link WhatsApp ke nomor guru, berisi pesan dan link lembarnya
+function linkWa_(g, mapel, kelas, url) {
+  var teks = 'Assalamu\'alaikum ' + (g.nama || '') + '. Ini lembar nilai ' + mapel + ' kelas ' + kelas +
+    '. Silakan isi kotak kuning: ' + url;
+  var nomor = g.email.indexOf('@') >= 0 ? '' : g.email;
+  return 'https://wa.me/' + nomor + '?text=' + encodeURIComponent(teks);
+}
+
 function tampilkanDaftarGuru_(hasil, gagal, kelas) {
   var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); };
   var baris = hasil.map(function (h) {
-    var wa = 'Assalamu\'alaikum ' + h.nama + '. Ini lembar nilai ' + h.mapel + ' kelas ' + kelas +
-      '. Silakan isi kotak kuning: ' + h.url;
     return '<div style="border:1px solid #dee2e6;border-radius:10px;padding:8px 10px;margin:0 0 8px">' +
       '<b>' + esc(h.nama) + '</b><br><span style="font-size:12px;color:#495057">' + esc(h.mapel) + '</span><br>' +
       '<a href="' + esc(h.url) + '" target="_blank" style="font-size:12px">Buka lembar</a> &nbsp; ' +
-      '<a href="https://wa.me/' + h.wa + '?text=' + encodeURIComponent(wa) + '" target="_blank" ' +
+      '<a href="' + esc(h.wa) + '" target="_blank" ' +
       'style="font-size:12px;color:#198754">Kirim lewat WhatsApp</a></div>';
   }).join('');
   var catatan = gagal.length ? '<p style="color:#842029;font-size:12px">Lembar guru ini belum bisa dibuka lewat link ' +
@@ -540,7 +548,7 @@ function tampilkanDaftarGuru_(hasil, gagal, kelas) {
   var html = HtmlService.createHtmlOutput(
     '<div style="font-family:Poppins,Arial,sans-serif;color:#212529;font-size:14px">' +
     '<p style="margin:0 0 10px">Lembar nilai sudah siap. Tiap guru hanya melihat mapelnya sendiri. ' +
-    'Link juga tersimpan di halaman GURU.</p>' + catatan + baris +
+    'Link WA juga tersimpan di halaman GURU (kolom F).</p>' + catatan + baris +
     '<p style="font-size:11px;color:#6c757d">Nilai dari guru masuk ke file ini otomatis tiap 1 jam.</p></div>')
     .setWidth(440).setHeight(Math.min(560, 150 + hasil.length * 82));
   SpreadsheetApp.getUi().showModalDialog(html, 'Lembar guru');

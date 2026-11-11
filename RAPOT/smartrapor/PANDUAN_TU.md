@@ -48,7 +48,7 @@ jadi guru tidak bisa melihat atau mengubah nilai mapel lain.
 3. Pilih menu **SmartRapor → Kirim lembar nilai ke guru**, lalu tunggu kira-kira 1 menit.
 4. Muncul daftar guru. Klik **Kirim lewat WhatsApp** di setiap nama: WhatsApp terbuka ke nomor guru itu dengan pesan
    berisi link lembarnya, tinggal tekan kirim. Guru tidak perlu punya Gmail.
-   Link juga tersimpan di kolom terakhir halaman GURU.
+   Link yang sama juga muncul di halaman GURU kolom **Kirim lewat WhatsApp**, jadi bisa diklik kapan saja.
 5. Guru membuka link itu, lalu **mengisi kotak kuning saja**: baris 8 untuk materi / tujuan pembelajaran,
    mulai baris 9 untuk nilai siswa. Bagian lain terkunci.
 6. Nilai dari guru masuk ke file kelas **otomatis setiap 1 jam**. Untuk langsung mengambilnya,

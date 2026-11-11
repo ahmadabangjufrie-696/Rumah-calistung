@@ -222,11 +222,11 @@ def baris_guru(tab):
 
 def buat_guru(wb):
     ws = wb.create_sheet(GURU)
-    pita_judul(ws, 'Guru Mata Pelajaran', 'Isi nama & nomor WhatsApp guru. Lalu menu SmartRapor › '
-               'Kirim lembar nilai ke guru. Tiap guru hanya menerima mapelnya sendiri.', 'F')
-    lebar(ws, {'A': 2, 'B': 16, 'C': 34, 'D': 26, 'E': 32, 'F': 44})
-    for col, t in zip('BCDEF', ['Tab', 'Mata pelajaran', 'Nama guru', 'No. WhatsApp guru',
-                                'Link lembar guru (otomatis)']):
+    pita_judul(ws, 'Guru Mata Pelajaran', 'Isi nama & nomor WhatsApp guru (628xxx). Lalu menu SmartRapor › '
+               'Kirim lembar nilai ke guru, dan klik "Kirim WA" di kolom F.', 'G')
+    lebar(ws, {'A': 2, 'B': 16, 'C': 30, 'D': 24, 'E': 22, 'F': 32, 'G': 26})
+    for col, t in zip('BCDEFG', ['Tab', 'Mata pelajaran', 'Nama guru', 'No. WhatsApp guru',
+                                 'Kirim lewat WhatsApp (otomatis)', 'Lembar guru (otomatis)']):
         isi(ws, f'{col}5', t, size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center', border=KOTAK)
     daftar = [(t, n) for t, n in UMUM] + [(t, n) for t, n, _ in PONDOK]
     for i, (tab, nama) in enumerate(daftar):
@@ -235,7 +235,8 @@ def buat_guru(wb):
         isi(ws, f'C{r}', nama, size=9, border=KOTAK)
         isi(ws, f'D{r}', size=9, latar=KUNING, border=KOTAK)
         isi(ws, f'E{r}', size=9, latar=KUNING, border=KOTAK).number_format = '@'   # nomor WA: teks (0 di depan aman)
-        isi(ws, f'F{r}', size=8, latar=ABU, border=KOTAK, warna='0D6EFD')
+        isi(ws, f'F{r}', size=9, bold=True, latar=ABU, border=KOTAK, warna='198754')
+        isi(ws, f'G{r}', size=8, latar=ABU, border=KOTAK, warna='0D6EFD')
     r = GURU1 + len(daftar) + 1
     isi(ws, f'B{r}', 'Satu guru boleh memegang beberapa mapel: tulis nomor WA yang sama, semua mapelnya '
         'masuk satu lembar.', size=8, italic=True, warna='6C757D')

@@ -14,7 +14,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
   - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
     (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
   - Panduan TU (Google Doc dari `PANDUAN_TU.md`): **PANDUAN TU SmartRapor** id `1yvdlVF4SOPSDFnv7aRzJAGkOJmKR1pEpBKVYQgYMwSM`.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1aWFzHXSX5fhf-2K0F-JGYQRpb0PXwWqNGJCId3Kw3SE` (diperbarui 11 Nov: lembar guru + nomor WA;
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1MXUyv8aE_cxiNBHTPo4YlX0gHfDMVij6Gg83Cyh2EX8` (diperbarui 11 Nov: lembar guru + nomor WA;
     dokumen lama dibuang ke sampah. Selalu beri Ustadz LINK langsung ke dokumen ini, Ustadz bingung memilih di Drive).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
@@ -30,7 +30,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 
 ## Halaman di Google Sheet
 BERANDA (progres per mapel, nama guru diambil dari GURU, pilih siswa I25 [J25 = nomor, tersembunyi], centang yang dicetak H31:H34, tempat tombol
-H28/I28 dan H36/I36), PENGATURAN, GURU (B tab, C mapel, D nama guru, E no. WhatsApp [format teks] atau e-mail, F link lembar; baris 6–33; F4 waktu ambil terakhir),
+H28/I28 dan H36/I36), PENGATURAN, GURU (B tab, C mapel, D nama guru, E no. WhatsApp [format teks] atau e-mail, F link "Kirim WA ke …" (wa.me/nomor + pesan + link lembar), G link lembar; baris 6–33; F4 waktu ambil terakhir),
 SISWA (kolom AB tersembunyi = "No - Nama"), 12 tab mapel umum (Sumatif 1–8 + baris
 materi/TP baris 8, Non Tes, Tes → nilai rapor kolom Q, deskripsi S/T), 16 tab mapel pondok (Tugas, Lisan, Semester →
 K teori, L praktik), EKSKUL & CATATAN (keputusan per siswa: naik kelas VIII/IX, LULUS, belum bisa naik kelas),
