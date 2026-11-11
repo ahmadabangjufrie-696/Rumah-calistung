@@ -45,7 +45,8 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   LibreOffice server (tampil kotak), di Google normal.
 
 ## Status terakhir
-- Selesai & sudah dicoba Ustadz: tombol, cetak siswa ini (PDF berhasil).
+- Selesai & sudah dicoba Ustadz: tombol, cetak siswa ini (PDF berhasil), raport pondok huruf Amiri + tinggi baris
+  (11 Nov: Ustadz bilang "sudah aman").
 - Raport pondok baru saja diperbesar agar memenuhi 1 halaman A4 (perubahan langsung di file). **Menunggu Ustadz mencoba cetak.**
 - Cetak sekelas: sudah diperbaiki (pembungkus fungsi biasa). Di folder Drive `PDF SmartRapor` ada "Raport sekelas ...pdf"
   (11 Nov 00:35, dari file lama) — tampaknya pernah berhasil, tetapi **belum dikonfirmasi** Ustadz untuk file terbaru.
