@@ -536,6 +536,7 @@ def baris_progres(ws, r, tab, nama, kol, jml):
 
 
 # ---------------------------------------------------------------- halaman cetak
+PILIHAN_CETAK = ['Raport saja', 'Cover + Keterangan diri + Raport', 'Cover + Keterangan diri saja']
 PILIH = 'BERANDA!$J$25'   # nomor siswa yang dicetak (dari pilihan nama di BERANDA!I25)
 
 
@@ -561,7 +562,13 @@ def kartu_cetak(ws):
     # baris 28 dan 30: tempat tombol (dipasang Apps Script: menu SmartRapor › Pasang tombol)
     isi(ws, 'H27', 'Pindah siswa', size=8, bold=True, warna='6C757D')
     ws.row_dimensions[28].height = 34
-    isi(ws, 'H29', 'Cetak menjadi PDF', size=8, bold=True, warna='6C757D')
+    isi(ws, 'H29', 'Yang dicetak  ➜', size=8, bold=True, warna='6C757D', h='right')
+    isi(ws, 'I29', 'Raport saja', size=9, bold=True, warna=HIJAU, latar=KUNING,
+        border=Border(left=tipis, right=tipis, top=tipis, bottom=tipis))
+    dv2 = DataValidation(type='list', formula1=f'"{",".join(PILIHAN_CETAK)}"', showErrorMessage=True,
+                         error='Pilih dari daftar.')
+    ws.add_data_validation(dv2)
+    dv2.add('I29')
     ws.row_dimensions[30].height = 40
     isi(ws, 'H32', 'Tanpa tombol: buka halaman COVER / KETERANGAN DIRI / RAPOR SEKOLAH,', size=7,
         warna='ADB5BD')

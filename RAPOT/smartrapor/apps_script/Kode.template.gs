@@ -6,9 +6,15 @@ var SR = {
   BERANDA: 'BERANDA',
   SISWA: 'SISWA',
   PILIH: 'I25',                 // kotak pilihan "No - Nama" di BERANDA
+  PILIH_CETAK: 'I29',           // kotak "Yang dicetak" di BERANDA
   SISWA1: 5,                    // baris siswa pertama di SISWA
   MAKS: 40,
-  CETAK: ['COVER', 'KETERANGAN DIRI', 'RAPOR SEKOLAH'],
+  // isi PDF menurut pilihan "Yang dicetak" (cover cukup sekali, di awal kelas VII)
+  CETAK: {
+    'Raport saja': ['RAPOR SEKOLAH'],
+    'Cover + Keterangan diri + Raport': ['COVER', 'KETERANGAN DIRI', 'RAPOR SEKOLAH'],
+    'Cover + Keterangan diri saja': ['COVER', 'KETERANGAN DIRI']
+  },
   RAPOR: 'RAPOR SEKOLAH',
   FOLDER_PDF: 'PDF SmartRapor',
   PDFLIB: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'
@@ -66,6 +72,11 @@ function daftarSiswa_() {
 
 function pilihanSekarang_() {
   return SpreadsheetApp.getActive().getSheetByName(SR.BERANDA).getRange(SR.PILIH).getDisplayValue();
+}
+
+function halamanCetak_() {
+  var p = SpreadsheetApp.getActive().getSheetByName(SR.BERANDA).getRange(SR.PILIH_CETAK).getDisplayValue();
+  return SR.CETAK[p] || SR.CETAK['Raport saja'];
 }
 
 function pilih_(teks) {
@@ -159,12 +170,13 @@ async function cetakSekelas() {
 // sembunyikan semua halaman kecuali halaman cetak; ekspor PDF hanya memuat halaman yang tampil
 function sembunyikanSelainCetak_() {
   var ss = SpreadsheetApp.getActive();
+  var halaman = halamanCetak_();
   var keadaan = ss.getSheets().map(function (s) { return { sheet: s, tersembunyi: s.isSheetHidden() }; });
-  var pertama = ss.getSheetByName(SR.CETAK[0]);
-  SR.CETAK.forEach(function (n) { var s = ss.getSheetByName(n); if (s) s.showSheet(); });
+  var pertama = ss.getSheetByName(halaman[0]);
+  halaman.forEach(function (n) { var s = ss.getSheetByName(n); if (s) s.showSheet(); });
   pertama.activate();
   keadaan.forEach(function (k) {
-    if (SR.CETAK.indexOf(k.sheet.getName()) < 0 && !k.tersembunyi) k.sheet.hideSheet();
+    if (halaman.indexOf(k.sheet.getName()) < 0 && !k.tersembunyi) k.sheet.hideSheet();
   });
   SpreadsheetApp.flush();
   return keadaan;
