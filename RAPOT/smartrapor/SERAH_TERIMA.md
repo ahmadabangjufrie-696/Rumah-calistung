@@ -70,6 +70,10 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   yang punya link boleh mengedit" (hanya kotak kuning terbuka), tombol WA membuka chat ke nomor itu. E-mail masih diterima.
   Ustadz sudah menempel kode versi e-mail; versi WA perlu ditempel lagi. Belum dicoba di Google.
 
+- 11 Nov: mapel bergantian guru putra/putri (mis. Informatika: Hendrawan putra, Febryangki putri) — dibahas,
+  **Ustadz memutuskan: lupakan putri, urus kelas putra/laki saja**. Satu mapel = satu guru per file kelas. Jangan buat fitur
+  pembagian per L/P kecuali diminta lagi. Nama guru asli belum ada (tidak ada di Drive); tunggu daftar dari Ustadz.
+
 ## Yang perlu dikonfirmasi Ustadz
 1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).
 2. ~~Tanggal Hijriah~~ → `٤ رَجَب ١٤٤٦` (11 Nov, dipasang di file + perakit).
