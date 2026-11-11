@@ -52,7 +52,8 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 - 11 Nov: langkah 5 di BERANDA (I15) diganti "Pilih siswa & centang di kanan bawah, lalu klik tombol CETAK." (langsung di file + perakit).
   Belum ada PDF baru sesudah raport pondok diperbesar (01:13) → masih menunggu Ustadz mencoba cetak.
 - 11 Nov: atas permintaan Ustadz, **semua tulisan raport pondok memakai huruf Amiri** (seperti judul تقرير...),
-  kecuali 2 baris kop Latin (Arial). Baris mapel 19–34 ditinggikan ke 25 px. Langsung di file + perakit.
+  kecuali 2 baris kop Latin (Arial). Baris mapel 19–34 ditinggikan ke 25 px;
+  baris kebiasaan (38–39) dan catatan (41) ke 58 px karena di Google tulisan Amiri 2 baris terpotong. Langsung di file + perakit.
   Uji lokal: Amiri bisa dipasang dari npm `@fontsource/amiri` (woff2 → ttf dengan fontTools ke ~/.fonts).
 
 ## Yang perlu dikonfirmasi Ustadz

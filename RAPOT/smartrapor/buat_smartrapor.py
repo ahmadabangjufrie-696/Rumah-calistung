@@ -1083,7 +1083,7 @@ def buat_rapor_pondok(wb):
             tulis_arab(ws, rr.split(':')[0], f'=IF({cp(kol, idx)}="",{q(CP)}!${kol}$8,{cp(kol, idx)})', size=11,
                        bungkus=True)
         kotak_rentang(ws, f'A{r}:G{r}')
-        ws.row_dimensions[r].height = 30
+        ws.row_dimensions[r].height = 43.5
         r += 1
     ws.row_dimensions[r].height = 4
     r += 1
@@ -1092,7 +1092,7 @@ def buat_rapor_pondok(wb):
     tulis_arab(ws, f'A{r}', f'=IF({cp("G", idx)}<>"",{cp("G", idx)},IF({rata}="","",'
                             f'VLOOKUP({rata},{q(DATA)}!$E$13:$F$16,2,TRUE)))', bungkus=True, size=11)
     kotak_rentang(ws, f'A{r}:G{r}')
-    ws.row_dimensions[r].height = 30
+    ws.row_dimensions[r].height = 43.5
     r += 1
     ws.row_dimensions[r].height = 4
     r += 1
