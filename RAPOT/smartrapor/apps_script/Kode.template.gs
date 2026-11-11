@@ -14,6 +14,13 @@ var SR = {
   RAPOR: 'RAPOR SEKOLAH',
   P5: 'RAPOR P5',
   FOLDER_PDF: 'PDF SmartRapor',
+  GURU: 'GURU',
+  GURU1: 6,                     // baris mapel pertama di GURU (kolom B tab, D nama, E e-mail, F link)
+  JML_MAPEL: 28,
+  BARIS1: 9,                    // baris siswa pertama di tab mapel
+  // halaman yang dikunci (peringatan) di file kelas; tab mapel ikut dikunci saat lembar guru dikirim
+  DIKUNCI: ['RAPOR SEKOLAH', 'RAPOR PONDOK', 'RAPOR P5', 'COVER', 'IDENTITAS SEKOLAH', 'KETERANGAN DIRI',
+    'DATA ARAB'],
   PDFLIB: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'
 };
 
@@ -32,6 +39,9 @@ function onOpen() {
     .addSeparator()
     .addItem('Cetak siswa ini (PDF)', 'cetakSiswaIni')
     .addItem('Cetak sekelas (PDF)', 'cetakSekelas')
+    .addSeparator()
+    .addItem('Kirim lembar nilai ke guru', 'kirimLembarGuru')
+    .addItem('Ambil nilai dari guru', 'ambilNilaiGuru')
     .addSeparator()
     .addItem('Rapikan tinggi baris raport', 'rapikanTinggi')
     .addItem('Pasang tombol di BERANDA', 'pasangTombol')
@@ -288,6 +298,239 @@ function pasangTombol() {
   });
   sh.activate();
   pesan_('Tombol sudah terpasang di BERANDA.\n\nKlik tombolnya untuk pindah siswa atau mencetak PDF.');
+}
+
+// ------------------------------------------------------------------ lembar guru
+// Tiap guru menerima file sendiri berisi tab mapelnya saja (nama siswa ikut, nilai mapel lain tidak).
+// Nilai di lembar guru ditarik ke file kelas: otomatis tiap 1 jam, atau lewat menu "Ambil nilai dari guru".
+
+function jenisTab_(sh) { return sh.getRange('Q7').getDisplayValue() === 'NILAI RAPOR' ? 'umum' : 'pondok'; }
+
+// sel yang diisi guru (selain nama guru, yang diambil dari halaman GURU)
+function selIsian_(jenis) {
+  var a = SR.BARIS1, z = SR.BARIS1 + SR.MAKS - 1;
+  return jenis === 'umum' ? ['I4', 'C8:J8', 'C' + a + ':J' + z, 'M' + a + ':N' + z] : ['I4', 'C' + a + ':J' + z];
+}
+
+function daftarGuru_() {
+  var sh = SpreadsheetApp.getActive().getSheetByName(SR.GURU);
+  if (!sh) return [];
+  var v = sh.getRange(SR.GURU1, 2, SR.JML_MAPEL, 4).getDisplayValues();   // B..E
+  var hasil = [];
+  for (var i = 0; i < v.length; i++) {
+    if (!v[i][0]) continue;
+    hasil.push({ tab: v[i][0], mapel: v[i][1], nama: v[i][2].trim(), email: v[i][3].trim().toLowerCase(),
+      baris: SR.GURU1 + i });
+  }
+  return hasil;
+}
+
+function kelompokGuru_() {
+  var grup = {}, urut = [];
+  daftarGuru_().forEach(function (m) {
+    if (!m.email) return;
+    if (!grup[m.email]) { grup[m.email] = { email: m.email, nama: m.nama, mapel: [] }; urut.push(m.email); }
+    if (!grup[m.email].nama) grup[m.email].nama = m.nama;
+    grup[m.email].mapel.push(m);
+  });
+  return urut.map(function (e) { return grup[e]; });
+}
+
+function idLembar_(email) { return PropertiesService.getDocumentProperties().getProperty('lembar_' + email); }
+
+function bukaLembar_(email) {
+  var id = idLembar_(email);
+  if (!id) return null;
+  try {
+    if (DriveApp.getFileById(id).isTrashed()) return null;
+    return SpreadsheetApp.openById(id);
+  } catch (e) { return null; }
+}
+
+function folderGuru_() {
+  var ss = SpreadsheetApp.getActive();
+  var induk = DriveApp.getFileById(ss.getId()).getParents();
+  var folder = induk.hasNext() ? induk.next() : DriveApp.getRootFolder();
+  var nama = 'Lembar Guru - ' + ss.getName();
+  var ada = folder.getFoldersByName(nama);
+  return ada.hasNext() ? ada.next() : folder.createFolder(nama);
+}
+
+function namaKelas_() {
+  var ss = SpreadsheetApp.getActive();
+  var v = ss.getSheetByName('PENGATURAN').createTextFinder('Kelas').matchEntireCell(true).findNext();
+  return v ? v.offset(0, 1).getDisplayValue() : ss.getName();
+}
+
+function kirimLembarGuru() {
+  var ss = SpreadsheetApp.getActive();
+  var guru = kelompokGuru_();
+  if (!guru.length) {
+    ss.getSheetByName(SR.GURU).activate();
+    pesan_('Isi dulu nama dan e-mail guru di halaman GURU (kolom kuning).');
+    return;
+  }
+  ss.toast('Menyiapkan lembar guru... (±1 menit)', 'SmartRapor', 60);
+  ambil_(true);                                     // simpan dulu nilai yang sudah diisi guru
+  var folder = folderGuru_(), kelas = namaKelas_(), hasil = [], gagal = [];
+  var shGuru = ss.getSheetByName(SR.GURU);
+  guru.forEach(function (g) {
+    var lembar = bukaLembar_(g.email);
+    if (!lembar) {
+      lembar = SpreadsheetApp.create('Nilai ' + kelas + ' - ' + (g.nama || g.email));
+      DriveApp.getFileById(lembar.getId()).moveTo(folder);
+      PropertiesService.getDocumentProperties().setProperty('lembar_' + g.email, lembar.getId());
+    }
+    var perlu = g.mapel.map(function (m) { return m.tab; });
+    g.mapel.forEach(function (m) {
+      var src = ss.getSheetByName(m.tab);
+      if (!src) return;
+      var dst = lembar.getSheetByName(m.tab);
+      if (!dst) {
+        dst = src.copyTo(lembar).setName(m.tab);
+        jadikanMandiri_(ss, src, dst);
+        kunciLembar_(dst, jenisTab_(src));
+      } else {
+        segarkanNama_(src, dst);
+      }
+      kunciTabKelas_(src);
+    });
+    lembar.getSheets().forEach(function (sh) {        // buang lembar kosong bawaan / mapel yang dipindah
+      if (perlu.indexOf(sh.getName()) < 0 && lembar.getSheets().length > 1) lembar.deleteSheet(sh);
+    });
+    lembar.getSheets()[0].activate();
+    try {
+      DriveApp.getFileById(lembar.getId()).addEditor(g.email);
+    } catch (e) { gagal.push(g.email); }
+    var url = lembar.getUrl();
+    g.mapel.forEach(function (m) {              // tautan biasa (tanpa rumus: aman untuk pemisah ; atau ,)
+      shGuru.getRange(m.baris, 6).setRichTextValue(SpreadsheetApp.newRichTextValue()
+        .setText('Buka lembar ' + m.tab).setLinkUrl(url).build());
+    });
+    hasil.push({ nama: g.nama || g.email, mapel: perlu.join(', '), url: url });
+  });
+  pasangAmbilOtomatis_();
+  kunciHalamanCetak_();
+  tampilkanDaftarGuru_(hasil, gagal, kelas);
+}
+
+// rumus yang merujuk halaman lain (SISWA, PENGATURAN, GURU) diganti nilainya, supaya lembar guru berdiri sendiri
+function jadikanMandiri_(ss, src, dst) {
+  var rg = dst.getDataRange();
+  var rumus = rg.getFormulas(), nilai = src.getRange(rg.getA1Notation()).getValues();
+  var grid = rg.getValues(), cache = {};
+  var pola = /('(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!\$?[A-Z]{1,3}\$?\d+(:\$?[A-Z]{1,3}\$?\d+)?/g;
+  for (var i = 0; i < rumus.length; i++) {
+    for (var j = 0; j < rumus[i].length; j++) {
+      var f = rumus[i][j];
+      if (!f) continue;
+      if (f.indexOf('!') < 0) { grid[i][j] = f; continue; }
+      // rujukan rentang, atau sel yang hanya berisi rujukan (mis. KKTP): pakai nilainya
+      if (/![^,;)]*:/.test(f) || /^=\s*('(?:[^']|'')+'|[A-Za-z_][A-Za-z0-9_.]*)!\$?[A-Z]{1,3}\$?\d+\s*$/.test(f)) {
+        grid[i][j] = nilai[i][j]; continue;
+      }
+      grid[i][j] = f.replace(pola, function (ref) {
+        if (!(ref in cache)) {
+          var v = ss.getRange(ref).getValue();
+          cache[ref] = '"' + String(v).replace(/"/g, '""') + '"';     // teks (nama guru, kalimat deskripsi)
+        }
+        return cache[ref];
+      });
+    }
+  }
+  rg.setValues(grid);
+}
+
+function segarkanNama_(src, dst) {
+  var a1 = 'A' + SR.BARIS1 + ':B' + (SR.BARIS1 + SR.MAKS - 1);
+  dst.getRange(a1).setValues(src.getRange(a1).getValues());
+  dst.getRange('C4').setValue(src.getRange('C4').getDisplayValue());
+}
+
+// di lembar guru: hanya kotak isian yang bisa diubah
+function kunciLembar_(sh, jenis) {
+  var p = sh.protect().setDescription('SmartRapor: hanya kotak kuning yang diisi');
+  p.setUnprotectedRanges(selIsian_(jenis).map(function (a) { return sh.getRange(a); }));
+  p.addEditor(Session.getEffectiveUser());
+  p.removeEditors(p.getEditors());
+  if (p.canDomainEdit()) p.setDomainEdit(false);
+}
+
+// di file kelas: tab mapel diisi lewat lembar guru, beri peringatan bila diubah langsung
+function kunciTabKelas_(sh) {
+  if (sh.getProtections(SpreadsheetApp.ProtectionType.SHEET).length) return;
+  sh.protect().setDescription('SmartRapor: nilai diisi guru lewat lembar guru').setWarningOnly(true);
+}
+
+function kunciHalamanCetak_() {
+  var ss = SpreadsheetApp.getActive();
+  SR.DIKUNCI.forEach(function (n) {
+    var sh = ss.getSheetByName(n);
+    if (!sh || sh.getProtections(SpreadsheetApp.ProtectionType.SHEET).length) return;
+    sh.protect().setDescription('SmartRapor: halaman ini terisi otomatis').setWarningOnly(true);
+  });
+}
+
+function ambilNilaiGuru() {
+  SpreadsheetApp.getActive().toast('Mengambil nilai dari lembar guru...', 'SmartRapor', 30);
+  var n = ambil_(false);
+  pesan_(n ? 'Nilai dari ' + n + ' mapel sudah masuk. Lihat BERANDA untuk progresnya.'
+    : 'Belum ada lembar guru. Isi halaman GURU, lalu pilih menu SmartRapor › Kirim lembar nilai ke guru.');
+}
+
+function ambilNilaiOtomatis() { ambil_(true); }
+
+function ambil_(diam) {
+  var ss = SpreadsheetApp.getActive(), n = 0, buka = {};
+  daftarGuru_().forEach(function (m) {
+    if (!m.email) return;
+    if (!(m.email in buka)) buka[m.email] = bukaLembar_(m.email);
+    var lembar = buka[m.email];
+    var src = lembar && lembar.getSheetByName(m.tab), dst = ss.getSheetByName(m.tab);
+    if (!src || !dst) return;
+    selIsian_(jenisTab_(dst)).forEach(function (a1) {
+      var v = src.getRange(a1).getValues();
+      if (a1 === 'I4') {                              // KKTP: hanya bila guru mengubahnya
+        if (String(v[0][0]) !== dst.getRange(a1).getDisplayValue()) dst.getRange(a1).setValues(v);
+        return;
+      }
+      dst.getRange(a1).setValues(v);
+    });
+    n++;
+  });
+  var sh = ss.getSheetByName(SR.GURU);
+  if (sh && n) sh.getRange('F4').setValue('Terakhir diambil: ' +
+    Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), 'dd/MM/yyyy HH:mm'));
+  return n;
+}
+
+function pasangAmbilOtomatis_() {
+  var ada = ScriptApp.getProjectTriggers().some(function (t) {
+    return t.getHandlerFunction() === 'ambilNilaiOtomatis';
+  });
+  if (!ada) ScriptApp.newTrigger('ambilNilaiOtomatis').timeBased().everyHours(1).create();
+}
+
+function tampilkanDaftarGuru_(hasil, gagal, kelas) {
+  var esc = function (t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); };
+  var baris = hasil.map(function (h) {
+    var wa = 'Assalamu\'alaikum ' + h.nama + '. Ini lembar nilai ' + h.mapel + ' kelas ' + kelas +
+      '. Silakan isi kotak kuning: ' + h.url;
+    return '<div style="border:1px solid #dee2e6;border-radius:10px;padding:8px 10px;margin:0 0 8px">' +
+      '<b>' + esc(h.nama) + '</b><br><span style="font-size:12px;color:#495057">' + esc(h.mapel) + '</span><br>' +
+      '<a href="' + esc(h.url) + '" target="_blank" style="font-size:12px">Buka lembar</a> &nbsp; ' +
+      '<a href="https://wa.me/?text=' + encodeURIComponent(wa) + '" target="_blank" ' +
+      'style="font-size:12px;color:#198754">Kirim lewat WhatsApp</a></div>';
+  }).join('');
+  var catatan = gagal.length ? '<p style="color:#842029;font-size:12px">E-mail ini tidak bisa diberi akses, ' +
+    'periksa penulisannya: ' + esc(gagal.join(', ')) + '</p>' : '';
+  var html = HtmlService.createHtmlOutput(
+    '<div style="font-family:Poppins,Arial,sans-serif;color:#212529;font-size:14px">' +
+    '<p style="margin:0 0 10px">Lembar nilai sudah siap. Tiap guru hanya melihat mapelnya sendiri. ' +
+    'Link juga tersimpan di halaman GURU.</p>' + catatan + baris +
+    '<p style="font-size:11px;color:#6c757d">Nilai dari guru masuk ke file ini otomatis tiap 1 jam.</p></div>')
+    .setWidth(440).setHeight(Math.min(560, 150 + hasil.length * 82));
+  SpreadsheetApp.getUi().showModalDialog(html, 'Lembar guru');
 }
 
 // ------------------------------------------------------------------ bantu

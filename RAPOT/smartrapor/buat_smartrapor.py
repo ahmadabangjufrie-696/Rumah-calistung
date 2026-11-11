@@ -210,6 +210,41 @@ def buat_pengaturan(wb):
     return ws
 
 
+# ---------------------------------------------------------------- GURU
+GURU = 'GURU'
+GURU1 = 6           # baris mapel pertama di GURU (urutan: UMUM lalu PONDOK)
+
+
+def baris_guru(tab):
+    tabs = [t for t, _ in UMUM] + [t for t, _, _ in PONDOK]
+    return GURU1 + tabs.index(tab)
+
+
+def buat_guru(wb):
+    ws = wb.create_sheet(GURU)
+    pita_judul(ws, 'Guru Mata Pelajaran', 'Isi nama & e-mail (Gmail) guru. Lalu menu SmartRapor › '
+               'Kirim lembar nilai ke guru. Tiap guru hanya menerima mapelnya sendiri.', 'F')
+    lebar(ws, {'A': 2, 'B': 16, 'C': 34, 'D': 26, 'E': 32, 'F': 44})
+    for col, t in zip('BCDEF', ['Tab', 'Mata pelajaran', 'Nama guru', 'E-mail guru (Gmail)',
+                                'Link lembar guru (otomatis)']):
+        isi(ws, f'{col}5', t, size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center', border=KOTAK)
+    daftar = [(t, n) for t, n in UMUM] + [(t, f'{n}   {a}') for t, n, a in PONDOK]
+    for i, (tab, nama) in enumerate(daftar):
+        r = GURU1 + i
+        isi(ws, f'B{r}', tab, size=9, bold=True, border=KOTAK)
+        isi(ws, f'C{r}', nama, size=9, border=KOTAK)
+        isi(ws, f'D{r}', size=9, latar=KUNING, border=KOTAK)
+        isi(ws, f'E{r}', size=9, latar=KUNING, border=KOTAK)
+        isi(ws, f'F{r}', size=8, latar=ABU, border=KOTAK, warna='0D6EFD')
+    r = GURU1 + len(daftar) + 1
+    isi(ws, f'B{r}', 'Satu guru boleh memegang beberapa mapel: tulis e-mail yang sama, semua mapelnya '
+        'masuk satu lembar.', size=8, italic=True, warna='6C757D')
+    isi(ws, f'B{r + 1}', 'Nilai dari lembar guru masuk ke file ini otomatis tiap 1 jam, atau lewat menu '
+        'SmartRapor › Ambil nilai dari guru.', size=8, italic=True, warna='6C757D')
+    ws.freeze_panes = f'A{GURU1}'
+    ws.sheet_properties.tabColor = EMAS
+
+
 # ---------------------------------------------------------------- SISWA
 KOLOM_SISWA = [
     ('No', 5), ('NIS', 10), ('NISN', 13), ('Nama Peserta Didik', 30), ('Nama (tulisan Arab)', 22),
@@ -259,14 +294,15 @@ def validasi_nilai(ws, rng):
     dv.add(rng)
 
 
-def kepala_mapel(ws, judul, sub, sampai):
+def kepala_mapel(ws, judul, sub, sampai, tab):
     pita_judul(ws, judul, sub, sampai)
     isi(ws, 'A4', 'Nama Guru', size=9, bold=True)
     ws.merge_cells('C4:F4')
     for c in 'CDEF':
-        ws[f'{c}4'].fill = PatternFill('solid', fgColor=KUNING)
+        ws[f'{c}4'].fill = PatternFill('solid', fgColor=ABU)
         ws[f'{c}4'].border = KOTAK
-    isi(ws, 'C4', size=10, bold=True)
+    g = f'{GURU}!$D${baris_guru(tab)}'
+    isi(ws, 'C4', f'=IF({g}="","",{g})', size=10, bold=True)
     isi(ws, 'H4', 'KKTP', size=9, bold=True, h='right')
     isi(ws, 'I4', f'={SEL["kktp"]}', size=10, bold=True, latar=KUNING, h='center', border=KOTAK)
     gabung(ws, f'A5:{sampai}5', 'Isi hanya kotak KUNING.  MERAH = nilai wajib belum diisi.  '
@@ -275,7 +311,7 @@ def kepala_mapel(ws, judul, sub, sampai):
 
 def buat_mapel_umum(wb, tab, nama):
     ws = wb.create_sheet(tab)
-    kepala_mapel(ws, nama.upper(), 'Mapel umum  ·  Sumatif lingkup materi + sumatif akhir semester', 'T')
+    kepala_mapel(ws, nama.upper(), 'Mapel umum  ·  Sumatif lingkup materi + sumatif akhir semester', 'T', tab)
     hdr = {'A': 'No', 'B': 'Nama Siswa'}
     hdr.update({gl(3 + i): f'Sumatif {i + 1}' for i in range(8)})
     hdr.update({'K': 'Rata-rata Sumatif', 'L': '', 'M': 'Non Tes', 'N': 'Tes', 'O': 'Rata-rata Akhir Sem.',
@@ -337,7 +373,7 @@ def buat_mapel_umum(wb, tab, nama):
 
 def buat_mapel_pondok(wb, tab, nama, arab):
     ws = wb.create_sheet(tab)
-    kepala_mapel(ws, f'{nama.upper()}   {arab}', 'Mapel pondok  ·  Tugas, lisan/praktik, dan semester', 'M')
+    kepala_mapel(ws, f'{nama.upper()}   {arab}', 'Mapel pondok  ·  Tugas, lisan/praktik, dan semester', 'M', tab)
     grup = [('C7:F7', 'Nilai Pengetahuan (Tugas)'), ('G7:I7', 'Nilai Lisan / Praktik'),
             ('J7:J7', 'Semester'), ('K7:L7', 'Nilai Raport')]
     for rng, t in grup:
@@ -509,7 +545,7 @@ def buat_beranda(wb):
     isi(ws, 'H9', 'LANGKAH MUDAH', size=11, bold=True, warna=HIJAU)
     langkah = [('1', 'Isi PENGATURAN', 'Identitas sekolah, kelas, wali kelas, tanggal.'),
                ('2', 'Isi data SISWA', 'Cukup sekali, nama muncul di semua tab.'),
-               ('3', 'Bagikan link ke guru', 'Guru mengisi kotak kuning di tab mapelnya.'),
+               ('3', 'Isi GURU & kirim', 'Menu SmartRapor › Kirim lembar nilai ke guru.'),
                ('4', 'Isi EKSKUL & CATATAN', 'Ekskul, prestasi, catatan, keputusan.'),
                ('5', 'Cetak', 'Pilih siswa & centang di kanan bawah, lalu klik tombol CETAK.')]
     r = 11
@@ -1348,7 +1384,7 @@ def isi_contoh(wb):
             ws[f'{KS[k]}{r}'] = v
     for tab, tps in TP_CONTOH.items():
         w = wb[tab]
-        w['C4'] = 'Guru ' + tab.title()
+        wb[GURU][f'D{baris_guru(tab)}'] = 'Guru ' + tab.title()
         for j, tp in enumerate(tps):
             w[f'{gl(3 + j)}8'] = tp
         for i in range(len(NAMA_CONTOH)):
@@ -1360,7 +1396,7 @@ def isi_contoh(wb):
             w[f'N{r}'] = rnd.randint(68, 95)
     for tab in ('HADIST', 'FIQIH', 'NAHWU', 'TASRIF'):
         w = wb[tab]
-        w['C4'] = 'Ustadz Contoh'
+        wb[GURU][f'D{baris_guru(tab)}'] = 'Ustadz Contoh'
         for i in range(len(NAMA_CONTOH)):
             r = BARIS1 + i
             for col in 'CDEFGHIJ':
@@ -1378,7 +1414,7 @@ def isi_contoh(wb):
             w[f'J{BARIS1 + i}'] = catatan
     for tab in ('BAHASA ARAB', 'TAUHID', 'TARIKH', 'MAHFUZATH'):
         w = wb[tab]
-        w['C4'] = 'Ustadz Contoh'
+        wb[GURU][f'D{baris_guru(tab)}'] = 'Ustadz Contoh'
         for i in range(len(NAMA_CONTOH)):
             for col in 'CDEFGHIJ':
                 w[f'{col}{BARIS1 + i}'] = rnd.randint(55 if tab == 'TARIKH' else 70, 96)
@@ -1402,6 +1438,7 @@ def buat(tujuan, contoh=False):
     buat_pengaturan(wb)                 # dibuat lebih dulu: alamat sel dipakai halaman lain
     buat_beranda(wb)                    # wb.active (lembar pertama)
     buat_siswa(wb)
+    buat_guru(wb)
     for tab, nama in UMUM:
         buat_mapel_umum(wb, tab, nama)
     for tab, nama, arab in PONDOK:

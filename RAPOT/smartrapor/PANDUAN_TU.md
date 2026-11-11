@@ -37,15 +37,28 @@ Lalu di **tiap file kelas**, buka halaman **PENGATURAN** dan isi kotak kuning:
 3. Nama siswa otomatis muncul di semua tab mapel. **Jangan menulis nama di tab mapel.**
 4. Kalau ada siswa pindah atau baru, ubah di halaman SISWA saja.
 
-## D. Membagikan ke guru
+## D. Mengirim lembar nilai ke guru
 
-1. Di file kelas, klik tombol **Bagikan** (kanan atas).
-2. Ketik e-mail guru-guru yang mengajar di kelas itu → pilih **Editor** → **Kirim**.
-3. Sampaikan ke guru: buka tab mapel masing-masing (tab di bawah layar) dan **isi kotak kuning saja**.
-   Baris 8 untuk materi / tujuan pembelajaran, mulai baris 9 untuk nilai siswa.
-   Kolom lain terisi sendiri. Jangan menghapus baris atau kolom.
-4. Wali kelas mengisi **EKSKUL & CATATAN** (ekskul, prestasi, kehadiran, catatan, keputusan)
-   dan **CATATAN PONDOK**. Guru P5 mengisi **P5 PROYEK 1–3**.
+Guru **tidak** dibagikan file kelas. Tiap guru menerima **lembar sendiri** yang hanya berisi mapelnya,
+jadi guru tidak bisa melihat atau mengubah nilai mapel lain.
+
+1. Di file kelas, buka halaman **GURU**.
+2. Isi **Nama guru** dan **E-mail guru (Gmail)** di kotak kuning untuk setiap mapel.
+   Guru yang memegang beberapa mapel cukup ditulis dengan e-mail yang sama, semua mapelnya masuk satu lembar.
+3. Pilih menu **SmartRapor → Kirim lembar nilai ke guru**, lalu tunggu kira-kira 1 menit.
+4. Muncul daftar guru. Klik **Kirim lewat WhatsApp** di setiap nama untuk mengirim link lembarnya.
+   Link juga tersimpan di kolom terakhir halaman GURU.
+5. Guru membuka link itu, lalu **mengisi kotak kuning saja**: baris 8 untuk materi / tujuan pembelajaran,
+   mulai baris 9 untuk nilai siswa. Bagian lain terkunci.
+6. Nilai dari guru masuk ke file kelas **otomatis setiap 1 jam**. Untuk langsung mengambilnya,
+   pilih menu **SmartRapor → Ambil nilai dari guru**.
+
+Catatan penting:
+- Sesudah lembar dikirim, **jangan mengubah urutan siswa** di halaman SISWA. Siswa baru tambahkan di baris paling bawah,
+  lalu pilih lagi **Kirim lembar nilai ke guru** supaya nama baru muncul di lembar guru (nilai yang sudah diisi tetap aman).
+- Ganti guru: ubah e-mail di halaman GURU, lalu pilih lagi **Kirim lembar nilai ke guru**.
+- Wali kelas mengisi **EKSKUL & CATATAN** (ekskul, prestasi, kehadiran, catatan, keputusan),
+  **CATATAN PONDOK**, dan **P5 PROYEK 1–3** langsung di file kelas.
 
 ## E. Memantau
 
@@ -64,7 +77,7 @@ Ingatkan guru yang mapelnya belum lengkap.
 3. Hapus semua tulisan yang ada, **Ctrl + V**, lalu klik **Simpan** (ikon disket).
 4. Tutup jendela itu, lalu muat ulang file SmartRapor (tekan **F5**).
 5. Pilih menu **SmartRapor → Pasang tombol di BERANDA**.
-6. Pertama kali, Google meminta izin: **Lanjutkan → pilih akun → Lanjutan → Buka SmartRapor (tidak aman) → Izinkan**.
+6. Pertama kali (dan setiap kali kode diperbarui), Google meminta izin: **Lanjutkan → pilih akun → Lanjutan → Buka SmartRapor (tidak aman) → Izinkan**.
    Tulisan "tidak aman" muncul karena kodenya buatan sendiri, bukan dari toko Google.
 
 ## G. Mencetak raport
@@ -89,4 +102,5 @@ di PENGATURAN. Kosongkan nilai di tab mapel. Data siswa tidak perlu diketik ulan
 | Menu SmartRapor tidak muncul | Muat ulang (F5) dan tunggu beberapa detik. Kalau tetap tidak ada, ulangi Bagian F. |
 | Nama siswa tidak muncul di tab mapel | Periksa halaman SISWA, nama harus diisi di kolom Nama Peserta Didik. |
 | Deskripsi raport kosong | Guru belum mengisi materi/TP di baris 8 tab mapelnya. |
+| Nilai guru belum masuk ke raport | Pilih menu SmartRapor → Ambil nilai dari guru. |
 | Tulisan Arab tampil kotak-kotak | Buka di Google Chrome/Edge versi terbaru. |

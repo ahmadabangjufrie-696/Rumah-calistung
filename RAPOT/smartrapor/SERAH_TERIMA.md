@@ -14,7 +14,8 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
   - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
     (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
   - Panduan TU (Google Doc dari `PANDUAN_TU.md`): **PANDUAN TU SmartRapor** id `1sIKK7xmAv0wDTzPtnv0oSUE-MfUgOUQKTvMJu80_FAQ`.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1pjpuqZ26hQdPUUqMHmDxPEfool4jjWnmca7pRpx5v74`.
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1e1SJJwmZE-hePJExca3GmNYMOl6WEwy39jUH5dtE0vs` (diperbarui 11 Nov, lembar guru;
+    dokumen lama dibuang ke sampah).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
 ## Berkas
@@ -28,8 +29,9 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 | `PANDUAN_TU.md` | panduan TU klik demi klik (salin, isi, bagikan, cetak). Unggah sebagai HTML → Google Doc; hindari daftar bersarang |
 
 ## Halaman di Google Sheet
-BERANDA (progres per mapel, pilih siswa I25 [J25 = nomor, tersembunyi], centang yang dicetak H31:H34, tempat tombol
-H28/I28 dan H36/I36), PENGATURAN, SISWA (kolom AB tersembunyi = "No - Nama"), 12 tab mapel umum (Sumatif 1–8 + baris
+BERANDA (progres per mapel, nama guru diambil dari GURU, pilih siswa I25 [J25 = nomor, tersembunyi], centang yang dicetak H31:H34, tempat tombol
+H28/I28 dan H36/I36), PENGATURAN, GURU (B tab, C mapel, D nama guru, E e-mail, F link lembar; baris 6–33; F4 waktu ambil terakhir),
+SISWA (kolom AB tersembunyi = "No - Nama"), 12 tab mapel umum (Sumatif 1–8 + baris
 materi/TP baris 8, Non Tes, Tes → nilai rapor kolom Q, deskripsi S/T), 16 tab mapel pondok (Tugas, Lisan, Semester →
 K teori, L praktik), EKSKUL & CATATAN (keputusan per siswa: naik kelas VIII/IX, LULUS, belum bisa naik kelas),
 CATATAN PONDOK, P5 PROYEK 1–3, COVER, IDENTITAS SEKOLAH, KETERANGAN DIRI, RAPOR SEKOLAH, RAPOR PONDOK, RAPOR P5,
@@ -42,6 +44,8 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   H31:H34 harus dipasang lewat API (`setDataValidation` BOOLEAN), dan Ustadz harus menempel kode tombol lagi.
 - Uji: LibreOffice (`soffice --headless --convert-to xlsx/pdf`) untuk rumus & tampilan; Node + tiruan Apps Script untuk
   kode tombol (`node --check`, lalu tiruan layanan). Apps Script tidak bisa dijalankan dari server; Ustadz yang mencoba.
+- **Locale file = id_ID**: rumus lewat Sheets API (update_values / formulaValue) harus memakai pemisah `;`
+  (dengan `,` hasilnya #ERROR!). Di Apps Script hindari menulis rumus baru; pakai nilai / RichText.
 - Pelajaran: fungsi `async` tidak bisa dipanggil langsung dari tombol/menu (pakai fungsi biasa pembungkus).
   Sel gabungan tidak menyesuaikan tinggi sendiri (tinggi diatur skrip `rapikanTinggi_`). Huruf Amiri tidak ada di
   LibreOffice server (tampil kotak), di Google normal.
@@ -58,6 +62,11 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
   kecuali 2 baris kop Latin (Arial). Baris mapel 19–34 ditinggikan ke 25 px;
   baris kebiasaan (38–39) dan catatan (41) ke 58 px karena di Google tulisan Amiri 2 baris terpotong. Langsung di file + perakit.
   Uji lokal: Amiri bisa dipasang dari npm `@fontsource/amiri` (woff2 → ttf dengan fontTools ke ~/.fonts).
+
+- 11 Nov: **lembar guru** (permintaan Ustadz: guru hanya melihat mapelnya). Halaman GURU baru + menu
+  "Kirim lembar nilai ke guru" / "Ambil nilai dari guru" + pemicu tiap 1 jam + kunci (peringatan) di tab mapel & halaman cetak
+  file kelas. C4 tab mapel = rumus ke GURU (sudah dipasang di file). **Ustadz harus menempel kode baru** (dokumen KODE baru),
+  lalu mencoba: isi e-mail (boleh e-mail kedua milik Ustadz) → kirim → isi di lembar guru → ambil nilai. Belum dicoba.
 
 ## Yang perlu dikonfirmasi Ustadz
 1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).

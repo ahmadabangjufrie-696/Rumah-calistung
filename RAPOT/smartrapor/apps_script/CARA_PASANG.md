@@ -10,6 +10,8 @@ Dilakukan **sekali** pada file SmartRapor induk. Salinan untuk tiap kelas ("Buat
 6. Google meminta izin (pertama kali saja): **Lanjutkan → pilih akun → Lanjutan → Buka SmartRapor (tidak aman) → Izinkan**.
    Peringatan "tidak aman" muncul karena kodenya buatan sendiri, bukan dari toko Google.
 7. Tombol **▲ Sebelumnya, Berikutnya ▼, CETAK SISWA INI, CETAK SEKELAS** muncul di BERANDA.
+8. Menu **SmartRapor** juga berisi **Kirim lembar nilai ke guru** dan **Ambil nilai dari guru** (lihat PANDUAN_TU.md bagian D).
+   Saat pertama dipakai, Google meminta izin lagi (membuat file di Drive dan menjalankan pengambilan nilai tiap jam).
 
 PDF tersimpan di folder **PDF SmartRapor**, di folder yang sama dengan file SmartRapor.
 
