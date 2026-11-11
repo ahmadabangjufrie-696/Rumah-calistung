@@ -228,7 +228,7 @@ def buat_guru(wb):
     for col, t in zip('BCDEF', ['Tab', 'Mata pelajaran', 'Nama guru', 'No. WhatsApp guru',
                                 'Link lembar guru (otomatis)']):
         isi(ws, f'{col}5', t, size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center', border=KOTAK)
-    daftar = [(t, n) for t, n in UMUM] + [(t, f'{n}   {a}') for t, n, a in PONDOK]
+    daftar = [(t, n) for t, n in UMUM] + [(t, n) for t, n, _ in PONDOK]
     for i, (tab, nama) in enumerate(daftar):
         r = GURU1 + i
         isi(ws, f'B{r}', tab, size=9, bold=True, border=KOTAK)
