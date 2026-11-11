@@ -224,7 +224,7 @@ function ambilPdf_() {
   var url = 'https://docs.google.com/spreadsheets/d/' + ss.getId() + '/export?format=pdf' +
     '&size=A4&portrait=true&fitw=true&gridlines=false&printtitle=false&sheetnames=false' +
     '&pagenum=UNDEFINED&fzr=false&horizontal_alignment=CENTER&vertical_alignment=TOP' +
-    '&top_margin=0.5&bottom_margin=0.5&left_margin=0.5&right_margin=0.5';
+    '&top_margin=0.4&bottom_margin=0.4&left_margin=0.5&right_margin=0.5';
   for (var k = 0; k < 6; k++) {
     var r = UrlFetchApp.fetch(url, {
       headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
