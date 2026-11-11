@@ -104,7 +104,7 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
     menu SmartRapor › Pasang tombol → izinkan → Aktivasi → tempel kode di PENGATURAN.
 
 - **Daftar PR Ustadz** (Google Doc, berisi semua langkah uji + link): `PR SmartRapor - daftar kerja besok`
-  id `1p3R2EEunG4vrAx9lqQJDYq5RgT32rrRZxkGEbjCa-Z4`. Sesi berikutnya: tanyakan PR mana yang sudah dikerjakan & hasilnya.
+  id `1vixiC-Uytc0vxiZgjkt-ae2djOuZwuAAjlIbHbfjEp8` (langkah 5: file asli Ustadz = salinan file contoh + Mulai kelas baru). Sesi berikutnya: tanyakan PR mana yang sudah dikerjakan & hasilnya.
 
 ## Yang perlu dikonfirmasi Ustadz
 1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).
