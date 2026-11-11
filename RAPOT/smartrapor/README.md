@@ -16,7 +16,7 @@ Unggah `.xlsx` ke Google Drive, lalu buka sebagai Google Sheet.
 | BERANDA | ringkasan kelas, progres nilai per mapel, pilihan siswa yang dicetak |
 | PENGATURAN | identitas sekolah, kelas, wali kelas, tanggal, daftar mapel & kalimat deskripsi |
 | SISWA | data siswa (diisi sekali) |
-| GURU | nama & e-mail guru per mapel; link lembar guru (diisi skrip) |
+| GURU | nama & nomor WA (atau e-mail) guru per mapel; link lembar guru (diisi skrip) |
 | 12 tab mapel umum | Sumatif 1–8 + materi/TP, Non Tes, Tes → nilai rapor + deskripsi otomatis |
 | 16 tab mapel pondok | Tugas, Lisan, Semester → nilai raport teori & praktik |
 | EKSKUL & CATATAN | ekstrakurikuler, prestasi, kehadiran, catatan, keputusan |
@@ -38,7 +38,7 @@ Catatan: kotak centang di BERANDA (H31:H34) dipasang lewat Google Sheets API set
 ## Lembar guru (Apps Script)
 Menu **SmartRapor › Kirim lembar nilai ke guru** membuat satu Google Sheet per guru (folder `Lembar Guru - <file>`),
 berisi salinan tab mapelnya saja: rumus yang merujuk halaman lain diganti nilainya, hanya sel isian yang tidak
-dikunci, guru dijadikan editor. Nilai ditarik balik (`ambil_`) tiap 1 jam (pemicu waktu) atau lewat menu
+dikunci; dibagikan lewat link (nomor WA) atau guru dijadikan editor (e-mail). Nilai ditarik balik (`ambil_`) tiap 1 jam (pemicu waktu) atau lewat menu
 **Ambil nilai dari guru**. Sel isian: umum `I4, C8:J8, C9:J48, M9:N48`; pondok `I4, C9:J48`. Nama guru (C4) = rumus ke GURU.
 
 ## Berikutnya

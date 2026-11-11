@@ -222,10 +222,10 @@ def baris_guru(tab):
 
 def buat_guru(wb):
     ws = wb.create_sheet(GURU)
-    pita_judul(ws, 'Guru Mata Pelajaran', 'Isi nama & e-mail (Gmail) guru. Lalu menu SmartRapor › '
+    pita_judul(ws, 'Guru Mata Pelajaran', 'Isi nama & nomor WhatsApp guru. Lalu menu SmartRapor › '
                'Kirim lembar nilai ke guru. Tiap guru hanya menerima mapelnya sendiri.', 'F')
     lebar(ws, {'A': 2, 'B': 16, 'C': 34, 'D': 26, 'E': 32, 'F': 44})
-    for col, t in zip('BCDEF', ['Tab', 'Mata pelajaran', 'Nama guru', 'E-mail guru (Gmail)',
+    for col, t in zip('BCDEF', ['Tab', 'Mata pelajaran', 'Nama guru', 'No. WhatsApp guru',
                                 'Link lembar guru (otomatis)']):
         isi(ws, f'{col}5', t, size=9, bold=True, warna=PUTIH, latar=HIJAU2, h='center', border=KOTAK)
     daftar = [(t, n) for t, n in UMUM] + [(t, f'{n}   {a}') for t, n, a in PONDOK]
@@ -234,10 +234,10 @@ def buat_guru(wb):
         isi(ws, f'B{r}', tab, size=9, bold=True, border=KOTAK)
         isi(ws, f'C{r}', nama, size=9, border=KOTAK)
         isi(ws, f'D{r}', size=9, latar=KUNING, border=KOTAK)
-        isi(ws, f'E{r}', size=9, latar=KUNING, border=KOTAK)
+        isi(ws, f'E{r}', size=9, latar=KUNING, border=KOTAK).number_format = '@'   # nomor WA: teks (0 di depan aman)
         isi(ws, f'F{r}', size=8, latar=ABU, border=KOTAK, warna='0D6EFD')
     r = GURU1 + len(daftar) + 1
-    isi(ws, f'B{r}', 'Satu guru boleh memegang beberapa mapel: tulis e-mail yang sama, semua mapelnya '
+    isi(ws, f'B{r}', 'Satu guru boleh memegang beberapa mapel: tulis nomor WA yang sama, semua mapelnya '
         'masuk satu lembar.', size=8, italic=True, warna='6C757D')
     isi(ws, f'B{r + 1}', 'Nilai dari lembar guru masuk ke file ini otomatis tiap 1 jam, atau lewat menu '
         'SmartRapor › Ambil nilai dari guru.', size=8, italic=True, warna='6C757D')

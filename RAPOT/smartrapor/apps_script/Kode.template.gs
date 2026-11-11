@@ -15,7 +15,7 @@ var SR = {
   P5: 'RAPOR P5',
   FOLDER_PDF: 'PDF SmartRapor',
   GURU: 'GURU',
-  GURU1: 6,                     // baris mapel pertama di GURU (kolom B tab, D nama, E e-mail, F link)
+  GURU1: 6,                     // baris mapel pertama di GURU (kolom B tab, D nama, E no. WA / e-mail, F link)
   JML_MAPEL: 28,
   BARIS1: 9,                    // baris siswa pertama di tab mapel
   // halaman yang dikunci (peringatan) di file kelas; tab mapel ikut dikunci saat lembar guru dikirim
@@ -319,10 +319,20 @@ function daftarGuru_() {
   var hasil = [];
   for (var i = 0; i < v.length; i++) {
     if (!v[i][0]) continue;
-    hasil.push({ tab: v[i][0], mapel: v[i][1], nama: v[i][2].trim(), email: v[i][3].trim().toLowerCase(),
+    hasil.push({ tab: v[i][0], mapel: v[i][1], nama: v[i][2].trim(), email: kontak_(v[i][3]),
       baris: SR.GURU1 + i });
   }
   return hasil;
+}
+
+// kontak guru: nomor WhatsApp (dijadikan 62xxx) atau e-mail
+function kontak_(t) {
+  t = String(t || '').trim().toLowerCase();
+  if (!t || t.indexOf('@') >= 0) return t;
+  var d = t.replace(/[^0-9]/g, '');
+  if (d.indexOf('0') === 0) d = '62' + d.slice(1);
+  else if (d.indexOf('8') === 0) d = '62' + d;
+  return d;
 }
 
 function kelompokGuru_() {
@@ -367,7 +377,7 @@ function kirimLembarGuru() {
   var guru = kelompokGuru_();
   if (!guru.length) {
     ss.getSheetByName(SR.GURU).activate();
-    pesan_('Isi dulu nama dan e-mail guru di halaman GURU (kolom kuning).');
+    pesan_('Isi dulu nama dan nomor WhatsApp guru di halaman GURU (kolom kuning).');
     return;
   }
   ss.toast('Menyiapkan lembar guru... (±1 menit)', 'SmartRapor', 60);
@@ -400,14 +410,17 @@ function kirimLembarGuru() {
     });
     lembar.getSheets()[0].activate();
     try {
-      DriveApp.getFileById(lembar.getId()).addEditor(g.email);
-    } catch (e) { gagal.push(g.email); }
+      var berkas = DriveApp.getFileById(lembar.getId());
+      if (g.email.indexOf('@') >= 0) berkas.addEditor(g.email);
+      else berkas.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);   // cukup lewat link WA
+    } catch (e) { gagal.push(g.nama || g.email); }
     var url = lembar.getUrl();
     g.mapel.forEach(function (m) {              // tautan biasa (tanpa rumus: aman untuk pemisah ; atau ,)
       shGuru.getRange(m.baris, 6).setRichTextValue(SpreadsheetApp.newRichTextValue()
         .setText('Buka lembar ' + m.tab).setLinkUrl(url).build());
     });
-    hasil.push({ nama: g.nama || g.email, mapel: perlu.join(', '), url: url });
+    hasil.push({ nama: g.nama || g.email, mapel: perlu.join(', '), url: url,
+      wa: g.email.indexOf('@') >= 0 ? '' : g.email });
   });
   pasangAmbilOtomatis_();
   kunciHalamanCetak_();
@@ -519,11 +532,11 @@ function tampilkanDaftarGuru_(hasil, gagal, kelas) {
     return '<div style="border:1px solid #dee2e6;border-radius:10px;padding:8px 10px;margin:0 0 8px">' +
       '<b>' + esc(h.nama) + '</b><br><span style="font-size:12px;color:#495057">' + esc(h.mapel) + '</span><br>' +
       '<a href="' + esc(h.url) + '" target="_blank" style="font-size:12px">Buka lembar</a> &nbsp; ' +
-      '<a href="https://wa.me/?text=' + encodeURIComponent(wa) + '" target="_blank" ' +
+      '<a href="https://wa.me/' + h.wa + '?text=' + encodeURIComponent(wa) + '" target="_blank" ' +
       'style="font-size:12px;color:#198754">Kirim lewat WhatsApp</a></div>';
   }).join('');
-  var catatan = gagal.length ? '<p style="color:#842029;font-size:12px">E-mail ini tidak bisa diberi akses, ' +
-    'periksa penulisannya: ' + esc(gagal.join(', ')) + '</p>' : '';
+  var catatan = gagal.length ? '<p style="color:#842029;font-size:12px">Lembar guru ini belum bisa dibuka lewat link ' +
+    '(periksa nomor/e-mail, atau Drive sekolah melarang berbagi link): ' + esc(gagal.join(', ')) + '</p>' : '';
   var html = HtmlService.createHtmlOutput(
     '<div style="font-family:Poppins,Arial,sans-serif;color:#212529;font-size:14px">' +
     '<p style="margin:0 0 10px">Lembar nilai sudah siap. Tiap guru hanya melihat mapelnya sendiri. ' +

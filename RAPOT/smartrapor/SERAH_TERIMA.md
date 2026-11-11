@@ -14,8 +14,8 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
   - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
     (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
   - Panduan TU (Google Doc dari `PANDUAN_TU.md`): **PANDUAN TU SmartRapor** id `132gP0h_7fEIdgCZfWc9fqpTapTEil4uVMVjTLg065dg`.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1e1SJJwmZE-hePJExca3GmNYMOl6WEwy39jUH5dtE0vs` (diperbarui 11 Nov, lembar guru;
-    dokumen lama dibuang ke sampah).
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1aWFzHXSX5fhf-2K0F-JGYQRpb0PXwWqNGJCId3Kw3SE` (diperbarui 11 Nov: lembar guru + nomor WA;
+    dokumen lama dibuang ke sampah. Selalu beri Ustadz LINK langsung ke dokumen ini, Ustadz bingung memilih di Drive).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
 ## Berkas
@@ -30,7 +30,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 
 ## Halaman di Google Sheet
 BERANDA (progres per mapel, nama guru diambil dari GURU, pilih siswa I25 [J25 = nomor, tersembunyi], centang yang dicetak H31:H34, tempat tombol
-H28/I28 dan H36/I36), PENGATURAN, GURU (B tab, C mapel, D nama guru, E e-mail, F link lembar; baris 6–33; F4 waktu ambil terakhir),
+H28/I28 dan H36/I36), PENGATURAN, GURU (B tab, C mapel, D nama guru, E no. WhatsApp [format teks] atau e-mail, F link lembar; baris 6–33; F4 waktu ambil terakhir),
 SISWA (kolom AB tersembunyi = "No - Nama"), 12 tab mapel umum (Sumatif 1–8 + baris
 materi/TP baris 8, Non Tes, Tes → nilai rapor kolom Q, deskripsi S/T), 16 tab mapel pondok (Tugas, Lisan, Semester →
 K teori, L praktik), EKSKUL & CATATAN (keputusan per siswa: naik kelas VIII/IX, LULUS, belum bisa naik kelas),
@@ -66,7 +66,9 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 - 11 Nov: **lembar guru** (permintaan Ustadz: guru hanya melihat mapelnya). Halaman GURU baru + menu
   "Kirim lembar nilai ke guru" / "Ambil nilai dari guru" + pemicu tiap 1 jam + kunci (peringatan) di tab mapel & halaman cetak
   file kelas. C4 tab mapel = rumus ke GURU (sudah dipasang di file). **Ustadz harus menempel kode baru** (dokumen KODE baru),
-  lalu mencoba: isi e-mail (boleh e-mail kedua milik Ustadz) → kirim → isi di lembar guru → ambil nilai. Belum dicoba.
+  lalu mencoba. Atas permintaan Ustadz kontak guru = **nomor WhatsApp** (bukan e-mail): lembar dibagikan "siapa saja
+  yang punya link boleh mengedit" (hanya kotak kuning terbuka), tombol WA membuka chat ke nomor itu. E-mail masih diterima.
+  Ustadz sudah menempel kode versi e-mail; versi WA perlu ditempel lagi. Belum dicoba di Google.
 
 ## Yang perlu dikonfirmasi Ustadz
 1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).

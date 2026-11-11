@@ -43,10 +43,11 @@ Guru **tidak** dibagikan file kelas. Tiap guru menerima **lembar sendiri** yang 
 jadi guru tidak bisa melihat atau mengubah nilai mapel lain.
 
 1. Di file kelas, buka halaman **GURU**.
-2. Isi **Nama guru** dan **E-mail guru (Gmail)** di kotak kuning untuk setiap mapel.
-   Guru yang memegang beberapa mapel cukup ditulis dengan e-mail yang sama, semua mapelnya masuk satu lembar.
+2. Isi **Nama guru** dan **No. WhatsApp guru** di kotak kuning untuk setiap mapel (misalnya 0812xxxxxxx).
+   Guru yang memegang beberapa mapel cukup ditulis dengan nomor yang sama, semua mapelnya masuk satu lembar.
 3. Pilih menu **SmartRapor → Kirim lembar nilai ke guru**, lalu tunggu kira-kira 1 menit.
-4. Muncul daftar guru. Klik **Kirim lewat WhatsApp** di setiap nama untuk mengirim link lembarnya.
+4. Muncul daftar guru. Klik **Kirim lewat WhatsApp** di setiap nama: WhatsApp terbuka ke nomor guru itu dengan pesan
+   berisi link lembarnya, tinggal tekan kirim. Guru tidak perlu punya Gmail.
    Link juga tersimpan di kolom terakhir halaman GURU.
 5. Guru membuka link itu, lalu **mengisi kotak kuning saja**: baris 8 untuk materi / tujuan pembelajaran,
    mulai baris 9 untuk nilai siswa. Bagian lain terkunci.
@@ -56,7 +57,8 @@ jadi guru tidak bisa melihat atau mengubah nilai mapel lain.
 Catatan penting:
 - Sesudah lembar dikirim, **jangan mengubah urutan siswa** di halaman SISWA. Siswa baru tambahkan di baris paling bawah,
   lalu pilih lagi **Kirim lembar nilai ke guru** supaya nama baru muncul di lembar guru (nilai yang sudah diisi tetap aman).
-- Ganti guru: ubah e-mail di halaman GURU, lalu pilih lagi **Kirim lembar nilai ke guru**.
+- Jangan meneruskan link lembar guru ke orang lain: siapa pun yang memegang link bisa mengisi nilai mapel itu.
+- Ganti guru: ubah nomor WA di halaman GURU, lalu pilih lagi **Kirim lembar nilai ke guru**.
 - Wali kelas mengisi **EKSKUL & CATATAN** (ekskul, prestasi, kehadiran, catatan, keputusan),
   **CATATAN PONDOK**, dan **P5 PROYEK 1–3** langsung di file kelas.
 
