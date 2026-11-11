@@ -14,6 +14,9 @@ var SR = {
   RAPOR: 'RAPOR SEKOLAH',
   P5: 'RAPOR P5',
   FOLDER_PDF: 'PDF SmartRapor',
+  CAP: ['DATA ARAB', 'H6'],     // sel tanda "belum diaktifkan" yang tampil di judul raport
+  TEKS_CAP: '(judul raport muncul saat dicetak lewat tombol CETAK)',   // keadaan biasa
+  TEKS_BELUM: 'SMARTRAPOR BELUM DIAKTIFKAN',                          // dicetak oleh pemakai tanpa kode
   GURU: 'GURU',
   GURU1: 6,                     // baris mapel pertama di GURU (kolom B tab, D nama, E no. WA / e-mail, F link)
   JML_MAPEL: 28,
@@ -44,6 +47,7 @@ function onOpen() {
     .addItem('Ambil nilai dari guru', 'ambilNilaiGuru')
     .addSeparator()
     .addItem('Rapikan tinggi baris raport', 'rapikanTinggi')
+    .addItem('Aktivasi (lihat Gmail & status)', 'cekAktivasi')
     .addItem('Pasang tombol di BERANDA', 'pasangTombol')
     .addToUi();
 }
@@ -209,6 +213,8 @@ async function cetakSekelasProses_() {
 // sembunyikan semua halaman kecuali halaman cetak; ekspor PDF hanya memuat halaman yang tampil
 function sembunyikanSelainCetak_() {
   var ss = SpreadsheetApp.getActive();
+  aturCap_(aktif_() ? '' : SR.TEKS_BELUM);          // raport bersih hanya untuk pemakai yang sudah aktif
+  if (!aktif_()) toast_('SmartRapor belum diaktifkan: raport bertanda "BELUM DIAKTIFKAN". Lihat menu SmartRapor › Aktivasi.');
   var halaman = halamanCetak_();
   var keadaan = ss.getSheets().map(function (s) { return { sheet: s, tersembunyi: s.isSheetHidden() }; });
   var pertama = ss.getSheetByName(halaman[0]);
@@ -222,6 +228,7 @@ function sembunyikanSelainCetak_() {
 }
 
 function pulihkan_(keadaan) {
+  aturCap_(SR.TEKS_CAP);
   keadaan.forEach(function (k) { if (!k.tersembunyi) k.sheet.showSheet(); });
   var b = SpreadsheetApp.getActive().getSheetByName(SR.BERANDA);
   if (b) b.activate();
@@ -380,6 +387,7 @@ function kirimLembarGuru() {
     pesan_('Isi dulu nama dan nomor WhatsApp guru di halaman GURU (kolom kuning).');
     return;
   }
+  if (!aktif_()) { pesanBelumAktif_('Kirim lembar nilai ke guru'); return; }
   ss.toast('Menyiapkan lembar guru... (±1 menit)', 'SmartRapor', 60);
   ambil_(true);                                     // simpan dulu nilai yang sudah diisi guru
   var folder = folderGuru_(), kelas = namaKelas_(), hasil = [], gagal = [];
@@ -552,6 +560,54 @@ function tampilkanDaftarGuru_(hasil, gagal, kelas) {
     '<p style="font-size:11px;color:#6c757d">Nilai dari guru masuk ke file ini otomatis tiap 1 jam.</p></div>')
     .setWidth(440).setHeight(Math.min(560, 150 + hasil.length * 82));
   SpreadsheetApp.getUi().showModalDialog(html, 'Lembar guru');
+}
+
+// ------------------------------------------------------------------ aktivasi
+// Kode aktivasi = sidik (SHA-256) dari Gmail pemakai + kunci rahasia. Tidak memakai internet / server:
+// berlaku selamanya. Data tidak pernah dikunci; yang dibatasi hanya cetak bersih dan kirim lembar guru.
+function kunci_() { return '__RAHASIA__'.split('').reverse().join(''); }
+
+function kodeAktivasi_(email) {
+  var b = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,
+    String(email).trim().toLowerCase() + '|' + kunci_(), Utilities.Charset.UTF_8);
+  var abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = '';
+  for (var i = 0; i < 8; i++) s += abc.charAt(b[i] & 31);
+  return s.slice(0, 4) + '-' + s.slice(4);
+}
+
+function gmailSaya_() {
+  try { return Session.getEffectiveUser().getEmail() || ''; } catch (e) { return ''; }
+}
+
+function kodeTertulis_() {
+  var sh = SpreadsheetApp.getActive().getSheetByName('PENGATURAN');
+  var c = sh && sh.createTextFinder('Kode aktivasi').matchEntireCell(true).findNext();
+  return c ? c.offset(0, 1).getDisplayValue().toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
+}
+
+function aktif_() {
+  var e = gmailSaya_();
+  return !!e && kodeAktivasi_(e).replace('-', '') === kodeTertulis_();
+}
+
+function aturCap_(teks) {
+  var sh = SpreadsheetApp.getActive().getSheetByName(SR.CAP[0]);
+  if (sh) sh.getRange(SR.CAP[1]).setValue(teks);
+}
+
+function pesanBelumAktif_(apa) {
+  pesan_('"' + apa + '" hanya untuk SmartRapor yang sudah diaktifkan.\n\n' +
+    'Gmail Anda: ' + (gmailSaya_() || '(tidak terbaca)') + '\n' +
+    'Kirim Gmail ini ke penjual SmartRapor untuk mendapat kode aktivasi, lalu tulis kodenya di ' +
+    'PENGATURAN › Kode aktivasi.');
+}
+
+function cekAktivasi() {
+  var e = gmailSaya_();
+  if (aktif_()) { pesan_('SmartRapor sudah AKTIF untuk Gmail:\n' + e + '\n\nBerlaku selamanya.'); return; }
+  pesan_('SmartRapor BELUM AKTIF.\n\nGmail Anda: ' + (e || '(tidak terbaca)') + '\n\n' +
+    'Kirim Gmail ini ke penjual SmartRapor. Kode aktivasi yang diterima ditulis di PENGATURAN › Kode aktivasi ' +
+    '(paling bawah).\n\nNilai dan data tetap bisa dibuka dan diisi walaupun belum aktif.');
 }
 
 // ------------------------------------------------------------------ bantu

@@ -14,7 +14,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
   - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
     (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
   - Panduan TU (Google Doc dari `PANDUAN_TU.md`): **PANDUAN TU SmartRapor** id `1yvdlVF4SOPSDFnv7aRzJAGkOJmKR1pEpBKVYQgYMwSM`.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1MXUyv8aE_cxiNBHTPo4YlX0gHfDMVij6Gg83Cyh2EX8` (diperbarui 11 Nov: lembar guru + nomor WA;
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1qpt_QJ2hhE7NvjvAj8PxsFvNRXuHEwsL9rO6wGFI4aM` (versi aktivasi, 11 Nov) (diperbarui 11 Nov: lembar guru + nomor WA;
     dokumen lama dibuang ke sampah. Selalu beri Ustadz LINK langsung ke dokumen ini, Ustadz bingung memilih di Drive).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
@@ -22,7 +22,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 | Berkas | Isi |
 |---|---|
 | `buat_smartrapor.py` | perakit .xlsx (`python buat_smartrapor.py keluaran.xlsx --contoh`). Unggah ke Drive → otomatis jadi Google Sheet |
-| `apps_script/Kode.template.gs` + `buat_kode.py` → `Kode.gs` | menu SmartRapor, tombol ▲▼, CETAK SISWA INI, CETAK SEKELAS (gabung PDF pdf-lib), rapikan tinggi baris |
+| `apps_script/Kode.template.gs` + `buat_kode.py` (+ `rahasia.txt`, tidak di repo) → `Kode.gs` (tidak di repo) | menu SmartRapor, tombol ▲▼, CETAK SISWA INI, CETAK SEKELAS (gabung PDF pdf-lib), rapikan tinggi baris |
 | `apps_script/CARA_PASANG.md` | cara menempel kode (Ekstensi → Apps Script → hapus semua → tempel → Simpan → F5 → SmartRapor → Pasang tombol) |
 | `aset/` | logo sekolah, kop pondok |
 | `README.md` | daftar halaman |
@@ -79,6 +79,20 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 - 11 Nov: Ustadz sudah mengisi guru asli di GURU dan menjalankan "Kirim lembar nilai ke guru": folder
   `Lembar Guru - SmartRapor - Kelas IX B (contoh)` berisi 19 lembar (sebagian sisa percobaan: "Ustadz Contoh", nama berupa nomor,
   WAHYUDI dua kali). TAJWID belum punya lembar.
+
+- 11 Nov: **AKTIVASI / LISENSI** (Ustadz menjual ke wali kelas, sekali bayar seumur hidup, TANPA server/daftar Drive):
+  kode = 8 huruf dari SHA-256(gmail_kecil + '|' + KUNCI), alfabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (byte & 31), format XXXX-XXXX.
+  Skrip memeriksa `Session.getEffectiveUser()` vs PENGATURAN "Kode aktivasi" (B46/C46). Belum aktif → kirim lembar guru ditolak,
+  cetak tetap jalan tapi judul raport = "SMARTRAPOR BELUM DIAKTIFKAN". Judul raport (RAPOR SEKOLAH A1, RAPOR PONDOK A12,
+  RAPOR P5 B2) = rumus ke `'DATA ARAB'!H6`; isinya biasa "(judul raport muncul saat dicetak lewat tombol CETAK)", dikosongkan
+  skrip hanya selama cetak oleh pemakai aktif. Data tidak pernah dikunci. Menu "Aktivasi (lihat Gmail & status)".
+  - **KUNCI rahasia TIDAK di repo (repo publik!)**: `apps_script/rahasia.txt` (gitignore) dan `Kode.gs` (berisi kunci) tidak
+    di-commit lagi. Salinan kunci: Google Doc **RAHASIA SmartRapor (jangan dibagikan)** id `1fC9CJEA-UHfZhskjwhUXGxVhK5AeM_K8aOIEWPCVLsU`.
+    Sesi baru: salin kunci itu ke `apps_script/rahasia.txt` sebelum `python buat_kode.py`.
+  - Alat pembuat kode untuk HP Ustadz (artifact pribadi, berisi kunci): https://claude.ai/artifact/52CGQTzF9KLGW693Fx7ofS
+    Cek: contoh.guru@gmail.com → RM6C-39YR. Kode Gmail Ustadz sudah ditulis di PENGATURAN C46 file contoh.
+  - Disarankan ke Ustadz: jadikan repo GitHub **private** (kode produk terbuka untuk umum).
+  - Ustadz **harus menempel kode baru** (dokumen KODE 1qpt…). Belum dicoba di Google.
 
 ## Yang perlu dikonfirmasi Ustadz
 1. ~~Batas predikat pondok~~ → **sudah benar** (11 Nov).

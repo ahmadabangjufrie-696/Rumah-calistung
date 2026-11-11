@@ -40,6 +40,12 @@ def main():
         open(os.path.join(DI_SINI, f'tombol_{nama.lower()}.png'), 'wb').write(png)
         teks = teks.replace(f'__TOMBOL_{nama}__', base64.b64encode(png).decode())
     assert '__TOMBOL_' not in teks
+    jalur = os.path.join(DI_SINI, 'rahasia.txt')   # tidak masuk repo; salinannya ada di Drive Ustadz
+    if not os.path.exists(jalur):
+        raise SystemExit('rahasia.txt tidak ada. Salin kunci dari dokumen "RAHASIA SmartRapor" di Drive Ustadz.')
+    kunci = open(jalur, encoding='utf-8').read().strip()
+    teks = teks.replace('__RAHASIA__', kunci[::-1])
+    assert '__RAHASIA__' not in teks
     open(os.path.join(DI_SINI, 'Kode.gs'), 'w', encoding='utf-8').write(teks)
     print('Kode.gs dibuat,', len(teks) // 1024, 'KB')
 

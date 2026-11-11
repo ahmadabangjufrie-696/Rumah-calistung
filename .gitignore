@@ -81,3 +81,7 @@ android-sdk/ -e
 # Environment files
 *.env
 *.env.*
+
+# SmartRapor: kunci rahasia kode aktivasi (jangan masuk repo publik)
+RAPOT/smartrapor/apps_script/rahasia.txt
+RAPOT/smartrapor/apps_script/Kode.gs

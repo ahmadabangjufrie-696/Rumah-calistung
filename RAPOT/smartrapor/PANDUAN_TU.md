@@ -97,6 +97,14 @@ Di **BERANDA**, panel kanan bawah:
 Buat salinan baru dari file kelas semester lalu (**File → Buat salinan**), lalu ganti semester, tahun, dan tanggal
 di PENGATURAN. Kosongkan nilai di tab mapel. Data siswa tidak perlu diketik ulang.
 
+## I. Aktivasi (sekali saja)
+
+1. Pilih menu **SmartRapor → Aktivasi (lihat Gmail & status)**. Muncul Gmail Anda.
+2. Kirim Gmail itu ke penjual SmartRapor, lalu Anda menerima **kode aktivasi** (contoh: `ABCD-1234`).
+3. Buka **PENGATURAN**, baris paling bawah **Kode aktivasi**, lalu tempel kodenya.
+4. Kode berlaku **selamanya** untuk Gmail itu. Nilai dan data tetap bisa dibuka walaupun belum aktif;
+   yang perlu aktivasi hanya cetak raport resmi dan kirim lembar guru.
+
 ## Masalah yang sering terjadi
 
 | Masalah | Penyelesaian |
@@ -105,4 +113,5 @@ di PENGATURAN. Kosongkan nilai di tab mapel. Data siswa tidak perlu diketik ulan
 | Nama siswa tidak muncul di tab mapel | Periksa halaman SISWA, nama harus diisi di kolom Nama Peserta Didik. |
 | Deskripsi raport kosong | Guru belum mengisi materi/TP di baris 8 tab mapelnya. |
 | Nilai guru belum masuk ke raport | Pilih menu SmartRapor → Ambil nilai dari guru. |
+| Judul raport bertuliskan "BELUM DIAKTIFKAN" | Lihat bagian I (aktivasi). Cetak lewat tombol CETAK, bukan File › Cetak. |
 | Tulisan Arab tampil kotak-kotak | Buka di Google Chrome/Edge versi terbaru. |

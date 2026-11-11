@@ -133,7 +133,14 @@ PENGATURAN = [  # kunci, label, nilai bawaan
     ('keputusan', 'Kalimat keputusan (akhir catatan)',
      'Berdasarkan putusan rapat dewan guru serta memperhatikan capaian pembelajaran semester ganjil dan '
      'semester genap, maka siswa dinyatakan {keputusan}.'),
+    ('_', 'AKTIVASI SMARTRAPOR', None),
+    ('kode', 'Kode aktivasi', ''),
 ]
+CAP = "'DATA ARAB'!$H$6"   # tanda "belum diaktifkan" (diatur skrip saat cetak)
+
+
+def judul_cap(teks):
+    return f'=IF({CAP}="","{teks}",{CAP})'
 SEL = {}            # kunci -> alamat mutlak di PENGATURAN
 
 UMUM = [  # tab, nama di raport
@@ -648,7 +655,7 @@ def buat_rapor_sekolah(wb):
     ws = wb.create_sheet('RAPOR SEKOLAH')
     idx = pemilih(ws)
     lebar(ws, {'A': 5.5, 'B': 15, 'C': 13, 'D': 8, 'E': 36, 'F': 14, 'G': 18, 'H': 3, 'I': 3})
-    gabung(ws, 'A1:G1', 'PENCAPAIAN PEMBELAJARAN PESERTA DIDIK', font=CETAK, size=12, bold=True, h='center',
+    gabung(ws, 'A1:G1', judul_cap('PENCAPAIAN PEMBELAJARAN PESERTA DIDIK'), font=CETAK, size=12, bold=True, h='center',
            warna='000000')
     nama = siswa('Nama Peserta Didik', idx)
     kiri = [(3, 'Nama Sekolah', f'": "&{SEL["sekolah"]}', False), (4, 'Alamat', f'": "&{SEL["alamat"]}', False),
@@ -950,7 +957,9 @@ def buat_data_arab(wb):
         isi(ws, f'E{13 + i}', n, size=10, latar=KUNING, h='center', border=KOTAK)
         isi(ws, f'F{13 + i}', t, font='Amiri', size=12, latar=KUNING, border=KOTAK, h='right', bungkus=True)
         ws.row_dimensions[13 + i].height = 36
-    lebar(ws, {'A': 2, 'B': 8, 'C': 22, 'D': 3, 'E': 14, 'F': 70})
+    isi(ws, 'H5', 'Tanda cetak (diatur otomatis, jangan diubah)', size=8, italic=True, warna='6C757D')
+    isi(ws, 'H6', '(judul raport muncul saat dicetak lewat tombol CETAK)', size=8, warna='6C757D')
+    lebar(ws, {'A': 2, 'B': 8, 'C': 22, 'D': 3, 'E': 14, 'F': 70, 'G': 3, 'H': 34})
     ws.sheet_properties.tabColor = 'ADB5BD'
 
 
@@ -1036,7 +1045,7 @@ def buat_rapor_pondok(wb):
     for c in 'ABCDEFG':
         ws[f'{c}10'].border = Border(bottom=Side(style='double', color='000000'))
     ws.row_dimensions[11].height = 3
-    gabung(ws, 'A12:G12', 'تقرير عن نتائج تعلم الطالب', font='Amiri', size=16, bold=True, h='center',
+    gabung(ws, 'A12:G12', judul_cap('تقرير عن نتائج تعلم الطالب'), font='Amiri', size=16, bold=True, h='center',
            warna='000000')
     ws.row_dimensions[12].height = 26
     ws.row_dimensions[13].height = 3
@@ -1206,7 +1215,7 @@ def buat_rapor_p5(wb):
     ws = wb.create_sheet('RAPOR P5')
     idx = pemilih(ws)
     lebar(ws, {'A': 2, 'B': 17, 'C': 38, 'D': 14, 'E': 22, 'F': 2, 'G': 3})
-    for r, t in ((2, 'RAPOR PROYEK PENGUATAN'), (3, 'PROFIL PELAJAR PANCASILA')):
+    for r, t in ((2, judul_cap('RAPOR PROYEK PENGUATAN')), (3, 'PROFIL PELAJAR PANCASILA')):
         gabung(ws, f'B{r}:E{r}', t, font=CETAK, size=12, bold=True, h='center', warna='000000')
     baris = [(5, 'Nama Sekolah', f'": "&{SEL["sekolah"]}', 'Kelas/Semester', f'": "&{SEL["kelas"]}'),
              (6, 'Alamat Sekolah', f'": "&{SEL["alamat"]}', 'Fase', f'": "&{SEL["fase"]}'),
