@@ -1,0 +1,346 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><base target="_top">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--h:#0F5132;--h2:#0a3a24;--e:#B8932E;--e2:#e8c66a;--krem:#fbfaf6;--garis:#e7e2d3;--abu:#9b8f6c}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Poppins,Arial,sans-serif;font-weight:500;color:#1f2a24;background:var(--krem);display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.hd{flex:none;height:84px;background:linear-gradient(120deg,var(--h2) 0%,var(--h) 60%,#16603e 100%);display:flex;align-items:center;padding:0 24px;gap:16px;border-bottom:4px solid var(--e)}
+.hd img{width:58px;height:58px;border-radius:50%;background:#fff;padding:3px;box-shadow:0 0 0 3px var(--e);object-fit:contain}
+.brand .t{font-family:'Playfair Display',serif;font-weight:800;font-size:30px;color:#fff;line-height:1}
+.brand .t b{color:var(--e2);font-weight:800}
+.brand .u{font-size:11.5px;font-weight:600;color:#d6e8dd;letter-spacing:2px;margin-top:7px;text-transform:uppercase}
+.chips{margin-left:auto;display:flex;gap:8px}
+.chip{background:rgba(255,255,255,.08);border:1px solid rgba(232,198,106,.7);color:#f6e7bd;border-radius:22px;padding:6px 14px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.bd{flex:1;display:flex;min-height:0}
+.lab{font-size:11.5px;letter-spacing:2.5px;color:var(--e);font-weight:700;text-transform:uppercase}
+/* kiri */
+.kiri{width:320px;flex:none;border-right:1px solid var(--garis);display:flex;flex-direction:column;background:#fff}
+.lh{padding:18px 18px 6px}
+.lt{font-family:'Playfair Display',serif;font-weight:700;font-size:24px;color:var(--h);margin-top:2px}
+.lt small{font-family:Poppins;font-size:12px;font-weight:500;color:#8b8b8b;margin-left:6px}
+.cari{margin:8px 16px 8px;border:1.5px solid #ddd3b8;border-radius:12px;padding:10px 12px;font-size:14px;background:#fdfcf8;font-family:inherit;outline:none}
+.cari:focus{border-color:var(--h)}
+.list{flex:1;overflow-y:auto;padding:0 10px 10px}
+.s{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:12px;font-size:13.5px;font-weight:600;color:#2b332e;cursor:pointer;width:100%;text-align:left}
+.s:hover{background:#f3f7f4}
+.s .nu{width:20px;color:#b5ad97;font-size:11.5px;flex:none}
+.s .av{width:32px;height:32px;border-radius:50%;background:#e8f1eb;color:var(--h);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.s .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st.ok{color:#2e8b57;font-weight:700}
+.st.no{font-size:10.5px;background:#fdecea;color:#c0392b;border-radius:10px;padding:2px 8px;font-weight:600}
+.s.on{background:linear-gradient(90deg,var(--h),#1b6b46);color:#fff;box-shadow:0 8px 18px rgba(15,81,50,.28)}
+.s.on .nu{color:var(--e2)} .s.on .av{background:var(--e);color:#fff} .s.on .st.ok{color:var(--e2)}
+/* tengah */
+.tengah{flex:1;min-width:0;padding:18px 24px 14px;display:flex;flex-direction:column;overflow-y:auto}
+.nmb{font-family:'Playfair Display',serif;font-weight:800;font-size:32px;color:var(--h);line-height:1.1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ar{font-size:22px;color:#a8822a;margin-top:2px;font-family:'Noto Naskh Arabic',serif;font-weight:700;min-height:8px}
+.meta{font-size:13px;font-weight:600;color:#6f6f6f;margin-top:4px}
+.orn{height:2px;background:linear-gradient(90deg,var(--e),rgba(184,147,46,0));margin:12px 0}
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.c{background:#fff;border:1.5px solid #ece4cc;border-radius:14px;padding:10px 12px 9px}
+.c .k{font-size:10px;letter-spacing:1px;color:var(--abu);font-weight:700;white-space:nowrap;text-transform:uppercase}
+.c .v{font-family:'Playfair Display',serif;font-weight:800;font-size:28px;color:var(--h);line-height:1.15;margin-top:2px;white-space:nowrap}
+.c .v small{font-family:Poppins;font-size:12px;font-weight:600;color:#888}
+.c .x{font-size:11px;color:#8b8b8b;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c.ok .v{font-size:17px;font-family:Poppins;font-weight:700;color:#2e8b57;margin-top:8px}
+.c.bl .v{font-size:17px;font-family:Poppins;font-weight:700;color:#c0392b;margin-top:8px}
+.sec{font-size:11.5px;letter-spacing:2.5px;color:var(--e);font-weight:700;margin:14px 0 8px;text-transform:uppercase}
+.sec .sub{letter-spacing:0;color:var(--abu);font-weight:600;font-size:12px;text-transform:none}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tl{display:flex;align-items:center;gap:10px;border-radius:14px;padding:11px 12px;font-size:14.5px;font-weight:700;white-space:nowrap;text-align:left;transition:transform .1s}
+.tl:hover,.bk:hover{transform:translateY(-1px)}
+.tl .i{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.tl small{display:block;font-weight:500;font-size:11.5px;opacity:.85}
+.t1{background:linear-gradient(120deg,var(--h2),var(--h));color:#fff;box-shadow:0 8px 18px rgba(15,81,50,.3)} .t1 .i{background:rgba(255,255,255,.14)}
+.t2{background:linear-gradient(120deg,#a37c22,#cda748);color:#fff;box-shadow:0 8px 18px rgba(184,147,46,.3)} .t2 .i{background:rgba(255,255,255,.2)}
+.t3{background:#fff;color:var(--h);border:2px solid var(--h)} .t3 .i{background:#e8f1eb}
+.sk{background:#fff;border:1.5px solid #ece4cc;border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:9px}
+.opts{display:flex;gap:7px;flex-wrap:wrap}
+.cb{font-size:13px;font-weight:600;padding:6px 11px;border-radius:10px;border:1.5px solid #ddd3b8;color:#777;background:#fff;white-space:nowrap}
+.cb.on{background:#e8f1eb;border-color:var(--h);color:var(--h)}
+.bk{display:flex;align-items:center;gap:12px;border-radius:12px;padding:10px 14px;font-size:16px;font-weight:700;background:linear-gradient(120deg,var(--h2),var(--h));color:#fff;box-shadow:0 8px 18px rgba(15,81,50,.28);text-align:left;width:100%}
+.bk .i{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:18px}
+.bk small{display:block;font-weight:500;font-size:12px;opacity:.85}
+.bk .ar2{margin-left:auto;font-size:22px;opacity:.75}
+.once{margin-top:auto;padding-top:10px;border-top:1px dashed #ddd3b8;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.once.saran{border:1.5px solid var(--e);border-radius:12px;padding:10px;background:#fffaf0;margin-top:14px}
+.ol{width:100%;font-size:12.5px;font-weight:700;color:#8a8170}
+.ol small{font-weight:500;color:#a9a08a}
+.ol b{color:#a37c22}
+.cb2{font-size:11.5px;font-weight:600;padding:5px 8px;border-radius:8px;border:1.5px solid #ddd3b8;color:#8a8170;background:#fff;white-space:nowrap}
+.cb2.on{background:#f7f0dc;border-color:var(--e);color:#7a5c12}
+.sp{flex:1}
+.ob{font-size:12px;font-weight:700;color:var(--h);border:1.5px solid var(--h);border-radius:9px;padding:5px 10px;background:#fdfcf8;white-space:nowrap}
+/* kanan */
+.kanan{width:340px;flex:none;padding:16px 20px 12px 0;display:flex;flex-direction:column}
+.tabs{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.tb{font-size:12px;font-weight:600;padding:5px 10px;border-radius:16px;border:1.5px solid #ddd3b8;color:#666;background:#fff;white-space:nowrap}
+.tb.on{background:var(--h);color:#fff;border-color:var(--h)}
+.paper{flex:1;background:#fff;border-radius:8px;box-shadow:0 14px 34px rgba(0,0,0,.18),0 0 0 1px #eee;padding:8px;overflow:hidden;position:relative;cursor:zoom-in;display:flex;align-items:flex-start;justify-content:center}
+.paper canvas{max-width:100%;max-height:100%}
+.zoom{text-align:center;font-size:11.5px;font-weight:600;color:var(--abu);margin-top:8px}
+.muat{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.85);font-size:12.5px;color:var(--abu);font-weight:600;text-align:center;padding:20px}
+.putar{width:34px;height:34px;border:3px solid #e8f1eb;border-top-color:var(--h);border-radius:50%;animation:p 0.9s linear infinite}
+@keyframes p{to{transform:rotate(360deg)}}
+.ft{flex:none;height:34px;border-top:1px solid var(--garis);display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:11.5px;font-weight:600;color:var(--abu);background:#fff}
+/* lapisan */
+.lapis{position:fixed;inset:0;background:rgba(15,30,22,.6);display:none;align-items:center;justify-content:center;z-index:9}
+.lapis.buka{display:flex}
+.kartu{background:#fff;border-radius:16px;padding:26px 30px;width:440px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.kartu h3{font-family:'Playfair Display',serif;font-size:24px;color:var(--h);margin-bottom:8px}
+.kartu p{font-size:13.5px;color:#555;margin-bottom:16px;line-height:1.5}
+.bar{height:10px;background:#eef3ef;border-radius:6px;overflow:hidden;margin:6px 0 14px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--h),var(--e));transition:width .4s}
+.tbl{display:inline-block;background:linear-gradient(120deg,var(--h2),var(--h));color:#fff;padding:11px 22px;border-radius:12px;font-weight:700;text-decoration:none;font-size:14.5px}
+.tbl2{display:inline-block;margin-left:8px;padding:10px 18px;border-radius:12px;border:1.5px solid #ddd3b8;font-weight:600;color:#666;font-size:14px}
+.besar{position:fixed;inset:0;background:rgba(20,24,22,.85);display:none;z-index:8;overflow:auto;padding:24px;text-align:center}
+.besar.buka{display:block}
+.besar canvas{display:block;margin:0 auto 18px;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:100%;background:#fff}
+.tutup{position:fixed;top:14px;right:22px;color:#fff;font-size:30px;z-index:9}
+</style></head>
+<body>
+<div class="hd"><img src="data:image/png;base64,__LOGO__" alt="">
+  <div class="brand"><div class="t">Smart<b>Rapor</b></div><div class="u" id="sekolah">&nbsp;</div></div>
+  <div class="chips" id="chips"></div>
+</div>
+<div class="bd">
+  <div class="kiri">
+    <div class="lh"><div class="lab">Daftar siswa</div><div class="lt">Pilih Siswa<small id="jml"></small></div></div>
+    <input class="cari" id="cari" placeholder="🔍  Cari nama siswa…" oninput="isiDaftar()">
+    <div class="list" id="daftar"><div style="padding:20px;color:#999;font-size:13px">Memuat data siswa…</div></div>
+  </div>
+  <div class="tengah">
+    <div class="lab">Siswa terpilih</div>
+    <div class="nmb" id="nama">—</div><div class="ar" id="arab" dir="rtl" style="text-align:left"></div>
+    <div class="meta" id="meta">&nbsp;</div>
+    <div class="orn"></div>
+    <div class="stat">
+      <div class="c"><div class="k">Rata-rata</div><div class="v" id="rata">–</div><div class="x" id="rataP">&nbsp;</div></div>
+      <div class="c"><div class="k">Peringkat</div><div class="v" id="rank">–</div><div class="x">raport sekolah</div></div>
+      <div class="c"><div class="k">Tidak hadir</div><div class="v" id="absen">–</div><div class="x" id="absenX">&nbsp;</div></div>
+      <div class="c" id="kStatus"><div class="k">Status nilai</div><div class="v" id="status">–</div><div class="x" id="kurang">&nbsp;</div></div>
+    </div>
+    <div class="sec">Cetak siswa ini</div>
+    <div class="row3">
+      <button class="tl t1" onclick="cetak(['sekolah'],false)"><span class="i">🖨️</span><div>Raport Sekolah<small>siswa ini · PDF</small></div></button>
+      <button class="tl t2" onclick="cetak(['pondok'],false)"><span class="i">📗</span><div>Raport Pondok<small>1 halaman, Arab</small></div></button>
+      <button class="tl t3" onclick="cetak(['p5'],false)"><span class="i">🌱</span><div>Raport P5<small>Profil Pancasila</small></div></button>
+    </div>
+    <div class="sec">Cetak sekelas <span class="sub">— pilih yang mau dicetak</span></div>
+    <div class="sk">
+      <div class="opts" id="optKelas">
+        <button class="cb on" data-j="sekolah" onclick="tukar(this)">☑ Raport Sekolah</button>
+        <button class="cb on" data-j="pondok" onclick="tukar(this)">☑ Raport Pondok</button>
+        <button class="cb" data-j="p5" onclick="tukar(this)">☐ Raport P5 (Pancasila)</button>
+      </div>
+      <button class="bk" onclick="cetakKelas()"><span class="i">📚</span><div>Cetak Sekelas<small id="ringkas">&nbsp;</small></div><span class="ar2">›</span></button>
+    </div>
+    <div class="once" id="once">
+      <span class="ol" id="onceL">📁 Cetak sekali saja <small>(awal kelas VII / siswa pindahan / ganti yang rusak)</small></span>
+      <button class="cb2 on" data-j="cover" onclick="tukar(this)">☑ Cover</button>
+      <button class="cb2" data-j="identitas" onclick="tukar(this)">☐ Identitas Sekolah</button>
+      <button class="cb2" data-j="diri" onclick="tukar(this)">☐ Keterangan Diri</button>
+      <span class="sp"></span>
+      <button class="ob" onclick="cetakSekali(false)">Siswa ini</button>
+      <button class="ob" onclick="cetakSekali(true)">Sekelas</button>
+    </div>
+  </div>
+  <div class="kanan">
+    <div class="tabs" id="tabs">
+      <button class="tb on" data-t="sekolah">Sekolah</button><button class="tb" data-t="pondok">Pondok</button>
+      <button class="tb" data-t="p5">P5</button><button class="tb" data-t="cover">Cover</button>
+      <button class="tb" data-t="identitas">Identitas</button><button class="tb" data-t="diri">Ket. Diri</button>
+    </div>
+    <div class="paper" id="kertas" onclick="perbesar()"><canvas id="kanvas"></canvas>
+      <div class="muat" id="muat"><div class="putar"></div><div id="muatT">Menyiapkan gambar raport…</div></div></div>
+    <div class="zoom">Klik gambar untuk memperbesar</div>
+  </div>
+</div>
+<div class="ft"><span>SmartRapor · Kurikulum Merdeka</span><span>Klik nama siswa, lalu pilih tombol cetak</span></div>
+
+<div class="lapis" id="lapis"><div class="kartu" id="kartu"></div></div>
+<div class="besar" id="besar"><button class="tutup" onclick="tutupBesar()">✕</button><div id="besarIsi"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+var D = null, pilihNo = null, tab = 'sekolah', tokenPv = 0, pdfSaatIni = null;
+var NAMA_JENIS = { sekolah: 'Raport Sekolah', pondok: 'Raport Pondok', p5: 'Raport P5', cover: 'Cover',
+                   identitas: 'Identitas Sekolah', diri: 'Keterangan Diri' };
+
+// pdf.js: pekerja dimuat lewat blob supaya jalan di dalam jendela Google
+var siapPdf = (function () {
+  var src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  return fetch(src).then(function (r) { return r.text(); }).then(function (t) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([t], { type: 'text/javascript' }));
+  }).catch(function () { pdfjsLib.GlobalWorkerOptions.workerSrc = src; });
+})();
+
+function jalankan(fn) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  return new Promise(function (ok, gagal) {
+    var r = google.script.run.withSuccessHandler(ok).withFailureHandler(gagal);
+    r[fn].apply(r, args);
+  });
+}
+function $(id) { return document.getElementById(id); }
+function aman(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function angka(x, d) { return x === '' || x == null ? '–' : Number(x).toFixed(d).replace('.', ','); }
+
+jalankan('dataPanel').then(function (d) {
+  D = d;
+  $('sekolah').textContent = d.sekolah || ' ';
+  $('chips').innerHTML = [d.kelas && 'Kelas ' + d.kelas, d.semester && 'Semester ' + d.semester, d.tahun]
+    .filter(Boolean).map(function (t) { return '<span class="chip">' + aman(t) + '</span>'; }).join('');
+  var lengkap = d.siswa.filter(function (s) { return !s.kurang.length; }).length;
+  $('jml').textContent = d.siswa.length + ' siswa · ' + lengkap + ' lengkap';
+  if (d.saranCover) {
+    $('once').classList.add('saran');
+    $('onceL').innerHTML = '📁 <b>Saatnya cetak cover</b> <small>(kelas VII semester ganjil) — cukup sekali saja</small>';
+  }
+  isiDaftar(); ringkas();
+  if (d.siswa.length) pilihSiswa(d.dipilih || d.siswa[0].no);
+  else { $('muatT').textContent = 'Data siswa masih kosong. Isi dulu tab SISWA.'; document.querySelector('.putar').style.display = 'none'; }
+}).catch(function (e) { $('daftar').innerHTML = '<div style="padding:20px;color:#c0392b">Gagal memuat: ' + aman(e.message) + '</div>'; });
+
+function isiDaftar() {
+  if (!D) return;
+  var q = $('cari').value.trim().toUpperCase();
+  $('daftar').innerHTML = D.siswa.filter(function (s) { return !q || s.nama.toUpperCase().indexOf(q) >= 0; })
+    .map(function (s) {
+      var ini = s.nama.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('');
+      var st = s.kurang.length ? '<span class="st no" title="Belum ada nilai: ' + aman(s.kurang.join(', ')) + '">belum</span>'
+                               : '<span class="st ok">✓</span>';
+      return '<button class="s' + (s.no === pilihNo ? ' on' : '') + '" onclick="pilihSiswa(' + s.no + ')">' +
+        '<span class="nu">' + ('0' + s.no).slice(-2) + '</span><span class="av">' + aman(ini) + '</span>' +
+        '<span class="nm">' + aman(s.nama) + '</span>' + st + '</button>';
+    }).join('') || '<div style="padding:16px;color:#999;font-size:13px">Nama tidak ditemukan.</div>';
+}
+
+function cariSiswa(no) { return D.siswa.filter(function (s) { return s.no === no; })[0]; }
+
+function pilihSiswa(no) {
+  pilihNo = no; isiDaftar();
+  var s = cariSiswa(no); if (!s) return;
+  $('nama').textContent = s.nama;
+  $('arab').textContent = s.arab || '';
+  $('meta').textContent = [s.nisn && 'NISN ' + s.nisn, s.nis && 'NIS ' + s.nis].filter(Boolean).join('  ·  ') || ' ';
+  $('rata').textContent = angka(s.rata, 1);
+  $('rataP').textContent = s.pondok === '' ? ' ' : 'pondok: ' + angka(s.pondok, 0);
+  $('rank').innerHTML = s.peringkat ? s.peringkat + '<small> / ' + D.jumlahDinilai + '</small>' : '–';
+  var tot = (+s.sakit || 0) + (+s.izin || 0) + (+s.alpa || 0);
+  $('absen').innerHTML = tot + '<small> hari</small>';
+  $('absenX').textContent = 'S ' + (s.sakit || 0) + ' · I ' + (s.izin || 0) + ' · A ' + (s.alpa || 0);
+  $('kStatus').className = 'c ' + (s.kurang.length ? 'bl' : 'ok');
+  $('status').textContent = s.kurang.length ? '✗ Belum lengkap' : '✓ Lengkap';
+  $('kurang').textContent = s.kurang.length ? 'kosong: ' + s.kurang.join(', ') : ' ';
+  $('kurang').title = s.kurang.join(', ');
+  pratinjau();
+}
+
+// ---------------------------------------------------------------- gambar raport
+document.querySelectorAll('.tb').forEach(function (b) {
+  b.onclick = function () {
+    document.querySelectorAll('.tb').forEach(function (x) { x.classList.remove('on'); });
+    b.classList.add('on'); tab = b.dataset.t; pratinjau();
+  };
+});
+
+function pratinjau() {
+  if (!pilihNo) return;
+  var token = ++tokenPv;
+  $('muat').style.display = 'flex'; document.querySelector('.putar').style.display = '';
+  $('muatT').textContent = 'Menyiapkan gambar ' + NAMA_JENIS[tab] + '…';
+  jalankan('pratinjau', pilihNo, tab).then(function (b64) {
+    if (token !== tokenPv) return;
+    var bin = atob(b64), u = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return siapPdf.then(function () { return pdfjsLib.getDocument({ data: u }).promise; }).then(function (pdf) {
+      if (token !== tokenPv) return;
+      pdfSaatIni = pdf;
+      return pdf.getPage(1).then(function (hal) {
+        var kotak = $('kertas'), v1 = hal.getViewport({ scale: 1 });
+        var skala = Math.min((kotak.clientWidth - 16) / v1.width, (kotak.clientHeight - 16) / v1.height) * (window.devicePixelRatio || 1) * 1.5;
+        var vp = hal.getViewport({ scale: skala }), kv = $('kanvas');
+        kv.width = vp.width; kv.height = vp.height;
+        return hal.render({ canvasContext: kv.getContext('2d'), viewport: vp }).promise.then(function () {
+          if (token === tokenPv) $('muat').style.display = 'none';
+        });
+      });
+    });
+  }).catch(function (e) {
+    if (token !== tokenPv) return;
+    document.querySelector('.putar').style.display = 'none';
+    $('muatT').textContent = 'Gambar belum bisa ditampilkan: ' + e.message;
+  });
+}
+
+function perbesar() {
+  if (!pdfSaatIni) return;
+  var isi = $('besarIsi'); isi.innerHTML = ''; $('besar').classList.add('buka');
+  var lebar = Math.min(window.innerWidth - 60, 900);
+  for (var n = 1; n <= pdfSaatIni.numPages; n++) (function (n) {
+    var kv = document.createElement('canvas'); isi.appendChild(kv);
+    pdfSaatIni.getPage(n).then(function (hal) {
+      var v1 = hal.getViewport({ scale: 1 }), vp = hal.getViewport({ scale: lebar / v1.width * 2 });
+      kv.width = vp.width; kv.height = vp.height; kv.style.width = lebar + 'px';
+      hal.render({ canvasContext: kv.getContext('2d'), viewport: vp });
+    });
+  })(n);
+}
+function tutupBesar() { $('besar').classList.remove('buka'); }
+
+// ---------------------------------------------------------------- pilihan centang
+function tukar(b) {
+  b.classList.toggle('on');
+  b.textContent = (b.classList.contains('on') ? '☑ ' : '☐ ') + b.textContent.slice(2);
+  ringkas();
+}
+function dicentang(sel) {
+  return Array.prototype.filter.call(document.querySelectorAll(sel), function (b) { return b.classList.contains('on'); })
+    .map(function (b) { return b.dataset.j; });
+}
+function ringkas() {
+  var j = dicentang('#optKelas .cb');
+  $('ringkas').textContent = (D ? D.siswa.length : 0) + ' siswa · ' + j.length + ' jenis raport · jadi 1 file PDF';
+}
+
+// ---------------------------------------------------------------- cetak
+function cetakKelas() { cetak(dicentang('#optKelas .cb'), true); }
+function cetakSekali(sekelas) { cetak(dicentang('.once .cb2'), sekelas); }
+
+function kartu(html) { $('kartu').innerHTML = html; $('lapis').classList.add('buka'); }
+function tutupKartu() { $('lapis').classList.remove('buka'); }
+
+function cetak(jenis, sekelas) {
+  if (!jenis.length) { kartu('<h3>Belum dipilih</h3><p>Centang dulu halaman yang mau dicetak.</p><button class="tbl2" onclick="tutupKartu()">Tutup</button>'); return; }
+  if (!sekelas && !pilihNo) return;
+  var id = 'c' + Date.now(), selesai = false;
+  var judul = sekelas ? 'Mencetak sekelas' : 'Mencetak ' + aman(cariSiswa(pilihNo).nama);
+  kartu('<h3>' + judul + '</h3><p id="pTeks">Memulai…</p><div class="bar"><i id="pBar"></i></div>' +
+        '<p style="font-size:12px;color:#999;margin:0">' + (sekelas ? 'Sekelas bisa 2–5 menit. Jangan tutup jendela ini.' : 'Biasanya kurang dari 1 menit.') + '</p>');
+  function tampil(p) {
+    if (!p || p.id !== id || selesai) return;
+    if (p.selesai) {
+      selesai = true;
+      if (p.galat) kartu('<h3>Cetak gagal</h3><p>' + aman(p.galat) + '<br><br>Foto pesan ini dan kirim ke admin.</p><button class="tbl2" onclick="tutupKartu()">Tutup</button>');
+      else kartu('<h3>PDF sudah jadi ✓</h3><p>' + p.pesan + '<br>Tersimpan di folder <b>PDF SmartRapor</b> di Google Drive.</p>' +
+        '<a class="tbl" href="' + p.url + '" target="_blank">Buka PDF</a><button class="tbl2" onclick="tutupKartu()">Tutup</button>' +
+        '<p style="font-size:12px;color:#999;margin:14px 0 0">Di halaman PDF, tekan ikon printer atau Ctrl + P.</p>');
+      return;
+    }
+    if ($('pTeks')) { $('pTeks').textContent = p.teks; $('pBar').style.width = (p.persen || 0) + '%'; }
+  }
+  function intip() {
+    if (selesai) return;
+    jalankan('progresCetak').then(tampil).catch(function () {}).then(function () { if (!selesai) setTimeout(intip, 1500); });
+  }
+  jalankan('cetakPanel', { id: id, jenis: jenis, sekelas: sekelas, no: pilihNo })
+    .then(function () { return jalankan('progresCetak').then(tampil); })
+    .catch(function (e) { if (!selesai) { selesai = true; kartu('<h3>Cetak gagal</h3><p>' + aman(e.message) + '</p><button class="tbl2" onclick="tutupKartu()">Tutup</button>'); } });
+  setTimeout(intip, 1500);
+}
+</script>
+</body></html>

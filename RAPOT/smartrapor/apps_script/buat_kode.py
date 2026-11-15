@@ -5,7 +5,7 @@
 Gambar tombol disisipkan ke Kode.gs sebagai base64, supaya cukup satu berkas
 yang ditempel ke Apps Script.
 """
-import base64, io, os
+import base64, io, json, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
 DI_SINI = os.path.dirname(os.path.abspath(__file__))
@@ -17,7 +17,23 @@ TOMBOL = {  # nama: (teks, lebar, tinggi, warna latar, warna teks)
     'TURUN': ('Berikutnya  ▼', 170, 30, (15, 81, 50), (255, 255, 255)),
     'CETAK1': ('CETAK SISWA INI', 170, 36, (201, 162, 39), (33, 37, 41)),
     'CETAKSEMUA': ('CETAK SEKELAS', 170, 36, (25, 135, 84), (255, 255, 255)),
+    'PANEL': ('★  BUKA PANEL SMARTRAPOR', 345, 40, (15, 81, 50), (232, 198, 106)),
 }
+LOGO = os.path.join(DI_SINI, '..', 'aset', 'logo_sekolah.jpg')   # logo di kepala panel
+
+
+def logo_png():
+    im = Image.open(LOGO).convert('RGB')
+    im.thumbnail((132, 132), Image.LANCZOS)
+    buf = io.BytesIO()
+    im.save(buf, 'PNG', optimize=True)
+    return base64.b64encode(buf.getvalue()).decode()
+
+
+def daftar_mapel():
+    sys.path.insert(0, os.path.join(DI_SINI, '..'))
+    import buat_smartrapor as b
+    return [t for t, _ in b.UMUM], list(b.URUT_PONDOK)
 
 
 def gambar(teks, w, h, latar, warna):
@@ -39,7 +55,11 @@ def main():
         png = gambar(t, w, h, bg, fg)
         open(os.path.join(DI_SINI, f'tombol_{nama.lower()}.png'), 'wb').write(png)
         teks = teks.replace(f'__TOMBOL_{nama}__', base64.b64encode(png).decode())
-    assert '__TOMBOL_' not in teks
+    sekolah, pondok = daftar_mapel()
+    teks = teks.replace('__MAPEL_SEKOLAH__', json.dumps(sekolah)).replace('__MAPEL_PONDOK__', json.dumps(pondok))
+    panel = open(os.path.join(DI_SINI, 'Panel.html'), encoding='utf-8').read().replace('__LOGO__', logo_png())
+    teks = teks.replace('__PANEL_HTML__', json.dumps(panel, ensure_ascii=False))
+    assert '__TOMBOL_' not in teks and '__MAPEL_' not in teks and '__PANEL_' not in teks
     open(os.path.join(DI_SINI, 'Kode.gs'), 'w', encoding='utf-8').write(teks)
     print('Kode.gs dibuat,', len(teks) // 1024, 'KB')
 

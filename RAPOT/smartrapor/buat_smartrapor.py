@@ -23,6 +23,7 @@ from openpyxl.formatting.rule import FormulaRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter as gl
 from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.workbook.defined_name import DefinedName
 from openpyxl.worksheet.pagebreak import Break
 
 DI_SINI = os.path.dirname(os.path.abspath(__file__))
@@ -304,6 +305,11 @@ def buat_pengaturan(wb):
     isi(ws, f'E{r + 1}', 'Tulisan {nama} otomatis diganti nama siswa.', size=8, italic=True, warna='6C757D')
     ws.freeze_panes = 'A5'
     ws.sheet_properties.tabColor = EMAS
+    # nama rentang untuk Panel SmartRapor (Apps Script membacanya lewat nama, bukan alamat sel)
+    for nama, kunci in (('SR_SEKOLAH', 'sekolah'), ('SR_KELAS', 'kelas'), ('SR_SEMESTER', 'semester'),
+                        ('SR_TAHUN', 'tahun')):
+        wb.defined_names[nama] = DefinedName(nama, attr_text=SEL[kunci])
+    wb.defined_names['SR_TINGKAT'] = DefinedName('SR_TINGKAT', attr_text='PENGATURAN!' + SEL['_tingkat'])
     return ws
 
 

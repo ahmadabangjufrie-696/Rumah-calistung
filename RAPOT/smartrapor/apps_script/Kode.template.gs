@@ -14,6 +14,11 @@ var SR = {
   RAPOR: 'RAPOR SEKOLAH',
   P5: 'RAPOR P5',
   FOLDER_PDF: 'PDF SmartRapor',
+  // Panel SmartRapor
+  MAPEL_SEKOLAH: __MAPEL_SEKOLAH__,      // tab mapel umum, nilai raport di kolom Q
+  MAPEL_PONDOK: __MAPEL_PONDOK__,        // tab mapel pondok, nilai di kolom K
+  BARIS_MAPEL: 9,                        // baris siswa pertama di tab mapel
+  EKSKUL: 'EKSKUL & CATATAN', EKS1: 7,   // sakit/izin/tanpa ket. di kolom L/M/N
   PDFLIB: 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'
 };
 
@@ -21,12 +26,15 @@ var TOMBOL = {
   NAIK: { gambar: '__TOMBOL_NAIK__', sel: 'H28', fungsi: 'siswaSebelumnya', w: 170, h: 30 },
   TURUN: { gambar: '__TOMBOL_TURUN__', sel: 'I28', fungsi: 'siswaBerikutnya', w: 170, h: 30 },
   CETAK1: { gambar: '__TOMBOL_CETAK1__', sel: 'H36', fungsi: 'cetakSiswaIni', w: 170, h: 36 },
-  CETAKSEMUA: { gambar: '__TOMBOL_CETAKSEMUA__', sel: 'I36', fungsi: 'cetakSekelas', w: 170, h: 36 }
+  CETAKSEMUA: { gambar: '__TOMBOL_CETAKSEMUA__', sel: 'I36', fungsi: 'cetakSekelas', w: 170, h: 36 },
+  PANEL: { gambar: '__TOMBOL_PANEL__', sel: 'H39', fungsi: 'bukaPanel', w: 345, h: 40 }
 };
 
 // ------------------------------------------------------------------ menu
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('SmartRapor')
+    .addItem('★ Buka Panel SmartRapor', 'bukaPanel')
+    .addSeparator()
     .addItem('▲ Siswa sebelumnya', 'siswaSebelumnya')
     .addItem('▼ Siswa berikutnya', 'siswaBerikutnya')
     .addSeparator()
@@ -145,22 +153,13 @@ function cetakSiswaIni() {
 }
 
 async function cetakSiswaIniProses_() {
-  var ss = SpreadsheetApp.getActive();
   var nama = pilihanSekarang_();
   if (!nama) { pesan_('Pilih dulu siswa di BERANDA.'); return; }
-  if (!halamanCetak_().length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
+  var halaman = halamanCetak_();
+  if (!halaman.length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
   toast_('Membuat PDF ' + nama + ' ...');
-  rapikanTinggi_();
-  var bagian = eksporBagian_();
-  var pdf, catatan = '';
-  try {
-    pdf = await susunPdf_(bagian);
-  } catch (e) {
-    pdf = cadanganSatuPdf_();          // tanpa catatan kaki
-    catatan = '<br><span style="color:#b02a37">Catatan kaki belum bisa ditambahkan (' + e.message + ').</span>';
-  }
-  var file = folderPdf_().createFile(pdf.setName(nama + ' - ' + ss.getName() + '.pdf'));
-  tampilkanLink_('PDF raport <b>' + nama + '</b> sudah jadi.' + catatan, file.getUrl(), 'Buka PDF');
+  var h = await prosesCetak_({ halaman: halaman, siswa: [nama] });
+  tampilkanLink_(h.pesan, h.url, h.label);
 }
 
 // Tombol dan menu tidak bisa memanggil fungsi async secara langsung,
@@ -172,45 +171,63 @@ function cetakSekelas() {
 }
 
 async function cetakSekelasProses_() {
-  var ss = SpreadsheetApp.getActive();
   var daftar = daftarSiswa_();
   if (!daftar.length) { pesan_('Data siswa masih kosong. Isi dulu halaman SISWA.'); return; }
-  if (!halamanCetak_().length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
-  var awal = pilihanSekarang_();
-  var semua = [];
+  var halaman = halamanCetak_();
+  if (!halaman.length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
+  var h = await prosesCetak_({ halaman: halaman, siswa: daftar, sekelas: true });
+  tampilkanLink_(h.pesan, h.url, h.label);
+}
+
+// Inti cetak (dipakai tombol BERANDA dan Panel).
+// o = { halaman: [nama tab], siswa: ['No - Nama', ...], sekelas: bool, id: penanda panel }
+async function prosesCetak_(o) {
+  var ss = SpreadsheetApp.getActive();
+  var daftar = o.siswa, n = daftar.length, awal = pilihanSekarang_(), semua = [];
   try {
-    for (var i = 0; i < daftar.length; i++) {
-      toast_('Menyiapkan ' + (i + 1) + ' dari ' + daftar.length + ': ' + daftar[i]);
-      pilih_(daftar[i]);
-      eksporBagian_().forEach(function (b) { b.siswa = daftar[i]; semua.push(b); });
+    for (var i = 0; i < n; i++) {
+      var t = n > 1 ? 'Menyiapkan ' + (i + 1) + ' dari ' + n + ': ' + daftar[i] : 'Menyiapkan ' + daftar[i] + ' ...';
+      lapor_(o.id, t, Math.round(i / n * 85));
+      if (n > 1) toast_(t);
+      if (daftar[i] !== pilihanSekarang_()) pilih_(daftar[i]); else rapikanTinggi_();
+      eksporBagian_(o.halaman).forEach(function (b) { b.siswa = daftar[i]; semua.push(b); });
     }
   } finally {
-    if (awal) pilih_(awal);
+    if (n > 1 && awal) pilih_(awal);
   }
   var folder = folderPdf_();
+  var namaFile = (n > 1 ? 'Raport sekelas' : daftar[0]) + ' - ' + o.halaman.join(', ') + ' - ' + ss.getName() + '.pdf';
+  var berhasil = (n > 1 ? 'PDF <b>' + n + ' siswa</b> sudah jadi dalam satu berkas.' :
+    'PDF <b>' + daftar[0] + '</b> sudah jadi.');
+  lapor_(o.id, n > 1 ? 'Menggabungkan ' + n + ' siswa menjadi satu PDF ...' : 'Menyusun PDF ...', 92);
   try {
-    toast_('Menggabungkan raport ' + daftar.length + ' siswa menjadi satu PDF ...');
-    var gabung = await susunPdf_(semua);
-    var file = folder.createFile(gabung.setName('Raport sekelas - ' + ss.getName() + '.pdf'));
-    tampilkanLink_('PDF <b>' + daftar.length + ' siswa</b> sudah jadi dalam satu berkas.', file.getUrl(), 'Buka PDF');
+    var pdf = await susunPdf_(semua);
+    var file = folder.createFile(pdf.setName(namaFile));
+    return { url: file.getUrl(), pesan: berhasil, label: 'Buka PDF' };
   } catch (e) {
-    // cadangan: simpan tiap halaman per siswa dalam satu folder (tanpa catatan kaki)
+    if (n === 1) {                       // satu siswa: satu ekspor tanpa catatan kaki
+      if (daftar[0] !== pilihanSekarang_()) pilih_(daftar[0]);
+      var f1 = folder.createFile(cadanganSatuPdf_(o.halaman).setName(namaFile));
+      return { url: f1.getUrl(), label: 'Buka PDF',
+               pesan: berhasil + '<br><span style="color:#b02a37">Catatan kaki belum bisa ditambahkan (' + e.message + ').</span>' };
+    }
+    // sekelas: simpan tiap halaman per siswa dalam satu folder (tanpa catatan kaki)
     var sub = folder.createFolder('Raport sekelas - ' + ss.getName() + ' - ' +
       Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), 'dd-MM-yyyy HH.mm'));
     semua.forEach(function (b, k) {
       sub.createFile(b.blob.setName(('00' + (k + 1)).slice(-3) + ' - ' + b.siswa + ' - ' + b.sheet + '.pdf'));
     });
-    tampilkanLink_('PDF sudah jadi per halaman (penggabungan gagal: ' + e.message + ').', sub.getUrl(),
-      'Buka folder PDF');
+    return { url: sub.getUrl(), label: 'Buka folder PDF',
+             pesan: 'PDF sudah jadi per halaman (penggabungan gagal: ' + e.message + ').' };
   }
 }
 
 // Ekspor tiap halaman yang dicentang untuk siswa yang sedang dipilih.
 // Hasil: [{sheet, blob, kaki}] sesuai urutan cetak.
-function eksporBagian_() {
+function eksporBagian_(halaman) {
   var ss = SpreadsheetApp.getActive();
   SpreadsheetApp.flush();
-  var nama = halamanCetak_().filter(function (n) { return ss.getSheetByName(n); });
+  var nama = (halaman || halamanCetak_()).filter(function (n) { return ss.getSheetByName(n); });
   var hasil = nama.map(function (n) {
     var sh = ss.getSheetByName(n);
     return { sheet: n, url: urlEkspor_(sh.getSheetId()),
@@ -250,14 +267,13 @@ function ambilPdf_(url) {
 }
 
 // Cadangan bila pdf-lib gagal: satu ekspor berisi semua halaman yang dicentang (tanpa catatan kaki).
-function cadanganSatuPdf_() {
-  var keadaan = sembunyikanSelainCetak_();
+function cadanganSatuPdf_(halaman) {
+  var keadaan = sembunyikanSelainCetak_(halaman || halamanCetak_());
   try { return ambilPdf_(); } finally { pulihkan_(keadaan); }
 }
 
-function sembunyikanSelainCetak_() {
+function sembunyikanSelainCetak_(halaman) {
   var ss = SpreadsheetApp.getActive();
-  var halaman = halamanCetak_();
   var keadaan = ss.getSheets().map(function (s) { return { sheet: s, tersembunyi: s.isSheetHidden() }; });
   halaman.forEach(function (n) { var s = ss.getSheetByName(n); if (s) s.showSheet(); });
   ss.getSheetByName(halaman[0]).activate();
@@ -320,6 +336,121 @@ async function susunPdf_(bagian) {
   var bytes = await hasil.save();
   var data = Array.prototype.map.call(bytes, function (x) { return x > 127 ? x - 256 : x; });
   return Utilities.newBlob(data, 'application/pdf');
+}
+
+
+// ------------------------------------------------------------------ Panel SmartRapor
+// Jendela besar: daftar siswa, ringkasan nilai, gambar raport, dan tombol cetak.
+var JENIS = { sekolah: 'RAPOR SEKOLAH', pondok: 'RAPOR PONDOK', p5: 'RAPOR P5', cover: 'COVER',
+              identitas: 'IDENTITAS SEKOLAH', diri: 'KETERANGAN DIRI' };
+var URUT_JENIS = ['cover', 'identitas', 'diri', 'sekolah', 'pondok', 'p5'];
+var PANEL_HTML = __PANEL_HTML__;
+
+function bukaPanel() {
+  var html = HtmlService.createHtmlOutput(PANEL_HTML).setWidth(1240).setHeight(760);
+  SpreadsheetApp.getUi().showModalDialog(html, ' ');
+}
+
+function namaRentang_(nama) {
+  var r = SpreadsheetApp.getActive().getRangeByName(nama);
+  return r ? r.getDisplayValue() : '';
+}
+
+function dataPanel() {
+  var ss = SpreadsheetApp.getActive();
+  var sw = ss.getSheetByName(SR.SISWA).getRange(SR.SISWA1, 1, SR.MAKS, 5).getDisplayValues();
+  var siswa = [];
+  sw.forEach(function (r, i) {
+    if (r[3]) siswa.push({ no: i + 1, nis: r[1], nisn: r[2], nama: r[3], arab: r[4], kurang: [] });
+  });
+  // nilai: hanya mapel yang sudah mulai diisi guru yang dihitung
+  function bacaMapel(tabs, kolom, wadah) {
+    tabs.forEach(function (tab) {
+      var sh = ss.getSheetByName(tab);
+      if (!sh) return;
+      var v = sh.getRange(kolom + SR.BARIS_MAPEL + ':' + kolom + (SR.BARIS_MAPEL + SR.MAKS - 1)).getValues();
+      var dipakai = v.some(function (r) { return typeof r[0] === 'number'; });
+      if (!dipakai) return;
+      siswa.forEach(function (s) {
+        var x = v[s.no - 1][0];
+        if (typeof x === 'number') { s[wadah] = (s[wadah] || []).concat(x); }
+        else s.kurang.push(tab);
+      });
+    });
+  }
+  bacaMapel(SR.MAPEL_SEKOLAH, 'Q', '_s');
+  bacaMapel(SR.MAPEL_PONDOK, 'K', '_p');
+  var eks = ss.getSheetByName(SR.EKSKUL);
+  var absen = eks ? eks.getRange(SR.EKS1, 12, SR.MAKS, 3).getValues() : [];
+  siswa.forEach(function (s) {
+    var rata = function (a) { return a && a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : ''; };
+    s.rata = rata(s._s); s.pondok = rata(s._p);
+    var a = absen[s.no - 1] || ['', '', ''];
+    s.sakit = a[0] || 0; s.izin = a[1] || 0; s.alpa = a[2] || 0;
+    delete s._s; delete s._p;
+  });
+  var dinilai = siswa.filter(function (s) { return s.rata !== ''; });
+  siswa.forEach(function (s) {
+    s.peringkat = s.rata === '' ? '' : 1 + dinilai.filter(function (t) { return t.rata > s.rata + 1e-9; }).length;
+  });
+  var pilihan = pilihanSekarang_();
+  var dipilih = pilihan ? parseInt(pilihan, 10) : null;
+  var tingkat = namaRentang_('SR_TINGKAT'), semester = namaRentang_('SR_SEMESTER');
+  return {
+    sekolah: namaRentang_('SR_SEKOLAH'), kelas: namaRentang_('SR_KELAS'), semester: semester,
+    tahun: namaRentang_('SR_TAHUN'), siswa: siswa, jumlahDinilai: dinilai.length,
+    dipilih: siswa.some(function (s) { return s.no === dipilih; }) ? dipilih : null,
+    saranCover: /^VII \(/.test(tingkat) && semester === 'Ganjil'
+  };
+}
+
+function teksSiswa_(no) {
+  var cocok = daftarSiswa_().filter(function (t) { return parseInt(t, 10) === no; });
+  if (!cocok.length) throw new Error('Siswa nomor ' + no + ' tidak ditemukan di tab SISWA.');
+  return cocok[0];
+}
+
+// gambar raport untuk panel: PDF satu halaman cetak, dikirim sebagai base64
+function pratinjau(no, jenis) {
+  var teks = teksSiswa_(no);
+  if (teks !== pilihanSekarang_()) pilih_(teks);
+  var sh = SpreadsheetApp.getActive().getSheetByName(JENIS[jenis]);
+  if (!sh) throw new Error('Halaman ' + JENIS[jenis] + ' tidak ada di file ini.');
+  SpreadsheetApp.flush();
+  return Utilities.base64Encode(ambilPdf_(urlEkspor_(sh.getSheetId())).getBytes());
+}
+
+function lapor_(id, teks, persen, akhir) {
+  if (!id) return;
+  var isi = { id: id, teks: teks, persen: persen };
+  if (akhir) for (var k in akhir) isi[k] = akhir[k];
+  CacheService.getUserCache().put('SR_PROGRES', JSON.stringify(isi), 1800);
+}
+
+function progresCetak() {
+  var v = CacheService.getUserCache().get('SR_PROGRES');
+  return v ? JSON.parse(v) : null;
+}
+
+// Dipanggil panel. Proses cetak berjalan bertahap; panel menanyakan kemajuannya lewat progresCetak().
+function cetakPanel(o) {
+  var halaman = URUT_JENIS.filter(function (j) { return o.jenis.indexOf(j) >= 0; })
+    .map(function (j) { return JENIS[j]; })
+    .filter(function (n) { return SpreadsheetApp.getActive().getSheetByName(n); });
+  lapor_(o.id, 'Memulai ...', 0);
+  var daftar;
+  try {
+    if (!halaman.length) throw new Error('Halaman yang dipilih tidak ada di file ini.');
+    daftar = o.sekelas ? daftarSiswa_() : [teksSiswa_(o.no)];
+    if (!daftar.length) throw new Error('Data siswa masih kosong. Isi dulu tab SISWA.');
+  } catch (e) {
+    lapor_(o.id, '', 100, { selesai: true, galat: e.message });
+    return true;
+  }
+  prosesCetak_({ id: o.id, halaman: halaman, siswa: daftar, sekelas: o.sekelas })
+    .then(function (h) { lapor_(o.id, '', 100, { selesai: true, url: h.url, pesan: h.pesan }); })
+    .catch(function (e) { lapor_(o.id, '', 100, { selesai: true, galat: e.message }); });
+  return true;
 }
 
 // ------------------------------------------------------------------ tombol di BERANDA

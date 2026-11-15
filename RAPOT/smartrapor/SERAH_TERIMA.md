@@ -15,7 +15,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
     id `1n2Rb2K2Kyf85mdZp2SblroglMmSz-QCK0NbSlRZxfLo` (10 siswa buatan). Kode tombol **belum** ditempel.
   - 15 Nov atas permintaan Ustadz dibuang ke Sampah: file contoh lama `1RrOsB1w...`, percobaan C3 pertama `1ZBBI_k1...`,
     dokumen KODE lama 11 Nov `1OAb9Me4...`. Hanya ada SATU file raport contoh dan SATU dokumen KODE.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1XUlKndCxuPwkzGHD-7CKONXaBy0kTXWc5Zd3JrUj8Q0` (15 Nov sore: catatan kaki huruf miring).
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1k_xYhrPwtqZ65dD9h7InUyglhuJwt1YxNc2vDhYb1n0` (15 Nov sore: catatan kaki huruf miring).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
 ## Berkas
@@ -96,3 +96,11 @@ kotak كشف الحضور, tanggal Hijriah + Masehi. **QR keaslian dan lingkaran
 ## Folder lain di `RAPOT/`
 Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`, `alat/pasang_beranda.py`,
 `contoh_google_sheet/`. Sudah ditinggalkan; Ustadz memilih Google Sheets.
+
+## Panel SmartRapor (jendela besar)
+- Menu **SmartRapor → ★ Buka Panel SmartRapor**, atau tombol emas **BUKA PANEL SMARTRAPOR** di BERANDA H39 (dipasang lewat "Pasang tombol").
+- Tampilan: `apps_script/Panel.html` (disisipkan ke Kode.gs oleh `buat_kode.py`, logo dari `aset/logo_sekolah.jpg`).
+- Data dibaca lewat nama rentang `SR_SEKOLAH`, `SR_KELAS`, `SR_SEMESTER`, `SR_TAHUN`, `SR_TINGKAT` (dibuat oleh generator; di file contoh dipasang lewat API).
+- Gambar raport: halaman diekspor ke PDF lalu digambar dengan pdf.js 3.11.174 (cdnjs) di jendela.
+- Cetak dari panel berjalan bertahap; kemajuan disimpan di CacheService (`SR_PROGRES`) dan ditanyakan panel tiap 1,5 detik.
+- PENGATURAN: kelas (tingkat + rombel), fase, semester, tahun, KKTP, tanggal Masehi/Hijriah, peringkat pondok = pilihan dari daftar. SISWA: L/P, agama, status keluarga, anak ke-, diterima di kelas = daftar (tidak ketat).
