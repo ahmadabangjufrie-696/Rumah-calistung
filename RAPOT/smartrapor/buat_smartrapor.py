@@ -112,24 +112,24 @@ PENGATURAN = [  # kunci, label, nilai bawaan
     ('kepsek', 'Kepala sekolah', 'Hj. Sy. Amina, S.Pd.'),
     ('nip_kepsek', 'NIP kepala sekolah', ''),
     ('_', 'KELAS & SEMESTER', None),
-    ('kelas', 'Kelas', 'IX ( Sembilan ) B'),
-    ('fase', 'Fase', 'D'),
-    ('semester', 'Semester', 'Genap'),
-    ('tahun', 'Tahun pelajaran', '2025/2026'),
+    ('kelas', 'Kelas', ('kelas', 'IX ( Sembilan )', 'B')),
+    ('fase', 'Fase', ('pilih', 'D', ['A', 'B', 'C', 'D', 'E', 'F'])),
+    ('semester', 'Semester', ('pilih', 'Genap', ['Ganjil', 'Genap'])),
+    ('tahun', 'Tahun pelajaran', ('pilih', '2025/2026', [f'{y}/{y + 1}' for y in range(2023, 2041)])),
     ('tempat', 'Tempat penandatanganan', 'Tanjung Selor'),
     ('tanggal', 'Tanggal raport (Masehi)', ('masehi', 20, 'Juni', 2026)),
     ('wali', 'Wali kelas', 'Ahmad Jufri'),
     ('nip_wali', 'NIP wali kelas', ''),
-    ('kktp', 'KKTP bawaan (nilai tuntas)', 70),
+    ('kktp', 'KKTP bawaan (nilai tuntas)', ('pilih', 70, [str(i) for i in range(50, 91)])),
     ('_', 'PONDOK PESANTREN (raport pondok)', None),
     ('kop1', 'Kop baris 1', 'KABUPATEN BULUNGAN KALIMANTAN UTARA'),
     ('kop2', 'Kop baris 2', 'Jln. Jelarai Tanjung Selor Timur Kabupaten Bulungan Kalimantan Utara Telp.(0552) 23155'),
     ('pimpinan_arab', 'Pimpinan pondok (tulisan Arab)', 'مطهر الجفري . ماجيستر'),
     ('wali_arab', 'Wali kelas (tulisan Arab)', 'أحمد الجفري'),
-    ('kelas_angka', 'Kelas (angka, untuk raport Arab)', 9),
+    ('kelas_angka', 'Kelas (angka, untuk raport Arab)', ('kelas_angka',)),
     ('tempat_arab', 'Tempat (tulisan Arab)', 'تانجونج سيلور'),
     ('hijriah', 'Tanggal raport (Hijriah)', ('hijri', 5, 'Muharram', 1448)),
-    ('peringkat_pondok', 'Tampilkan peringkat di raport pondok (YA/TIDAK)', 'TIDAK'),
+    ('peringkat_pondok', 'Tampilkan peringkat di raport pondok', ('pilih', 'TIDAK', ['YA', 'TIDAK'])),
     ('keputusan', 'Kalimat keputusan (akhir catatan)',
      'Berdasarkan putusan rapat dewan guru serta memperhatikan capaian pembelajaran semester ganjil dan '
      'semester genap, maka siswa dinyatakan {keputusan}.'),
@@ -175,6 +175,38 @@ BULAN_HIJRI = [('Muharram', 'مُحَرَّم'), ('Shafar', 'صَفَر'), ('Rab
                ('Jumadil Akhir', 'جُمَادَى الآخِرَة'), ('Rajab', 'رَجَب'), ('Syaban', 'شَعْبَان'),
                ('Ramadhan', 'رَمَضَان'), ('Syawal', 'شَوَّال'), ('Dzulqadah', 'ذُو القَعْدَة'),
                ('Dzulhijjah', 'ذُو الحِجَّة')]
+
+
+TINGKAT = ['I ( Satu )', 'II ( Dua )', 'III ( Tiga )', 'IV ( Empat )', 'V ( Lima )', 'VI ( Enam )',
+           'VII ( Tujuh )', 'VIII ( Delapan )', 'IX ( Sembilan )', 'X ( Sepuluh )', 'XI ( Sebelas )',
+           'XII ( Dua Belas )']
+ROMBEL = ['-', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+
+
+def daftar_pilih(ws, ref, pilihan):
+    dv = DataValidation(type='list', formula1='"' + ','.join(str(x) for x in pilihan) + '"',
+                        showErrorMessage=True, error='Pilih dari daftar.', allow_blank=False)
+    ws.add_data_validation(dv)
+    dv.add(ref)
+
+
+def kelas_pilih(ws, r, label, tingkat, rombel):
+    """Kelas = tingkat (VII ( Tujuh ) ...) + rombel (A, B, ... atau - bila tidak ada)."""
+    isi(ws, f'B{r}', label, size=10, bold=True, warna=HIJAU)
+    isi(ws, f'C{r}', 'pilih dari daftar ▾ (klik kotak kuning, lalu klik panah)', size=8, italic=True, warna='6C757D')
+    r += 1
+    for nama, nilai, pilihan in (('Tingkat', tingkat, TINGKAT), ('Rombel (A/B/C …, pilih - bila tidak ada)', rombel, ROMBEL)):
+        isi(ws, f'B{r}', '      ' + nama, size=10, warna='495057')
+        isi(ws, f'C{r}', nilai, size=10, bold=True, latar=KUNING, border=KOTAK, h='left')
+        daftar_pilih(ws, f'C{r}', pilihan)
+        r += 1
+    t, b = f'$C${r - 2}', f'$C${r - 1}'
+    SEL['_tingkat'] = t
+    isi(ws, f'B{r}', '      Hasil (otomatis)', size=10, italic=True, warna='6C757D')
+    isi(ws, f'C{r}', f'={t}&IF(OR({b}="",{b}="-"),""," "&{b})', size=10, bold=True, latar='E9F2EC',
+        border=KOTAK, warna=HIJAU, h='left')
+    SEL['kelas'] = f'PENGATURAN!$C${r}'
+    return r + 1
 
 
 def tanggal_pilih(ws, r, kunci, label, jenis, hari, bulan, tahun):
@@ -225,8 +257,26 @@ def buat_pengaturan(wb):
             ws[f'C{r}'].border = Border(bottom=Side(style='medium', color=EMAS))
             r += 1
             continue
-        if isinstance(nilai, tuple):          # tanggal: hari, bulan, tahun dipilih dari daftar
+        if isinstance(nilai, tuple) and nilai[0] in ('masehi', 'hijri'):   # tanggal: 3 daftar pilihan
             r = tanggal_pilih(ws, r, kunci, label, *nilai)
+            continue
+        if isinstance(nilai, tuple) and nilai[0] == 'kelas':
+            r = kelas_pilih(ws, r, label, nilai[1], nilai[2])
+            continue
+        if isinstance(nilai, tuple) and nilai[0] == 'kelas_angka':   # otomatis dari tingkat kelas
+            isi(ws, f'B{r}', label.replace('untuk raport Arab', 'otomatis'), size=10, warna='495057')
+            t = SEL['_tingkat']
+            rumus = '=' + ''.join(f'IF({t}="{n}",{i},' for i, n in enumerate(TINGKAT, 1)) + '""' + ')' * len(TINGKAT)
+            isi(ws, f'C{r}', rumus, size=10, bold=True, latar='E9F2EC', warna=HIJAU, border=KOTAK, h='left')
+            SEL[kunci] = f'PENGATURAN!$C${r}'
+            r += 1
+            continue
+        if isinstance(nilai, tuple) and nilai[0] == 'pilih':
+            isi(ws, f'B{r}', label, size=10, warna='495057')
+            isi(ws, f'C{r}', nilai[1], size=10, bold=True, latar=KUNING, border=KOTAK, h='left')
+            daftar_pilih(ws, f'C{r}', nilai[2])
+            SEL[kunci] = f'PENGATURAN!$C${r}'
+            r += 1
             continue
         isi(ws, f'B{r}', label, size=10, warna='495057')
         c = isi(ws, f'C{r}', nilai, size=10, bold=True, latar=KUNING, bungkus=True, border=KOTAK)
@@ -267,6 +317,13 @@ KOLOM_SISWA = [
     ('Pekerjaan Ibu', 14), ('Nama Wali', 18), ('Alamat Wali', 20), ('Telepon Wali', 14), ('Pekerjaan Wali', 14),
 ]
 KS = {nama: gl(i + 1) for i, (nama, _) in enumerate(KOLOM_SISWA)}
+PILIHAN_SISWA = {
+    'L/P': ['L', 'P'],
+    'Agama': ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'],
+    'Status dalam Keluarga': ['Anak Kandung', 'Anak Tiri', 'Anak Angkat'],
+    'Anak ke-': [str(i) for i in range(1, 13)],
+    'Diterima di Kelas': ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'],
+}
 
 
 def siswa(kol, idx):
@@ -289,6 +346,13 @@ def buat_siswa(wb):
         isi(ws, f'A{r}', i + 1, size=9, h='center', border=KOTAK)
         for j in range(1, len(KOLOM_SISWA)):
             isi(ws, f'{gl(j + 1)}{r}', size=9, latar=KUNING if j == 3 else None, border=KOTAK)
+    # kolom yang pilihannya tetap: dipilih dari daftar (tetap boleh tempel data lain, hanya diberi tanda)
+    for kol, pilihan in PILIHAN_SISWA.items():
+        c = KS[kol]
+        dv = DataValidation(type='list', formula1='"' + ','.join(pilihan) + '"', showErrorMessage=False,
+                            allow_blank=True)
+        ws.add_data_validation(dv)
+        dv.add(f'{c}{SISWA1}:{c}{SISWA1 + MAKS - 1}')
     # daftar pilihan "No - Nama" untuk BERANDA (kolom AB disembunyikan)
     for i in range(MAKS):
         r = SISWA1 + i
