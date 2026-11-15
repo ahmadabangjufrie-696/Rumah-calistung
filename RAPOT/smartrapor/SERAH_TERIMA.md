@@ -64,16 +64,16 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 
 ## Raport pondok desain C3 (DISETUJUI Ustadz 15 Nov, sudah dipasang)
 Contoh desain di `desain_pondok/` (HTML `buat_desain.py` + `foto.js`). Yang dipasang = **Desain_C3**, lengkap dengan
-kotak كشف الحضور, tanggal Hijriah + Masehi, lingkaran stempel. **QR keaslian DIHAPUS atas permintaan Ustadz (15 Nov) — jangan dipasang lagi.**
+kotak كشف الحضور, tanggal Hijriah + Masehi. **QR keaslian dan lingkaran stempel DIHAPUS atas permintaan Ustadz (15 Nov) — jangan dipasang lagi.**
 - `buat_rapor_pondok` di `buat_smartrapor.py`: kolom A-C & L-N = pinggir (garis ganda hijau di tepi B/M, garis emas
   di tepi C/L), isi D..K, F = celah sempit (jarak kotak kehadiran-pembiasaan; di tabel digabung dengan G).
   Huruf Arab: Noto Naskh Arabic (judul Amiri). Jarak tulisan dari garis = 2 spasi di depan & belakang teks.
   Percobaan pertama (huruf Arial, tanpa celah/garis emas, mapel contoh banyak kosong) dinilai Ustadz "jelek".
   Gambar dari `aset/` (dibuat `aset/buat_aset_pondok.py`, huruf di `aset/huruf/`): `kop_c3.png` (tembus pandang,
-  di atas B2:H6), `air_c3.png` (tanda air), `sudut_c3.png` (hiasan sudut), `stempel_c3.png`.
+  di atas B2:H6), `air_c3.png` (tanda air), `sudut_c3.png` (hiasan sudut).
   Kop berupa gambar: untuk sekolah lain ubah KOP_* di `buat_aset_pondok.py` lalu jalankan ulang.
 - Lebar kolom ditulis dalam piksel Google (`PX` di `buat_rapor_pondok`; Google: piksel = lebar x 7 - 1). Posisi gambar
-  (kop, tanda air, stempel, hiasan sudut) dihitung dari piksel ini. Jangan ubah lebar kolom di file Google tanpa
+  (kop, tanda air, hiasan sudut) dihitung dari piksel ini. Jangan ubah lebar kolom di file Google tanpa
   menyamakan `PX`, nanti logo menutupi bingkai / hiasan sudut bergeser (pernah terjadi, foto Ustadz 15 Nov).
 - Kehadiran diambil dari EKSKUL & CATATAN kolom L/M/N (sama dengan raport sekolah).
 - Tanggal Masehi Arab dari PENGATURAN "Tanggal raport" (teks "20 Juni 2026" atau tanggal asli).

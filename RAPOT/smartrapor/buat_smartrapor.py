@@ -1173,7 +1173,6 @@ def buat_rapor_pondok(wb):
     teks(f'F{r}:H{r}', 'ولي الفصل', bold=True, h='center', size=11)
     teks(f'D{r}:E{r}', 'ولي الطالب', bold=True, h='center', size=11)
     tinggi(r, 18)
-    baris_cap = r + 1
     for k in range(1, 4):
         tinggi(r + k, 16)
     r += 4
@@ -1218,9 +1217,6 @@ def buat_rapor_pondok(wb):
     isi_w = sum(px_kol[3:11])
     pasang('air_c3.png', x_isi + (isi_w - 340) // 2, y_baris(21) + 30, 340, 340)
     pasang('kop_c3.png', x_isi, y_baris(4), isi_w, int(isi_w * 312 / 2127))
-    x_kanan = sum(px_kol[:8])
-    lebar_kanan = sum(px_kol[8:11])
-    pasang('stempel_c3.png', x_kanan + (lebar_kanan - 50) // 2, y_baris(baris_cap) + 2, 50, 50)
     # hiasan sudut: titik tengahnya di sudut garis ganda (dipasang menurut kolom/baris, bukan piksel total)
     s = 24
     kanan_off = px_kol[11] + px_kol[12] - s // 2

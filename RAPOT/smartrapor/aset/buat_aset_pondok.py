@@ -2,7 +2,6 @@
 
   kop_c3.png      kop: logo kanan, nama Arab hijau, nama Latin, alamat, latar tembus pandang
   sudut_c3.png    hiasan sudut (emas)
-  stempel_c3.png  lingkaran tempat stempel
   air_c3.png      tanda air logo samar (tembus pandang)
 
 Perlu: Python Pillow, Node + Playwright. Ubah KOP_* di bawah untuk sekolah lain.
@@ -47,10 +46,6 @@ SUDUT = f"""<!doctype html><html><head><meta charset="utf-8"><style>{HURUF}</sty
 <polygon points="50,20 71,29 80,50 71,71 50,80 29,71 20,50 29,29"/>
 <circle cx="50" cy="50" r="11"/></g><circle cx="50" cy="50" r="4" fill="{EMAS}"/></svg></div></body></html>"""
 
-STEMPEL = f"""<!doctype html><html><head><meta charset="utf-8"><style>{HURUF}
-#x {{ width: 52px; height: 52px; border: 1.5px dashed #aaa; border-radius: 50%; font: 8px Poppins; color: #aaa;
-      display: flex; align-items: center; justify-content: center; }}</style></head><body><div id="x">STEMPEL</div></body></html>"""
-
 JS = """const { chromium } = require('playwright');
 (async () => { const b = await chromium.launch(); const p = await b.newPage({ deviceScaleFactor: 3 });
   for (const [html, png] of JSON.parse(process.argv[2])) {
@@ -63,7 +58,7 @@ def main():
     tmp = os.path.join(D, '_tmp')
     os.makedirs(tmp, exist_ok=True)
     kerja = []
-    for nama, html in (('kop_c3', KOP), ('sudut_c3', SUDUT), ('stempel_c3', STEMPEL)):
+    for nama, html in (('kop_c3', KOP), ('sudut_c3', SUDUT)):
         f = os.path.join(tmp, nama + '.html')
         open(f, 'w').write(html)
         kerja.append([f, os.path.join(D, nama + '.png')])
