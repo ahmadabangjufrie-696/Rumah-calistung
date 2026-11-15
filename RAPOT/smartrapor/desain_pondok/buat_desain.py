@@ -121,7 +121,7 @@ def desain_a(hitam_putih=False, kop_hijau=False, tanda_air=None, garis_warna=Fal
 .kop {{ display: flex; align-items: center; gap: 14px; padding-bottom: 6px; }}
 .kop img {{ width: 92px; }}
 .kop .teks {{ flex: 1; text-align: center; }}
-.kop .ar {{ font-family: Ruqaa; font-weight: 700; font-size: 30px; color: {KOP}; line-height: 1.25; }}
+.kop .ar {{ font-family: Ruqaa; font-weight: 700; font-size: 30px; color: {KOP}; line-height: 1.25; padding-bottom: 9px; }}
 .kop .lat {{ font-family: Cormorant; font-weight: 700; font-size: 16.5px; letter-spacing: .8px; white-space: nowrap; color: {KOP}; direction: ltr; }}
 .kop .alamat {{ font-family: Poppins; font-size: 9.5px; color: {KOP}; direction: ltr; margin-top: 2px; }}
 .garis {{ height: 5px; border-top: 2px solid {E}; border-bottom: 1px solid {E}; margin: 4px 0 10px; }}
