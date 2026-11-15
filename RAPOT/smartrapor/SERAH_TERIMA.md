@@ -11,10 +11,10 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 ## Lokasi
 - Kode: repo `ahmadabangjufrie-696/rumah-calistung`, cabang `ccr-a2be243b-zifjyz`, folder `RAPOT/smartrapor/`.
 - Google Drive Ustadz, folder **SmartRapor (pengembangan)** (id `1eNMWSH69RC5ysRpjgDNyMhxcmrMnsO-p`):
-  - File contoh terbaru (15 Nov, raport pondok desain C3 rapi): **SmartRapor - Kelas IX B (contoh, desain C3 rapi)**
+  - File contoh terbaru (15 Nov, raport pondok desain C3 rapi): **SmartRapor - Kelas IX B (contoh)** (berbintang)
     id `1fvT0Kmo0NEIoWMXLS9o8WEV6pW9ECkE3PhisTFWiCc8` (10 siswa buatan). Kode tombol **belum** ditempel.
-  - Percobaan C3 pertama (kurang rapi menurut Ustadz) `1ZBBI_k11yUSjbpIDXpuVZEkGzd_N2v84MuuvoMZ700U` = "LAMA 2".
-  - File lama `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg` diberi nama "(contoh LAMA, jangan dipakai)".
+  - 15 Nov atas permintaan Ustadz dibuang ke Sampah: file contoh lama `1RrOsB1w...`, percobaan C3 pertama `1ZBBI_k1...`,
+    dokumen KODE lama 11 Nov `1OAb9Me4...`. Hanya ada SATU file raport contoh dan SATU dokumen KODE.
   - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1xGjwftiR_-zsUhM8OT3ZeUPsMyMwFXod8qF10zrePiM`.
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
