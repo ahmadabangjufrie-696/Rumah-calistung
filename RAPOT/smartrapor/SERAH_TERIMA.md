@@ -65,7 +65,7 @@ Contoh gambar di `desain_pondok/` (Desain_A Klasik Islami, Desain_B Modern Elega
 dibuat dengan `buat_desain.py` (HTML) + `foto.js` (Playwright). Huruf dari npm @fontsource (amiri, aref-ruqaa,
 noto-naskh-arabic, poppins, cormorant-garamond). Tambahan yang ditawarkan: QR keaslian, kehadiran (كشف الحضور),
 tanggal Hijriah + Masehi, kotak stempel.
-**Pilihan (usul Ustadz Hafid Abdillah): Desain_C2** = desain C + semua tulisan kop berwarna hijau (#0F5132, latar tetap putih) + tanda air logo samar di tengah. Lalu Ustadz minta garis hijau & emas seperti desain A → **Desain_C3** (bingkai & garis tabel hijau, ornamen sudut, garis bawah kop/judul & tepi catatan emas; latar tetap putih). **Menunggu Ustadz Ahmad setuju sebelum dipasang ke SmartRapor.**
+**Pilihan (usul Ustadz Hafid Abdillah): Desain_C2** = desain C + semua tulisan kop berwarna hijau (#0F5132, latar tetap putih) + tanda air logo samar di tengah. Lalu Ustadz minta garis hijau & emas seperti desain A → **Desain_C3** (bingkai & garis tabel hijau, ornamen sudut, garis bawah kop/judul emas, tepi kanan catatan wali kelas hijau; latar tetap putih). **Menunggu Ustadz Ahmad setuju sebelum dipasang ke SmartRapor.**
 Belum diputuskan: QR keaslian, kotak كشف الحضور (butuh isian baru), tanggal Hijriah + Masehi, kotak stempel.
 
 ## Rencana berikutnya

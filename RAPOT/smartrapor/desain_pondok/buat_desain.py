@@ -143,7 +143,7 @@ h1 span {{ display: inline-block; border-bottom: 2px solid {E}; padding: 0 18px 
 .kotak li:last-child {{ border-bottom: 0; }}
 .hadir td {{ font-size: 12.5px; padding: 4px 8px; border-bottom: 1px dotted #999; }}
 .hadir td:last-child {{ text-align: center; font-weight: 700; width: 60px; }}
-.cat {{ border: 1px solid {GARIS}; border-right: 5px solid {E}; margin-top: 9px; padding: 6px 10px; font-size: 13px; }}
+.cat {{ border: 1px solid {GARIS}; border-right: 5px solid {BK if garis_warna else E}; margin-top: 9px; padding: 6px 10px; font-size: 13px; }}
 .cat b {{ color: {H}; }}
 .ttd {{ display: grid; grid-template-columns: 1fr 1fr 1fr; margin-top: 10px; text-align: center; font-size: 13.5px; font-weight: 700; }}
 .ttd .tgl {{ grid-column: 1 / -1; text-align: right; font-size: 13px; margin-bottom: 2px; }}
