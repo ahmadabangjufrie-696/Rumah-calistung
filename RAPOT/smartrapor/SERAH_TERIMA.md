@@ -64,7 +64,9 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 Contoh gambar di `desain_pondok/` (Desain_A Klasik Islami, Desain_B Modern Elegan, Desain_C Hemat Tinta),
 dibuat dengan `buat_desain.py` (HTML) + `foto.js` (Playwright). Huruf dari npm @fontsource (amiri, aref-ruqaa,
 noto-naskh-arabic, poppins, cormorant-garamond). Tambahan yang ditawarkan: QR keaslian, kehadiran (كشف الحضور),
-tanggal Hijriah + Masehi, kotak stempel. **Menunggu pilihan Ustadz.**
+tanggal Hijriah + Masehi, kotak stempel.
+**Pilihan (usul Ustadz Hafid Abdillah): Desain_C2** = desain C + semua tulisan kop berwarna hijau (#0F5132, latar tetap putih) + tanda air logo samar di tengah. **Menunggu Ustadz Ahmad setuju sebelum dipasang ke SmartRapor.**
+Belum diputuskan: QR keaslian, kotak كشف الحضور (butuh isian baru), tanggal Hijriah + Masehi, kotak stempel.
 
 ## Rencana berikutnya
 - Rapikan BERANDA (tabel progres & panel cetak), uji cetak sekelas.
