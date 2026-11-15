@@ -1005,7 +1005,7 @@ def buat_rapor_pondok(wb):
     ws = wb.create_sheet('RAPOR PONDOK')
     idx = pemilih(ws)
     KOL = 'ABCDEFGHIJKLMN'
-    LBR = {'A': 2, 'B': 0.45, 'C': 0.75, 'D': 19.5, 'E': 17, 'F': 1, 'G': 9.5, 'H': 17, 'I': 9, 'J': 20.5, 'K': 5.5,
+    LBR = {'A': 2, 'B': 0.45, 'C': 0.75, 'D': 19.5, 'E': 15, 'F': 1, 'G': 11.7, 'H': 16.4, 'I': 9, 'J': 20.5, 'K': 5.5,
            'L': 0.75, 'M': 0.45, 'N': 2}
     lebar(ws, LBR)
     px_kol = [int(LBR[c] * 7 + 5) for c in KOL]
