@@ -15,7 +15,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
     id `1n2Rb2K2Kyf85mdZp2SblroglMmSz-QCK0NbSlRZxfLo` (10 siswa buatan). Kode tombol **belum** ditempel.
   - 15 Nov atas permintaan Ustadz dibuang ke Sampah: file contoh lama `1RrOsB1w...`, percobaan C3 pertama `1ZBBI_k1...`,
     dokumen KODE lama 11 Nov `1OAb9Me4...`. Hanya ada SATU file raport contoh dan SATU dokumen KODE.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1sWw54i8J-Y42QzAi2pDmn0McpA8qmgngdf2Q-GbqkFc` (15 Nov sore: catatan kaki huruf miring).
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1vgwa1jpfG7-3-dETlSaoDeGx1POZ2iIZm34dclR1Roc` (15 Nov sore: catatan kaki huruf miring).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
 ## Berkas
@@ -105,3 +105,4 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
 - Cetak dari panel berjalan bertahap; kemajuan disimpan di CacheService (`SR_PROGRES`) dan ditanyakan panel tiap 1,5 detik.
 - PENGATURAN: kelas (tingkat + rombel), fase, semester, tahun, KKTP, tanggal Masehi/Hijriah, peringkat pondok = pilihan dari daftar. SISWA: L/P, agama, status keluarga, anak ke-, diterima di kelas = daftar (tidak ketat).
 - Panel terbuka otomatis: menu NYALAKAN/MATIKAN membuat/menghapus pemicu onOpen (per akun, fungsi panelSaatBuka).
+- RAPOR SEKOLAH dicetak 2 bagian (rentangCetak_): tabel nilai, lalu mulai EKSTRAKURIKULER di halaman baru; nomor halaman dihitung bersama.

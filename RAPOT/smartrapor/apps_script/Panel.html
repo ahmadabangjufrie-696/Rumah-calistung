@@ -253,14 +253,18 @@ function pratinjau() {
   var token = ++tokenPv;
   $('muat').style.display = 'flex'; document.querySelector('.putar').style.display = '';
   $('muatT').textContent = 'Menyiapkan gambar ' + NAMA_JENIS[tab] + '…';
-  jalankan('pratinjau', pilihNo, tab).then(function (b64) {
+  jalankan('pratinjau', pilihNo, tab).then(function (daftar) {
     if (token !== tokenPv) return;
-    var bin = atob(b64), u = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-    return siapPdf.then(function () { return pdfjsLib.getDocument({ data: u }).promise; }).then(function (pdf) {
+    return siapPdf.then(function () {
+      return Promise.all(daftar.map(function (b64) {
+        var bin = atob(b64), u = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+        return pdfjsLib.getDocument({ data: u }).promise;
+      }));
+    }).then(function (dok) {
       if (token !== tokenPv) return;
-      pdfSaatIni = pdf;
-      return pdf.getPage(1).then(function (hal) {
+      pdfSaatIni = dok;
+      return dok[0].getPage(1).then(function (hal) {
         var kotak = $('kertas'), v1 = hal.getViewport({ scale: 1 });
         var skala = Math.min((kotak.clientWidth - 16) / v1.width, (kotak.clientHeight - 16) / v1.height) * (window.devicePixelRatio || 1) * 1.5;
         var vp = hal.getViewport({ scale: skala }), kv = $('kanvas');
@@ -281,14 +285,16 @@ function perbesar() {
   if (!pdfSaatIni) return;
   var isi = $('besarIsi'); isi.innerHTML = ''; $('besar').classList.add('buka');
   var lebar = Math.min(window.innerWidth - 60, 900);
-  for (var n = 1; n <= pdfSaatIni.numPages; n++) (function (n) {
-    var kv = document.createElement('canvas'); isi.appendChild(kv);
-    pdfSaatIni.getPage(n).then(function (hal) {
-      var v1 = hal.getViewport({ scale: 1 }), vp = hal.getViewport({ scale: lebar / v1.width * 2 });
-      kv.width = vp.width; kv.height = vp.height; kv.style.width = lebar + 'px';
-      hal.render({ canvasContext: kv.getContext('2d'), viewport: vp });
-    });
-  })(n);
+  pdfSaatIni.forEach(function (pdf) {
+    for (var n = 1; n <= pdf.numPages; n++) (function (n) {
+      var kv = document.createElement('canvas'); isi.appendChild(kv);
+      pdf.getPage(n).then(function (hal) {
+        var v1 = hal.getViewport({ scale: 1 }), vp = hal.getViewport({ scale: lebar / v1.width * 2 });
+        kv.width = vp.width; kv.height = vp.height; kv.style.width = lebar + 'px';
+        hal.render({ canvasContext: kv.getContext('2d'), viewport: vp });
+      });
+    })(n);
+  });
 }
 function tutupBesar() { $('besar').classList.remove('buka'); }
 

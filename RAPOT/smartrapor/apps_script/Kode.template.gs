@@ -230,10 +230,13 @@ function eksporBagian_(halaman) {
   var ss = SpreadsheetApp.getActive();
   SpreadsheetApp.flush();
   var nama = (halaman || halamanCetak_()).filter(function (n) { return ss.getSheetByName(n); });
-  var hasil = nama.map(function (n) {
+  var hasil = [];
+  nama.forEach(function (n) {
     var sh = ss.getSheetByName(n);
-    return { sheet: n, url: urlEkspor_(sh.getSheetId()),
-             kaki: KAKI[n] ? sh.getRange(KAKI[n]).getDisplayValue() : '' };
+    var kaki = KAKI[n] ? sh.getRange(KAKI[n]).getDisplayValue() : '';
+    rentangCetak_(sh).forEach(function (rg) {
+      hasil.push({ sheet: n, url: urlEkspor_(sh.getSheetId(), rg), kaki: kaki });
+    });
   });
   var permintaan = hasil.map(function (h) {
     return { url: h.url, headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }, muteHttpExceptions: true };
@@ -246,9 +249,20 @@ function eksporBagian_(halaman) {
   return hasil;
 }
 
-function urlEkspor_(gid) {
+// RAPOR SEKOLAH dicetak dua bagian: tabel nilai, lalu ekstrakurikuler dst. selalu mulai di halaman baru.
+function rentangCetak_(sh) {
+  if (sh.getName() !== SR.RAPOR) return [null];
+  var akhir = sh.getLastRow();
+  var a = sh.getRange(1, 1, akhir, 1).getDisplayValues();
+  for (var i = 1; i < a.length; i++) {
+    if (a[i][0] === 'EKSTRAKURIKULER') return ['A1:G' + i, 'A' + (i + 1) + ':G' + akhir];
+  }
+  return [null];
+}
+
+function urlEkspor_(gid, rentang) {
   return 'https://docs.google.com/spreadsheets/d/' + SpreadsheetApp.getActive().getId() + '/export?format=pdf' +
-    (gid === undefined ? '' : '&gid=' + gid) +
+    (gid === undefined ? '' : '&gid=' + gid) + (rentang ? '&range=' + encodeURIComponent(rentang) : '') +
     '&size=A4&portrait=true&fitw=true&gridlines=false&printtitle=false&sheetnames=false' +
     '&pagenum=UNDEFINED&fzr=false&horizontal_alignment=CENTER&vertical_alignment=TOP' +
     '&top_margin=0.4&bottom_margin=0.5&left_margin=0.5&right_margin=0.5';
@@ -322,15 +336,24 @@ async function susunPdf_(bagian) {
   var hasil = await L.PDFDocument.create();
   var huruf = await hasil.embedFont(L.StandardFonts.HelveticaOblique);   // huruf miring
   var ukuran = 8;
+  // bagian dari halaman yang sama (mis. RAPOR SEKOLAH dua bagian) dihitung bersama: "Halaman 2 dari 2"
+  var dokumen = [], total = {}, urut = {};
   for (var i = 0; i < bagian.length; i++) {
-    var dok = await L.PDFDocument.load(new Uint8Array(bagian[i].blob.getBytes()));
+    var d = await L.PDFDocument.load(new Uint8Array(bagian[i].blob.getBytes()));
+    var g = (bagian[i].siswa || '') + '|' + bagian[i].sheet;
+    dokumen.push({ dok: d, grup: g });
+    total[g] = (total[g] || 0) + d.getPageCount();
+  }
+  for (var i = 0; i < bagian.length; i++) {
+    var dok = dokumen[i].dok, grup = dokumen[i].grup;
     var hal = await hasil.copyPages(dok, dok.getPageIndices());
     var kaki = teksLatin_(bagian[i].kaki);
-    hal.forEach(function (p, k) {
+    hal.forEach(function (p) {
       hasil.addPage(p);
+      urut[grup] = (urut[grup] || 0) + 1;
       if (!kaki) return;
       var lebar = p.getWidth();
-      var kanan = 'Halaman ' + (k + 1) + ' dari ' + hal.length;
+      var kanan = 'Halaman ' + urut[grup] + ' dari ' + total[grup];
       p.drawText(kaki, { x: 36, y: 18, size: ukuran, font: huruf });
       p.drawText(kanan, { x: lebar - 36 - huruf.widthOfTextAtSize(kanan, ukuran), y: 18, size: ukuran, font: huruf });
     });
@@ -451,7 +474,9 @@ function pratinjau(no, jenis) {
   var sh = SpreadsheetApp.getActive().getSheetByName(JENIS[jenis]);
   if (!sh) throw new Error('Halaman ' + JENIS[jenis] + ' tidak ada di file ini.');
   SpreadsheetApp.flush();
-  return Utilities.base64Encode(ambilPdf_(urlEkspor_(sh.getSheetId())).getBytes());
+  return rentangCetak_(sh).map(function (rg) {
+    return Utilities.base64Encode(ambilPdf_(urlEkspor_(sh.getSheetId(), rg)).getBytes());
+  });
 }
 
 function lapor_(id, teks, persen, akhir) {
