@@ -1005,10 +1005,11 @@ def buat_rapor_pondok(wb):
     ws = wb.create_sheet('RAPOR PONDOK')
     idx = pemilih(ws)
     KOL = 'ABCDEFGHIJKLMN'
-    LBR = {'A': 2, 'B': 0.45, 'C': 0.75, 'D': 19.5, 'E': 15, 'F': 1, 'G': 11.7, 'H': 16.4, 'I': 9, 'J': 20.5, 'K': 5.5,
-           'L': 0.75, 'M': 0.45, 'N': 2}
-    lebar(ws, LBR)
-    px_kol = [int(LBR[c] * 7 + 5) for c in KOL]
+    # lebar dalam piksel Google Sheets (Google: piksel = lebar x 7 - 1); gambar diletakkan menurut piksel ini
+    PX = {'A': 19, 'B': 8, 'C': 10, 'D': 141, 'E': 110, 'F': 12, 'G': 85, 'H': 124, 'I': 68, 'J': 148, 'K': 43,
+          'L': 10, 'M': 8, 'N': 19}
+    lebar(ws, {c: round((p + 1) / 7 + 0.005, 3) for c, p in PX.items()})
+    px_kol = [PX[c] for c in KOL]
     NASKH = 'Noto Naskh Arabic'
     hj = Side(style='thin', color=HIJAU_C3)
     hj_tebal = Side(style='medium', color=HIJAU_C3)
@@ -1057,16 +1058,10 @@ def buat_rapor_pondok(wb):
     tinggi(1, 12)
     tinggi(2, 5)
     tinggi(3, 7)
-    # ---- kop (gambar tembus pandang di atas D4:K8; kode QR di D4 terlihat di baliknya)
+    # ---- kop (gambar di atas D4:K8)
     for r in range(4, 9):
         tinggi(r, 16.5)
-    ws.merge_cells('D4:D7')
     nis = siswa('NIS', idx)
-    ws['D4'] = (f'=IMAGE("https://quickchart.io/qr?size=200&margin=1&dark=0f3d2e&text="&ENCODEURL('
-                f'"SmartRapor | Raport Pondok | NIS "&{nis}&" | Kelas "&{SEL["kelas_angka"]}&" "&{SEL["semester"]}'
-                f'&" "&{SEL["tahun"]}&" | Jumlah "&{cp("H", idx)}&" | Rata-rata "&{cp("J", idx)}))')
-    ws['D4'].alignment = Alignment(horizontal='center', vertical='center')
-    isi(ws, 'D8', 'Cek keaslian', font='Poppins', size=6, warna='555555', h='center', v='top')
     tinggi(9, 5)
     for c in 'DEFGHIJK':
         ws[f'{c}9'].border = Border(bottom=Side(style='double', color=EMAS_C3))
