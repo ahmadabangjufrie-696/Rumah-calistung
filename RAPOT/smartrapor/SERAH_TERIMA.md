@@ -12,7 +12,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 - Kode: repo `ahmadabangjufrie-696/rumah-calistung`, cabang `ccr-a2be243b-zifjyz`, folder `RAPOT/smartrapor/`.
 - Google Drive Ustadz, folder **SmartRapor (pengembangan)** (id `1eNMWSH69RC5ysRpjgDNyMhxcmrMnsO-p`):
   - File contoh terbaru (15 Nov, raport pondok desain C3 rapi): **SmartRapor - Kelas IX B (contoh)** (berbintang)
-    id `1fvT0Kmo0NEIoWMXLS9o8WEV6pW9ECkE3PhisTFWiCc8` (10 siswa buatan). Kode tombol **belum** ditempel.
+    id `1n2Rb2K2Kyf85mdZp2SblroglMmSz-QCK0NbSlRZxfLo` (10 siswa buatan). Kode tombol **belum** ditempel.
   - 15 Nov atas permintaan Ustadz dibuang ke Sampah: file contoh lama `1RrOsB1w...`, percobaan C3 pertama `1ZBBI_k1...`,
     dokumen KODE lama 11 Nov `1OAb9Me4...`. Hanya ada SATU file raport contoh dan SATU dokumen KODE.
   - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1xGjwftiR_-zsUhM8OT3ZeUPsMyMwFXod8qF10zrePiM`.
@@ -79,6 +79,11 @@ kotak كشف الحضور, tanggal Hijriah + Masehi. **QR keaslian dan lingkaran
 - Tanggal Masehi Arab dari PENGATURAN "Tanggal raport" (teks "20 Juni 2026" atau tanggal asli).
 
 ## Langkah berikutnya
+0. Belum dijawab Ustadz (15 Nov): (a) catatan kaki lewat Ctrl+P (Ustadz menunjukkan contoh raport Excel lama yang punya
+   catatan kaki saat Ctrl+P; SmartRapor memasang catatan kaki lewat tombol cetak karena nama siswa berganti);
+   (b) kotak "Capaian" raport sekolah yang kosong (baris kedua kosong bila semua TP tuntas): diisi kalimat otomatis
+   seperti DATA ARAB, atau dibiarkan/dirapatkan? Kolom N RAPOR PONDOK berubah sendiri jadi 60 piksel saat diunggah;
+   setelah unggah, setel ke 19 lewat API.
 1. Ustadz tempel kode tombol (dokumen KODE) → Pasang tombol.
 2. Coba CETAK SISWA INI (catatan kaki), raport pondok 1 lembar A4, CETAK SEKELAS.
 3. Periksa batas predikat/tanggal Hijriah/peringkat, tunjukkan "tulisan yang salah".
