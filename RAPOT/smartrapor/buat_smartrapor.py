@@ -994,24 +994,43 @@ def hari_arab(n):
 
 
 def buat_rapor_pondok(wb):
-    """Raport pondok desain C3: kop hijau, bingkai ganda hijau, hiasan sudut & garis emas, tanda air logo."""
+    """Raport pondok desain C3: kop hijau, bingkai ganda hijau + garis emas, hiasan sudut, tanda air logo.
+
+    Kolom: A,B,C dan L,M,N = pinggir bingkai; D..K isi (kiri->kanan, cermin raport Arab):
+    D predikat, E terbilang praktik, F celah, G nilai praktik, H terbilang teori, I nilai teori, J mapel, K nomor.
+    """
     from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor, AnchorMarker
     from openpyxl.drawing.xdr import XDRPositiveSize2D
     from openpyxl.utils.units import pixels_to_EMU
     ws = wb.create_sheet('RAPOR PONDOK')
     idx = pemilih(ws)
-    # A dan I = pinggir untuk bingkai; B..H isi (kiri->kanan, cermin raport Arab)
-    LBR = {'A': 3, 'B': 19.5, 'C': 17, 'D': 9.5, 'E': 17, 'F': 9, 'G': 20.5, 'H': 5, 'I': 3}
+    KOL = 'ABCDEFGHIJKLMN'
+    LBR = {'A': 2, 'B': 0.45, 'C': 0.75, 'D': 19.5, 'E': 17, 'F': 1, 'G': 9.5, 'H': 17, 'I': 9, 'J': 20.5, 'K': 5.5,
+           'L': 0.75, 'M': 0.45, 'N': 2}
     lebar(ws, LBR)
-    px_kol = [int(LBR[c] * 7 + 5) for c in 'ABCDEFGHI']
+    px_kol = [int(LBR[c] * 7 + 5) for c in KOL]
+    NASKH = 'Noto Naskh Arabic'
     hj = Side(style='thin', color=HIJAU_C3)
     hj_tebal = Side(style='medium', color=HIJAU_C3)
     titik = Side(style='dotted', color='999999')
+    SP = '  '        # jarak tulisan dari garis
 
     def tinggi(r, pt):
         ws.row_dimensions[r].height = pt
 
-    def kotak(rng, dalam=None, atas=hj, latar=None):
+    def ar(ref, nilai, size=10.5, bold=False, h='right', bungkus=False, underline=None, font=NASKH, warna='000000'):
+        c = isi(ws, ref, nilai, font=font, size=size, bold=bold, h=h, bungkus=bungkus, warna=warna,
+                underline=underline)
+        c.alignment = Alignment(horizontal=h, vertical='center', wrap_text=bungkus, readingOrder=2)
+        return c
+
+    def teks(rng, nilai, **kw):
+        a_, b_ = rng.split(':') if ':' in rng else (rng, rng)
+        if a_ != b_:
+            ws.merge_cells(rng)
+        return ar(a_, nilai, **kw)
+
+    def kotak(rng, dalam=None, atas=hj):
         """garis luar hijau tipis; dalam = garis mendatar di dalam kotak"""
         if ':' not in rng:
             rng = f'{rng}:{rng}'
@@ -1022,164 +1041,160 @@ def buat_rapor_pondok(wb):
             for c in baris:
                 c.border = Border(left=hj if c.column == c1 else None, right=hj if c.column == c2 else None,
                                   top=atas if c.row == r1 else dalam, bottom=hj if c.row == r2 else dalam)
-                if latar:
-                    c.fill = PatternFill('solid', fgColor=latar)
 
-    def teks(rng, nilai, **kw):
-        a_, b_ = rng.split(':') if ':' in rng else (rng, rng)
-        if a_ != b_:
-            ws.merge_cells(rng)
-        return tulis_arab(ws, a_, nilai, **kw)
+    def bingkai(r1, r2, c1, c2, side):
+        """garis persegi di tepi luar sel r1..r2 x c1..c2 (garis lain di sel itu tetap)"""
+        for r in range(r1, r2 + 1):
+            for ci in range(c1, c2 + 1):
+                if r not in (r1, r2) and ci not in (c1, c2):
+                    continue
+                c = ws.cell(r, ci)
+                b = c.border
+                c.border = Border(left=side if ci == c1 else b.left, right=side if ci == c2 else b.right,
+                                  top=side if r == r1 else b.top, bottom=side if r == r2 else b.bottom)
 
-    # ---- kop (gambar tembus pandang di atas B2:H6; kode QR di B2 terlihat di baliknya)
+    # ---- pinggir atas
     tinggi(1, 12)
-    for r in range(2, 7):
+    tinggi(2, 5)
+    tinggi(3, 7)
+    # ---- kop (gambar tembus pandang di atas D4:K8; kode QR di D4 terlihat di baliknya)
+    for r in range(4, 9):
         tinggi(r, 16.5)
-    ws.merge_cells('B2:B5')
+    ws.merge_cells('D4:D7')
     nis = siswa('NIS', idx)
-    ws['B2'] = (f'=IMAGE("https://quickchart.io/qr?size=200&margin=1&dark=0f3d2e&text="&ENCODEURL('
+    ws['D4'] = (f'=IMAGE("https://quickchart.io/qr?size=200&margin=1&dark=0f3d2e&text="&ENCODEURL('
                 f'"SmartRapor | Raport Pondok | NIS "&{nis}&" | Kelas "&{SEL["kelas_angka"]}&" "&{SEL["semester"]}'
                 f'&" "&{SEL["tahun"]}&" | Jumlah "&{cp("H", idx)}&" | Rata-rata "&{cp("J", idx)}))')
-    ws['B2'].alignment = Alignment(horizontal='left', vertical='center')
-    isi(ws, 'B6', 'Cek keaslian', font='Arial', size=6, warna='666666', h='left')
-    ws['B6'].alignment = Alignment(horizontal='left', vertical='top', indent=2)
-    tinggi(7, 5)
-    for c in 'BCDEFGH':
-        ws[f'{c}7'].border = Border(bottom=Side(style='double', color=EMAS_C3))
-    tinggi(8, 6)
+    ws['D4'].alignment = Alignment(horizontal='center', vertical='center')
+    isi(ws, 'D8', 'Cek keaslian', font='Poppins', size=6, warna='555555', h='center', v='top')
+    tinggi(9, 5)
+    for c in 'DEFGHIJK':
+        ws[f'{c}9'].border = Border(bottom=Side(style='double', color=EMAS_C3))
+    tinggi(10, 8)
     # ---- judul
-    teks('B9:H9', 'تقرير عن نتائج تعلم الطالب', size=17, bold=True, h='center')
-    ws['B9'].font = Font(name='Amiri', size=17, bold=True, color=HIJAU_C3)
-    tinggi(9, 28)
-    tinggi(10, 3)
-    for c in 'DE':
-        ws[f'{c}10'].border = Border(top=Side(style='medium', color=EMAS_C3))
-    tinggi(11, 4)
+    teks('D11:K11', 'تقرير عن نتائج تعلم الطالب', size=17, bold=True, h='center', font='Amiri', warna=HIJAU_C3)
+    tinggi(11, 27)
+    tinggi(12, 3)
+    for c in 'FGH':
+        ws[f'{c}12'].border = Border(top=Side(style='medium', color=EMAS_C3))
+    tinggi(13, 8)
     # ---- identitas
     nama_arab = siswa('Nama (tulisan Arab)', idx)
-    teks('E12:H12', f'="اسم الطالب :   "&IF({nama_arab}="",{siswa("Nama Peserta Didik", idx)},{nama_arab})',
-         bold=True, size=13)
-    teks('B12:D12', f'="الفصل / الفصل الدراسي :   "&{arab(SEL["kelas_angka"])}&" / "&'
-                    f'IF({SEL["semester"]}="Ganjil","الأول","الثاني")', bold=True, size=13)
-    teks('E13:H13', f'="رقم التسجيل :   "&{arab(nis)}', bold=True, size=13)
+    teks('H14:K14', f'="اسم الطالب : "&IF({nama_arab}="",{siswa("Nama Peserta Didik", idx)},{nama_arab})',
+         bold=True, size=12)
+    teks('D14:G14', f'="الفصل / الفصل الدراسي : "&{arab(SEL["kelas_angka"])}&" / "&'
+                    f'IF({SEL["semester"]}="Ganjil","الأول","الثاني")', bold=True, size=12)
+    teks('H15:K15', f'="رقم التسجيل : "&{arab(nis)}', bold=True, size=12)
     tahun_ar = arab(f'SUBSTITUTE({SEL["tahun"]},"/"," / ")')
-    teks('B13:D13', f'="العام الدراسي :   "&{tahun_ar}',
-         bold=True, size=13)
-    tinggi(12, 21)
-    tinggi(13, 21)
-    tinggi(14, 7)
+    teks('D15:G15', f'="العام الدراسي : "&{tahun_ar}', bold=True, size=12)
+    tinggi(14, 21)
+    tinggi(15, 21)
+    tinggi(16, 7)
 
-    # ---- tabel nilai (B..H = predikat, kata praktik, praktik, kata teori, teori, mapel, nomor)
-    def kepala(rng, t, size=12):
+    # ---- tabel nilai
+    def kepala(rng, t, size=10.5):
         teks(rng, t, size=size, bold=True, h='center', bungkus=True)
         kotak(rng)
-    kepala('H15:H16', 'رقم')
-    kepala('G15:G16', 'مجال الدراسة')
-    kepala('C15:F15', 'قيمة المعرفة')
-    kepala('F16', 'قيمة تيوري', 11)
-    kepala('E16', 'درجات الرسالة', 11)
-    kepala('D16', 'مارس / شفهي', 10)
-    kepala('C16', 'درجات الرسالة', 11)
-    kepala('B15:B16', 'وصف تقدم التعلم')
-    tinggi(15, 22)
-    tinggi(16, 22)
+    kepala('K17:K18', 'رقم')
+    kepala('J17:J18', 'مجال الدراسة')
+    kepala('E17:I17', 'قيمة المعرفة')
+    kepala('I18', 'قيمة تيوري')
+    kepala('H18', 'درجات الرسالة')
+    kepala('F18:G18', 'مارس / شفهي')
+    kepala('E18', 'درجات الرسالة')
+    kepala('D17:D18', 'وصف تقدم التعلم')
+    tinggi(17, 21)
+    tinggi(18, 21)
     terbilang = f"{q(DATA)}!$B$6:$C$106"
     predikat = f"{q(DATA)}!$E$6:$F$9"
     arab_nama = {t: a_ for t, _, a_ in PONDOK}
-    r = 17
+    r = 19
     for no, tab in enumerate(URUT_PONDOK, 1):
         teori = f'INDEX({rentang_siswa(tab, "K")},{idx})'
         praktik = f'INDEX({rentang_siswa(tab, "L")},{idx})'
-        tulis_arab(ws, f'H{r}', ''.join(ANGKA_ARAB[int(d)] for d in str(no)), h='center', size=11, font='Arial')
-        tulis_arab(ws, f'G{r}', arab_nama[tab], size=11, bold=True, font='Arial')
-        tulis_arab(ws, f'F{r}', f'=IF({teori}="","-",{arab(teori)})', h='center', size=11, bold=True, font='Arial')
-        tulis_arab(ws, f'E{r}', f'=IF({teori}="","-",VLOOKUP(ROUND({teori},0),{terbilang},2,FALSE))', size=11,
-                   font='Arial')
-        tulis_arab(ws, f'D{r}', f'=IF({praktik}="","-",{arab(praktik)})', h='center', size=11, bold=True,
-                   font='Arial')
-        tulis_arab(ws, f'C{r}', f'=IF({praktik}="","-",VLOOKUP(ROUND({praktik},0),{terbilang},2,FALSE))', size=11,
-                   font='Arial')
-        tulis_arab(ws, f'B{r}', f'=IF(COUNT({teori},{praktik})=0,"-",VLOOKUP(AVERAGE({teori},{praktik}),'
-                                f'{predikat},2,TRUE))', size=11, h='center', font='Arial')
-        for c in 'BCDEFGH':
-            kotak(f'{c}{r}:{c}{r}')
-        tinggi(r, 19)
+        ar(f'K{r}', ''.join(ANGKA_ARAB[int(d)] for d in str(no)), h='center', size=10)
+        ar(f'J{r}', SP + arab_nama[tab] + SP, bold=True)
+        ar(f'I{r}', f'=IF({teori}="","-",{arab(teori)})', h='center', bold=True)
+        ar(f'H{r}', f'=IF({teori}="","-","{SP}"&VLOOKUP(ROUND({teori},0),{terbilang},2,FALSE)&"{SP}")')
+        ws.merge_cells(f'F{r}:G{r}')
+        ar(f'F{r}', f'=IF({praktik}="","-",{arab(praktik)})', h='center', bold=True)
+        ar(f'E{r}', f'=IF({praktik}="","-","{SP}"&VLOOKUP(ROUND({praktik},0),{terbilang},2,FALSE)&"{SP}")')
+        ar(f'D{r}', f'=IF(COUNT({teori},{praktik})=0,"-",VLOOKUP(AVERAGE({teori},{praktik}),{predikat},2,TRUE))',
+           h='center')
+        for rng in ('D', 'E', 'F:G', 'H', 'I', 'J', 'K'):
+            kotak(f'{rng[0]}{r}:{rng[-1]}{r}')
+        tinggi(r, 17.5)
         r += 1
     # ---- jumlah, rata-rata, peringkat (tiga kotak, garis atas tebal)
     jumlah, rata_ = cp('H', idx), cp('J', idx)
-    teks(f'F{r}:H{r}', f'="مجموع الدرجات :  "&IF({jumlah}="","-",{arab(jumlah)})', bold=True, size=12)
-    teks(f'D{r}:E{r}', f'="المعدل العام :  "&IF({rata_}="","-",{arab(rata_)})', bold=True, size=12, h='center')
-    teks(f'B{r}:C{r}', f'=IF(OR({SEL["peringkat_pondok"]}<>"YA",{cp("K", idx)}=""),"",'
-                       f'"الترتيب العلمي :  "&{arab(cp("K", idx))})', bold=True, size=12, h='center')
-    for rng in (f'F{r}:H{r}', f'D{r}:E{r}', f'B{r}:C{r}'):
+    teks(f'I{r}:K{r}', f'="{SP}مجموع الدرجات : "&IF({jumlah}="","-",{arab(jumlah)})&"{SP}"', bold=True, size=11)
+    teks(f'F{r}:H{r}', f'="المعدل العام : "&IF({rata_}="","-",{arab(rata_)})', bold=True, size=11, h='center')
+    teks(f'D{r}:E{r}', f'=IF(OR({SEL["peringkat_pondok"]}<>"YA",{cp("K", idx)}=""),"",'
+                       f'"الترتيب العلمي : "&{arab(cp("K", idx))})', bold=True, size=11, h='center')
+    for rng in (f'I{r}:K{r}', f'F{r}:H{r}', f'D{r}:E{r}'):
         kotak(rng, atas=hj_tebal)
-    tinggi(r, 24)
+    tinggi(r, 22)
     r += 1
     tinggi(r, 9)
     r += 1
-    # ---- pembiasaan (kanan, D..H) dan kehadiran (kiri, B..C)
-    teks(f'D{r}:H{r}', 'التعود على الذات', bold=True, h='center', size=12)
-    teks(f'B{r}:C{r}', 'كشف الحضور', bold=True, h='center', size=12)
-    tinggi(r, 21)
+    # ---- pembiasaan (kanan, G..K) dan kehadiran (kiri, D..E); F = celah
+    teks(f'G{r}:K{r}', 'التعود على الذات', bold=True, h='center', size=11)
+    teks(f'D{r}:E{r}', 'كشف الحضور', bold=True, h='center', size=11)
+    tinggi(r, 20)
     awal = r
     hadir = [('مرض', 'L'), ('إذن', 'M'), ('بدون إذن', 'N')]
     for k in range(4):
         rr = r + 1 + k
         kol = 'CDEF'[k]
-        teks(f'D{rr}:H{rr}', f'="{ANGKA_ARAB[k + 1]}. "&IF({cp(kol, idx)}="",{q(CP)}!${kol}$8,{cp(kol, idx)})',
-             size=10, bungkus=True, font='Arial')
+        teks(f'G{rr}:K{rr}', f'="{SP}{ANGKA_ARAB[k + 1]}. "&IF({cp(kol, idx)}="",{q(CP)}!${kol}$8,{cp(kol, idx)})&"{SP}"',
+             size=9, bungkus=True)
         if k < 3:
             lbl, kh = hadir[k]
             n = f"INDEX({q(EKS)}!${kh}${EKS1}:${kh}${EKS1 + MAKS - 1},{idx})"
-            tulis_arab(ws, f'C{rr}', lbl, size=11, font='Arial')
-            tulis_arab(ws, f'B{rr}', f'={hari_arab(n)}', size=11, bold=True, h='center', font='Arial')
-        tinggi(rr, 23)
-    kotak(f'D{awal}:H{awal}')
-    kotak(f'B{awal}:C{awal}')
-    kotak(f'D{awal + 1}:H{awal + 4}', dalam=titik)
-    kotak(f'B{awal + 1}:C{awal + 4}', dalam=titik)
+            ar(f'E{rr}', SP + lbl + SP, size=10.5)
+            ar(f'D{rr}', f'={hari_arab(n)}', size=10.5, bold=True, h='center')
+        tinggi(rr, 22)
+    kotak(f'G{awal}:K{awal}')
+    kotak(f'D{awal}:E{awal}')
+    kotak(f'G{awal + 1}:K{awal + 4}', dalam=titik)
+    kotak(f'D{awal + 1}:E{awal + 4}', dalam=titik)
     r = awal + 5
     tinggi(r, 9)
     r += 1
     # ---- catatan wali kelas
-    teks(f'B{r}:H{r}', f'="ملاحظة ولي الفصل :  "&IF({cp("G", idx)}<>"",{cp("G", idx)},IF({rata_}="","",'
-                       f'VLOOKUP({rata_},{q(DATA)}!$E$13:$F$16,2,TRUE)))', bungkus=True, size=11, font='Arial')
-    kotak(f'B{r}:H{r}')
-    tinggi(r, 32)
+    teks(f'D{r}:K{r}', f'="{SP}ملاحظة ولي الفصل : "&IF({cp("G", idx)}<>"",{cp("G", idx)},IF({rata_}="","",'
+                       f'VLOOKUP({rata_},{q(DATA)}!$E$13:$F$16,2,TRUE)))&"{SP}"', bungkus=True, size=10.5)
+    kotak(f'D{r}:K{r}')
+    tinggi(r, 30)
     r += 1
-    tinggi(r, 9)
+    tinggi(r, 10)
     r += 1
     # ---- tanggal Hijriah + Masehi, tanda tangan
-    teks(f'D{r}:H{r}', f'={SEL["tempat_arab"]}&"، "&{SEL["hijriah"]}&" هـ / "&{masehi_arab(SEL["tanggal"])}&" م"',
-         bold=True, size=12)
+    teks(f'G{r}:K{r}', f'={SEL["tempat_arab"]}&"، "&{SEL["hijriah"]}&" هـ / "&{masehi_arab(SEL["tanggal"])}&" م"',
+         bold=True, size=10.5)
     tinggi(r, 18)
     r += 1
-    teks(f'F{r}:H{r}', 'مدير المعهد', bold=True, h='center', size=13)
-    teks(f'D{r}:E{r}', 'ولي الفصل', bold=True, h='center', size=13)
-    teks(f'B{r}:C{r}', 'ولي الطالب', bold=True, h='center', size=13)
+    teks(f'I{r}:K{r}', 'مدير المعهد', bold=True, h='center', size=11)
+    teks(f'F{r}:H{r}', 'ولي الفصل', bold=True, h='center', size=11)
+    teks(f'D{r}:E{r}', 'ولي الطالب', bold=True, h='center', size=11)
     tinggi(r, 18)
     baris_cap = r + 1
     for k in range(1, 4):
-        tinggi(r + k, 17)
+        tinggi(r + k, 16)
     r += 4
-    teks(f'F{r}:H{r}', f'={SEL["pimpinan_arab"]}', bold=True, underline='single', size=13, h='center')
-    teks(f'D{r}:E{r}', f'={SEL["wali_arab"]}', bold=True, h='center', underline='single', size=13)
+    teks(f'I{r}:K{r}', f'={SEL["pimpinan_arab"]}', bold=True, underline='single', size=11, h='center')
+    teks(f'F{r}:H{r}', f'={SEL["wali_arab"]}', bold=True, h='center', underline='single', size=11)
     ayah = siswa('Nama Ayah (Arab)', idx)
-    teks(f'B{r}:C{r}', f'=IF({ayah}="",{siswa("Nama Ayah", idx)},{ayah})', bold=True, h='center',
-         underline='single', size=13)
+    teks(f'D{r}:E{r}', f'=IF({ayah}="",{siswa("Nama Ayah", idx)},{ayah})', bold=True, h='center',
+         underline='single', size=11)
     tinggi(r, 18)
-    r += 1
-    tinggi(r, 12)
-    akhir = r
-    # ---- bingkai ganda hijau di pinggir halaman
-    ganda = Side(style='double', color=HIJAU_C3)
-    for rr in range(1, akhir + 1):
-        for c in 'ABCDEFGHI':
-            sel = ws[f'{c}{rr}']
-            if c in 'AI' or rr in (1, akhir):
-                b = sel.border
-                sel.border = Border(left=ganda if c == 'A' else b.left, right=ganda if c == 'I' else b.right,
-                                    top=ganda if rr == 1 else b.top, bottom=ganda if rr == akhir else b.bottom)
+    # ---- pinggir bawah
+    tinggi(r + 1, 7)
+    tinggi(r + 2, 5)
+    tinggi(r + 3, 12)
+    akhir = r + 3
+    bingkai(2, akhir - 1, 2, 13, Side(style='double', color=HIJAU_C3))      # garis ganda hijau
+    bingkai(3, akhir - 2, 3, 12, Side(style='thin', color=EMAS_C3))         # garis emas tipis
     # ---- gambar
     px_baris = [0] + [int((ws.row_dimensions[i].height or 15) * 4 / 3) for i in range(1, akhir + 1)]
 
@@ -1204,17 +1219,28 @@ def buat_rapor_pondok(wb):
 
     lebar_total, tinggi_total = sum(px_kol), sum(px_baris)
     y_baris = lambda n: sum(px_baris[1:n])     # noqa: E731  (atas baris n)
-    isi_w = sum(px_kol[1:8])
-    pasang('air_c3.png', px_kol[0] + (isi_w - 330) // 2, y_baris(17) + 40, 330, 330)
-    pasang('kop_c3.png', px_kol[0], y_baris(2), isi_w, int(isi_w * 312 / 2127))
-    lebar_kanan = sum(px_kol[6:9]) - px_kol[8]
-    pasang('stempel_c3.png', sum(px_kol[:6]) + (lebar_kanan - 50) // 2, y_baris(baris_cap) + 1, 50, 50)
-    s = 22
-    for x, y in ((0, 0), (lebar_total - s, 0), (0, tinggi_total - s), (lebar_total - s, tinggi_total - s)):
-        pasang('sudut_c3.png', x, y, s, s)
-    siapkan_cetak(ws, f'A1:I{akhir}', satu_halaman=True)
-    ws.page_margins.left = ws.page_margins.right = 0.3
-    ws.page_margins.top = ws.page_margins.bottom = 0.3
+    x_isi = sum(px_kol[:3])
+    isi_w = sum(px_kol[3:11])
+    pasang('air_c3.png', x_isi + (isi_w - 340) // 2, y_baris(21) + 30, 340, 340)
+    pasang('kop_c3.png', x_isi, y_baris(4), isi_w, int(isi_w * 312 / 2127))
+    x_kanan = sum(px_kol[:8])
+    lebar_kanan = sum(px_kol[8:11])
+    pasang('stempel_c3.png', x_kanan + (lebar_kanan - 50) // 2, y_baris(baris_cap) + 2, 50, 50)
+    # hiasan sudut: titik tengahnya di sudut garis ganda (dipasang menurut kolom/baris, bukan piksel total)
+    s = 24
+    kanan_off = px_kol[11] + px_kol[12] - s // 2
+    bawah_off = px_baris[akhir - 2] + px_baris[akhir - 1] - s // 2
+    for col, cof, row, rof in ((0, px_kol[0] - s // 2, 0, px_baris[1] - s // 2), (11, kanan_off, 0, px_baris[1] - s // 2),
+                               (0, px_kol[0] - s // 2, akhir - 3, bawah_off), (11, kanan_off, akhir - 3, bawah_off)):
+        g = Gambar(os.path.join(DI_SINI, 'aset', 'sudut_c3.png'))
+        g.width = g.height = s
+        g.anchor = OneCellAnchor(_from=AnchorMarker(col=col, colOff=pixels_to_EMU(max(0, cof)), row=row,
+                                                    rowOff=pixels_to_EMU(max(0, rof))),
+                                 ext=XDRPositiveSize2D(pixels_to_EMU(s), pixels_to_EMU(s)))
+        ws.add_image(g)
+    siapkan_cetak(ws, f'A1:N{akhir}', satu_halaman=True)
+    ws.page_margins.left = ws.page_margins.right = 0.25
+    ws.page_margins.top = ws.page_margins.bottom = 0.25
 
 
 def buat_p5_input(wb, n):
@@ -1456,15 +1482,12 @@ def isi_contoh(wb):
             for j in range(len(tps)):
                 w[f'{gl(3 + j)}{r}'] = rnd.randint(64, 96)
             w[f'N{r}'] = rnd.randint(68, 95)
-    for tab in ('HADIST', 'FIQIH', 'NAHWU', 'TASRIF'):
+    for tab in URUT_PONDOK:
         w = wb[tab]
         w['C4'] = 'Ustadz Contoh'
         for i in range(len(NAMA_CONTOH)):
-            r = BARIS1 + i
             for col in 'CDEFGHIJ':
-                if tab == 'TASRIF' and col in 'GHI':
-                    continue
-                w[f'{col}{r}'] = rnd.randint(70, 95)
+                w[f'{col}{BARIS1 + i}'] = rnd.randint(55 if tab == 'TARIKH' else 70, 96)
     for n, (judul, desk, aspek, catatan) in enumerate(P5_CONTOH, 1):
         w = wb[f'P5 PROYEK {n}']
         w['C4'], w['C5'] = judul, desk
@@ -1474,12 +1497,6 @@ def isi_contoh(wb):
             for k in range(len(aspek)):
                 w[f'{gl(3 + k)}{BARIS1 + i}'] = rnd.choice(['MB', 'BSH', 'BSH', 'SB'])
             w[f'J{BARIS1 + i}'] = catatan
-    for tab in ('BAHASA ARAB', 'TAUHID', 'TARIKH', 'MAHFUZATH'):
-        w = wb[tab]
-        w['C4'] = 'Ustadz Contoh'
-        for i in range(len(NAMA_CONTOH)):
-            for col in 'CDEFGHIJ':
-                w[f'{col}{BARIS1 + i}'] = rnd.randint(55 if tab == 'TARIKH' else 70, 96)
     e = wb[EKS]
     for i in range(len(NAMA_CONTOH)):
         r = EKS1 + i

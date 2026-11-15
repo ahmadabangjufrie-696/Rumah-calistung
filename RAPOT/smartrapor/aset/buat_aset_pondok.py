@@ -73,7 +73,7 @@ def main():
     # tanda air: logo diperbesar, putih jadi tembus pandang, sisanya sangat samar
     im = Image.open(LOGO).convert('RGB').resize((600, 600), Image.LANCZOS)
     out = Image.new('RGBA', im.size)
-    px = [(r, g, b, int((255 - min(r, g, b)) / 255 * 255 * 0.07)) for r, g, b in im.get_flattened_data()]
+    px = [(r, g, b, int((255 - min(r, g, b)) / 255 * 255 * 0.06)) for r, g, b in im.get_flattened_data()]
     out.putdata(px)
     out.save(os.path.join(D, 'air_c3.png'))
     for f in os.listdir(tmp):

@@ -11,8 +11,9 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 ## Lokasi
 - Kode: repo `ahmadabangjufrie-696/rumah-calistung`, cabang `ccr-a2be243b-zifjyz`, folder `RAPOT/smartrapor/`.
 - Google Drive Ustadz, folder **SmartRapor (pengembangan)** (id `1eNMWSH69RC5ysRpjgDNyMhxcmrMnsO-p`):
-  - File contoh terbaru (15 Nov, raport pondok desain C3): **SmartRapor - Kelas IX B (contoh, desain C3)**
-    id `1ZBBI_k11yUSjbpIDXpuVZEkGzd_N2v84MuuvoMZ700U` (10 siswa buatan). Kode tombol **belum** ditempel.
+  - File contoh terbaru (15 Nov, raport pondok desain C3 rapi): **SmartRapor - Kelas IX B (contoh, desain C3 rapi)**
+    id `1fvT0Kmo0NEIoWMXLS9o8WEV6pW9ECkE3PhisTFWiCc8` (10 siswa buatan). Kode tombol **belum** ditempel.
+  - Percobaan C3 pertama (kurang rapi menurut Ustadz) `1ZBBI_k11yUSjbpIDXpuVZEkGzd_N2v84MuuvoMZ700U` = "LAMA 2".
   - File lama `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg` diberi nama "(contoh LAMA, jangan dipakai)".
   - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1xGjwftiR_-zsUhM8OT3ZeUPsMyMwFXod8qF10zrePiM`.
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
@@ -64,12 +65,15 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 ## Raport pondok desain C3 (DISETUJUI Ustadz 15 Nov, sudah dipasang)
 Contoh desain di `desain_pondok/` (HTML `buat_desain.py` + `foto.js`). Yang dipasang = **Desain_C3**, lengkap dengan
 QR keaslian, kotak كشف الحضور, tanggal Hijriah + Masehi, lingkaran stempel.
-- `buat_rapor_pondok` di `buat_smartrapor.py`: kolom A & I = pinggir bingkai (garis ganda hijau), isi B..H.
+- `buat_rapor_pondok` di `buat_smartrapor.py`: kolom A-C & L-N = pinggir (garis ganda hijau di tepi B/M, garis emas
+  di tepi C/L), isi D..K, F = celah sempit (jarak kotak kehadiran-pembiasaan; di tabel digabung dengan G).
+  Huruf Arab: Noto Naskh Arabic (judul Amiri). Jarak tulisan dari garis = 2 spasi di depan & belakang teks.
+  Percobaan pertama (huruf Arial, tanpa celah/garis emas, mapel contoh banyak kosong) dinilai Ustadz "jelek".
   Gambar dari `aset/` (dibuat `aset/buat_aset_pondok.py`, huruf di `aset/huruf/`): `kop_c3.png` (tembus pandang,
   di atas B2:H6), `air_c3.png` (tanda air), `sudut_c3.png` (hiasan sudut), `stempel_c3.png`.
   Kop berupa gambar: untuk sekolah lain ubah KOP_* di `buat_aset_pondok.py` lalu jalankan ulang.
 - QR (B2) = `IMAGE("https://quickchart.io/qr?...")` berisi NIS, kelas, semester, tahun, jumlah, rata-rata (tanpa nama).
-  Google meminta izin sekali: klik sel QR di laptop → **Izinkan akses** (lewat API muncul #REF! sampai diizinkan).
+  Sel QR = D4. Google meminta izin sekali: klik sel QR di laptop → **Izinkan akses** (lewat API muncul #REF! sampai diizinkan).
 - Kehadiran diambil dari EKSKUL & CATATAN kolom L/M/N (sama dengan raport sekolah).
 - Tanggal Masehi Arab dari PENGATURAN "Tanggal raport" (teks "20 Juni 2026" atau tanggal asli).
 
