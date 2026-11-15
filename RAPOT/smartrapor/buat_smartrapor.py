@@ -721,6 +721,10 @@ def buat_rapor_sekolah(wb):
     ws.merge_cells(f'F{r}:G{r}')
     tulis(ws, f'C{r}', f'=IF({SEL["nip_wali"]}="","","NIP. "&{SEL["nip_wali"]})', size=9, h='center')
     tulis(ws, f'F{r}', f'=IF({SEL["nip_kepsek"]}="","","NIP. "&{SEL["nip_kepsek"]})', size=9)
+    # teks catatan kaki (dipakai tombol cetak; kolom J disembunyikan)
+    ws['J1'] = (f'={siswa("Nama Peserta Didik", idx)}&" / "&{SEL["kelas"]}&" Semester "&{SEL["semester"]}'
+                f'&" Tahun Ajaran "&{SEL["tahun"]}')
+    ws.column_dimensions['J'].hidden = True
     siapkan_cetak(ws, f'A1:G{r}')
 
 
@@ -1260,6 +1264,9 @@ def buat_rapor_p5(wb):
     # penanda baris untuk Apps Script (kolom G disembunyikan)
     for rr, t in penanda.items():
         ws[f'G{rr}'] = t
+    # teks catatan kaki di G1 (dipakai tombol cetak)
+    ws['G1'] = (f'={siswa("Nama Peserta Didik", idx)}&"/ "&{siswa("NISN", idx)}&" / "&{siswa("NIS", idx)}'
+                f'&": "&{SEL["kelas"]}&": "&{SEL["tahun"]}')
     ws.column_dimensions['G'].hidden = True
     siapkan_cetak(ws, f'A1:F{r}')
 

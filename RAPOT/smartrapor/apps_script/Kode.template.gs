@@ -134,22 +134,33 @@ function rapikanP5_() {
 }
 
 // ------------------------------------------------------------------ cetak
+// Setiap halaman cetak diekspor sendiri (paralel), catatan kaki dicetakkan di bawah tiap halaman
+// RAPOR SEKOLAH dan RAPOR P5, lalu semuanya digabung menjadi satu PDF.
+var KAKI = { 'RAPOR SEKOLAH': 'J1', 'RAPOR P5': 'G1' };   // sel berisi teks catatan kaki
+
 function cetakSiswaIni() {
+  cetakSiswaIniProses_().catch(function (e) {
+    pesan_('Cetak gagal: ' + e.message + '\n\nFoto pesan ini dan kirim ke admin.');
+  });
+}
+
+async function cetakSiswaIniProses_() {
   var ss = SpreadsheetApp.getActive();
   var nama = pilihanSekarang_();
   if (!nama) { pesan_('Pilih dulu siswa di BERANDA.'); return; }
   if (!halamanCetak_().length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
   toast_('Membuat PDF ' + nama + ' ...');
   rapikanTinggi_();
-  var keadaan = sembunyikanSelainCetak_();
-  var pdf;
+  var bagian = eksporBagian_();
+  var pdf, catatan = '';
   try {
-    pdf = ambilPdf_();
-  } finally {
-    pulihkan_(keadaan);
+    pdf = await susunPdf_(bagian);
+  } catch (e) {
+    pdf = cadanganSatuPdf_();          // tanpa catatan kaki
+    catatan = '<br><span style="color:#b02a37">Catatan kaki belum bisa ditambahkan (' + e.message + ').</span>';
   }
   var file = folderPdf_().createFile(pdf.setName(nama + ' - ' + ss.getName() + '.pdf'));
-  tampilkanLink_('PDF raport <b>' + nama + '</b> sudah jadi.', file.getUrl(), 'Buka PDF');
+  tampilkanLink_('PDF raport <b>' + nama + '</b> sudah jadi.' + catatan, file.getUrl(), 'Buka PDF');
 }
 
 // Tombol dan menu tidak bisa memanggil fungsi async secara langsung,
@@ -166,44 +177,90 @@ async function cetakSekelasProses_() {
   if (!daftar.length) { pesan_('Data siswa masih kosong. Isi dulu halaman SISWA.'); return; }
   if (!halamanCetak_().length) { pesan_('Centang dulu raport yang mau dicetak di BERANDA (Yang dicetak).'); return; }
   var awal = pilihanSekarang_();
-  var blobs = [];
-  var keadaan = sembunyikanSelainCetak_();
+  var semua = [];
   try {
     for (var i = 0; i < daftar.length; i++) {
       toast_('Menyiapkan ' + (i + 1) + ' dari ' + daftar.length + ': ' + daftar[i]);
       pilih_(daftar[i]);
-      blobs.push(ambilPdf_().setName(daftar[i] + '.pdf'));
+      eksporBagian_().forEach(function (b) { b.siswa = daftar[i]; semua.push(b); });
     }
   } finally {
-    pulihkan_(keadaan);
     if (awal) pilih_(awal);
   }
   var folder = folderPdf_();
   try {
-    toast_('Menggabungkan ' + blobs.length + ' raport menjadi satu PDF ...');
-    var gabung = await gabungPdf_(blobs);
+    toast_('Menggabungkan raport ' + daftar.length + ' siswa menjadi satu PDF ...');
+    var gabung = await susunPdf_(semua);
     var file = folder.createFile(gabung.setName('Raport sekelas - ' + ss.getName() + '.pdf'));
     tampilkanLink_('PDF <b>' + daftar.length + ' siswa</b> sudah jadi dalam satu berkas.', file.getUrl(), 'Buka PDF');
   } catch (e) {
-    // cadangan: simpan per siswa dalam satu folder
+    // cadangan: simpan tiap halaman per siswa dalam satu folder (tanpa catatan kaki)
     var sub = folder.createFolder('Raport sekelas - ' + ss.getName() + ' - ' +
       Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), 'dd-MM-yyyy HH.mm'));
-    blobs.forEach(function (b, k) {
-      sub.createFile(b.setName(('0' + (k + 1)).slice(-2) + ' - ' + b.getName()));
+    semua.forEach(function (b, k) {
+      sub.createFile(b.blob.setName(('00' + (k + 1)).slice(-3) + ' - ' + b.siswa + ' - ' + b.sheet + '.pdf'));
     });
-    tampilkanLink_('PDF sudah jadi, satu berkas per siswa (penggabungan gagal: ' + e.message + ').',
-      sub.getUrl(), 'Buka folder PDF');
+    tampilkanLink_('PDF sudah jadi per halaman (penggabungan gagal: ' + e.message + ').', sub.getUrl(),
+      'Buka folder PDF');
   }
 }
 
-// sembunyikan semua halaman kecuali halaman cetak; ekspor PDF hanya memuat halaman yang tampil
+// Ekspor tiap halaman yang dicentang untuk siswa yang sedang dipilih.
+// Hasil: [{sheet, blob, kaki}] sesuai urutan cetak.
+function eksporBagian_() {
+  var ss = SpreadsheetApp.getActive();
+  SpreadsheetApp.flush();
+  var nama = halamanCetak_().filter(function (n) { return ss.getSheetByName(n); });
+  var hasil = nama.map(function (n) {
+    var sh = ss.getSheetByName(n);
+    return { sheet: n, url: urlEkspor_(sh.getSheetId()),
+             kaki: KAKI[n] ? sh.getRange(KAKI[n]).getDisplayValue() : '' };
+  });
+  var permintaan = hasil.map(function (h) {
+    return { url: h.url, headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }, muteHttpExceptions: true };
+  });
+  var jawab = UrlFetchApp.fetchAll(permintaan);
+  hasil.forEach(function (h, i) {
+    var r = jawab[i];
+    h.blob = r.getResponseCode() === 200 ? r.getBlob().setContentType('application/pdf') : ambilPdf_(h.url);
+  });
+  return hasil;
+}
+
+function urlEkspor_(gid) {
+  return 'https://docs.google.com/spreadsheets/d/' + SpreadsheetApp.getActive().getId() + '/export?format=pdf' +
+    (gid === undefined ? '' : '&gid=' + gid) +
+    '&size=A4&portrait=true&fitw=true&gridlines=false&printtitle=false&sheetnames=false' +
+    '&pagenum=UNDEFINED&fzr=false&horizontal_alignment=CENTER&vertical_alignment=TOP' +
+    '&top_margin=0.4&bottom_margin=0.5&left_margin=0.5&right_margin=0.5';
+}
+
+function ambilPdf_(url) {
+  url = url || urlEkspor_();
+  for (var k = 0; k < 6; k++) {
+    var r = UrlFetchApp.fetch(url, {
+      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+      muteHttpExceptions: true
+    });
+    if (r.getResponseCode() === 200) return r.getBlob().setContentType('application/pdf');
+    if (r.getResponseCode() === 429) { Utilities.sleep(4000 * (k + 1)); continue; }
+    throw new Error('Gagal membuat PDF (kode ' + r.getResponseCode() + ').');
+  }
+  throw new Error('Google sedang sibuk. Tunggu sebentar lalu coba lagi.');
+}
+
+// Cadangan bila pdf-lib gagal: satu ekspor berisi semua halaman yang dicentang (tanpa catatan kaki).
+function cadanganSatuPdf_() {
+  var keadaan = sembunyikanSelainCetak_();
+  try { return ambilPdf_(); } finally { pulihkan_(keadaan); }
+}
+
 function sembunyikanSelainCetak_() {
   var ss = SpreadsheetApp.getActive();
   var halaman = halamanCetak_();
   var keadaan = ss.getSheets().map(function (s) { return { sheet: s, tersembunyi: s.isSheetHidden() }; });
-  var pertama = ss.getSheetByName(halaman[0]);
   halaman.forEach(function (n) { var s = ss.getSheetByName(n); if (s) s.showSheet(); });
-  pertama.activate();
+  ss.getSheetByName(halaman[0]).activate();
   keadaan.forEach(function (k) {
     if (halaman.indexOf(k.sheet.getName()) < 0 && !k.tersembunyi) k.sheet.hideSheet();
   });
@@ -218,25 +275,6 @@ function pulihkan_(keadaan) {
   SpreadsheetApp.flush();
 }
 
-function ambilPdf_() {
-  var ss = SpreadsheetApp.getActive();
-  SpreadsheetApp.flush();
-  var url = 'https://docs.google.com/spreadsheets/d/' + ss.getId() + '/export?format=pdf' +
-    '&size=A4&portrait=true&fitw=true&gridlines=false&printtitle=false&sheetnames=false' +
-    '&pagenum=UNDEFINED&fzr=false&horizontal_alignment=CENTER&vertical_alignment=TOP' +
-    '&top_margin=0.4&bottom_margin=0.4&left_margin=0.5&right_margin=0.5';
-  for (var k = 0; k < 6; k++) {
-    var r = UrlFetchApp.fetch(url, {
-      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
-      muteHttpExceptions: true
-    });
-    if (r.getResponseCode() === 200) return r.getBlob().setContentType('application/pdf');
-    if (r.getResponseCode() === 429) { Utilities.sleep(4000 * (k + 1)); continue; }
-    throw new Error('Gagal membuat PDF (kode ' + r.getResponseCode() + ').');
-  }
-  throw new Error('Google sedang sibuk. Tunggu sebentar lalu coba lagi.');
-}
-
 function folderPdf_() {
   var ss = SpreadsheetApp.getActive();
   var induk = DriveApp.getFileById(ss.getId()).getParents();
@@ -245,7 +283,7 @@ function folderPdf_() {
   return ada.hasNext() ? ada.next() : tempat.createFolder(SR.FOLDER_PDF);
 }
 
-// ------------------------------------------------------------------ gabung PDF (pdf-lib)
+// ------------------------------------------------------------------ susun PDF + catatan kaki (pdf-lib)
 function pdfLib_() {
   if (typeof PDFLib !== 'undefined') return PDFLib;
   var g = globalThis;
@@ -258,13 +296,26 @@ function pdfLib_() {
   return g.PDFLib;
 }
 
-async function gabungPdf_(blobs) {
+// huruf standar PDF hanya mengenal huruf Latin; huruf lain dibuang dari catatan kaki
+function teksLatin_(t) { return String(t || '').replace(/[^\x20-\x7E\xA0-\xFF]/g, ''); }
+
+async function susunPdf_(bagian) {
   var L = pdfLib_();
   var hasil = await L.PDFDocument.create();
-  for (var i = 0; i < blobs.length; i++) {
-    var dok = await L.PDFDocument.load(new Uint8Array(blobs[i].getBytes()));
+  var huruf = await hasil.embedFont(L.StandardFonts.Helvetica);
+  var ukuran = 8;
+  for (var i = 0; i < bagian.length; i++) {
+    var dok = await L.PDFDocument.load(new Uint8Array(bagian[i].blob.getBytes()));
     var hal = await hasil.copyPages(dok, dok.getPageIndices());
-    hal.forEach(function (p) { hasil.addPage(p); });
+    var kaki = teksLatin_(bagian[i].kaki);
+    hal.forEach(function (p, k) {
+      hasil.addPage(p);
+      if (!kaki) return;
+      var lebar = p.getWidth();
+      var kanan = 'Halaman ' + (k + 1) + ' dari ' + hal.length;
+      p.drawText(kaki, { x: 36, y: 18, size: ukuran, font: huruf });
+      p.drawText(kanan, { x: lebar - 36 - huruf.widthOfTextAtSize(kanan, ukuran), y: 18, size: ukuran, font: huruf });
+    });
   }
   var bytes = await hasil.save();
   var data = Array.prototype.map.call(bytes, function (x) { return x > 127 ? x - 256 : x; });

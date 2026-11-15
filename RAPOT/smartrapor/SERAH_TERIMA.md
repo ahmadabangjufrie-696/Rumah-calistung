@@ -13,7 +13,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 - Google Drive Ustadz, folder **SmartRapor (pengembangan)** (id `1eNMWSH69RC5ysRpjgDNyMhxcmrMnsO-p`):
   - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
     (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1pjpuqZ26hQdPUUqMHmDxPEfool4jjWnmca7pRpx5v74`.
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1xGjwftiR_-zsUhM8OT3ZeUPsMyMwFXod8qF10zrePiM`.
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
 ## Berkas
@@ -41,10 +41,15 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 - Uji: LibreOffice (`soffice --headless --convert-to xlsx/pdf`) untuk rumus & tampilan; Node + tiruan Apps Script untuk
   kode tombol (`node --check`, lalu tiruan layanan). Apps Script tidak bisa dijalankan dari server; Ustadz yang mencoba.
 - Pelajaran: fungsi `async` tidak bisa dipanggil langsung dari tombol/menu (pakai fungsi biasa pembungkus).
+  File Google berlokal id_ID: rumus lewat API memakai pemisah titik-koma (`;`), bukan koma.
+  Catatan kaki raport sekolah (RAPOR SEKOLAH!J1, kolom J tersembunyi) dan P5 (RAPOR P5!G1) dicetakkan tombol cetak
+  dengan pdf-lib (tiap halaman diekspor terpisah memakai gid + fetchAll, lalu digabung). Uji: scratchpad nodetes/uji2.js.
   Sel gabungan tidak menyesuaikan tinggi sendiri (tinggi diatur skrip `rapikanTinggi_`). Huruf Amiri tidak ada di
   LibreOffice server (tampil kotak), di Google normal.
 
 ## Status terakhir
+- Catatan kaki ("NAMA / Kelas Semester ... Tahun Ajaran ...  Halaman x dari y") ditambahkan; kode tombol baru
+  (dokumen KODE terbaru) **perlu ditempel ulang** oleh Ustadz, lalu dicoba cetak.
 - Selesai & sudah dicoba Ustadz: tombol, cetak siswa ini (PDF berhasil).
 - Raport pondok baru saja diperbesar agar memenuhi 1 halaman A4 (perubahan langsung di file). **Menunggu Ustadz mencoba cetak.**
 - Cetak sekelas: sudah diperbaiki (pembungkus fungsi biasa), **belum dikonfirmasi** Ustadz.
