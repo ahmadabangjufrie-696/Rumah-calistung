@@ -60,6 +60,12 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 3. Peringkat raport pondok disembunyikan (PENGATURAN: YA/TIDAK).
 4. "Tulisan yang salah" di raport pondok: Ustadz belum menunjuk kata mana; minta foto/lingkari.
 
+## Desain baru raport pondok (sedang dipilih Ustadz)
+Contoh gambar di `desain_pondok/` (Desain_A Klasik Islami, Desain_B Modern Elegan, Desain_C Hemat Tinta),
+dibuat dengan `buat_desain.py` (HTML) + `foto.js` (Playwright). Huruf dari npm @fontsource (amiri, aref-ruqaa,
+noto-naskh-arabic, poppins, cormorant-garamond). Tambahan yang ditawarkan: QR keaslian, kehadiran (كشف الحضور),
+tanggal Hijriah + Masehi, kotak stempel. **Menunggu pilihan Ustadz.**
+
 ## Rencana berikutnya
 - Rapikan BERANDA (tabel progres & panel cetak), uji cetak sekelas.
 - Raport SD dan MA (minta contoh raport).
