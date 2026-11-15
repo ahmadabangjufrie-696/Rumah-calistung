@@ -11,8 +11,9 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
 ## Lokasi
 - Kode: repo `ahmadabangjufrie-696/rumah-calistung`, cabang `ccr-a2be243b-zifjyz`, folder `RAPOT/smartrapor/`.
 - Google Drive Ustadz, folder **SmartRapor (pengembangan)** (id `1eNMWSH69RC5ysRpjgDNyMhxcmrMnsO-p`):
-  - File contoh terbaru: **SmartRapor - Kelas IX B (contoh)** id `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg`
-    (10 siswa buatan; kode tombol mungkin sudah ditempel Ustadz di file ini).
+  - File contoh terbaru (15 Nov, raport pondok desain C3): **SmartRapor - Kelas IX B (contoh, desain C3)**
+    id `1ZBBI_k11yUSjbpIDXpuVZEkGzd_N2v84MuuvoMZ700U` (10 siswa buatan). Kode tombol **belum** ditempel.
+  - File lama `1RrOsB1wzFYdhMeXDG2L2GHZ2lKGxZK2BGDrwohq-mGg` diberi nama "(contoh LAMA, jangan dipakai)".
   - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1xGjwftiR_-zsUhM8OT3ZeUPsMyMwFXod8qF10zrePiM`.
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
@@ -60,22 +61,22 @@ DATA ARAB (terbilang, batas predikat, catatan otomatis). Siswa pertama di tab ma
 3. Peringkat raport pondok disembunyikan (PENGATURAN: YA/TIDAK).
 4. "Tulisan yang salah" di raport pondok: Ustadz belum menunjuk kata mana; minta foto/lingkari.
 
-## Desain baru raport pondok (sedang dipilih Ustadz)
-Contoh gambar di `desain_pondok/` (Desain_A Klasik Islami, Desain_B Modern Elegan, Desain_C Hemat Tinta),
-dibuat dengan `buat_desain.py` (HTML) + `foto.js` (Playwright). Huruf dari npm @fontsource (amiri, aref-ruqaa,
-noto-naskh-arabic, poppins, cormorant-garamond). Tambahan yang ditawarkan: QR keaslian, kehadiran (كشف الحضور),
-tanggal Hijriah + Masehi, kotak stempel.
-**Pilihan (usul Ustadz Hafid Abdillah): Desain_C2** = desain C + semua tulisan kop berwarna hijau (#0F5132, latar tetap putih) + tanda air logo samar di tengah. Lalu Ustadz minta garis hijau & emas seperti desain A → **Desain_C3** (bingkai & garis tabel hijau, ornamen sudut, garis bawah kop/judul emas, kotak catatan wali kelas bergaris tipis hijau di semua sisi; ada jarak antara nama Arab dan nama Latin di kop (huruf Arab tidak menyentuh huruf Latin); latar tetap putih). **Menunggu Ustadz Ahmad setuju sebelum dipasang ke SmartRapor.**
-Belum diputuskan: QR keaslian, kotak كشف الحضور (butuh isian baru), tanggal Hijriah + Masehi, kotak stempel.
+## Raport pondok desain C3 (DISETUJUI Ustadz 15 Nov, sudah dipasang)
+Contoh desain di `desain_pondok/` (HTML `buat_desain.py` + `foto.js`). Yang dipasang = **Desain_C3**, lengkap dengan
+QR keaslian, kotak كشف الحضور, tanggal Hijriah + Masehi, lingkaran stempel.
+- `buat_rapor_pondok` di `buat_smartrapor.py`: kolom A & I = pinggir bingkai (garis ganda hijau), isi B..H.
+  Gambar dari `aset/` (dibuat `aset/buat_aset_pondok.py`, huruf di `aset/huruf/`): `kop_c3.png` (tembus pandang,
+  di atas B2:H6), `air_c3.png` (tanda air), `sudut_c3.png` (hiasan sudut), `stempel_c3.png`.
+  Kop berupa gambar: untuk sekolah lain ubah KOP_* di `buat_aset_pondok.py` lalu jalankan ulang.
+- QR (B2) = `IMAGE("https://quickchart.io/qr?...")` berisi NIS, kelas, semester, tahun, jumlah, rata-rata (tanpa nama).
+  Google meminta izin sekali: klik sel QR di laptop → **Izinkan akses** (lewat API muncul #REF! sampai diizinkan).
+- Kehadiran diambil dari EKSKUL & CATATAN kolom L/M/N (sama dengan raport sekolah).
+- Tanggal Masehi Arab dari PENGATURAN "Tanggal raport" (teks "20 Juni 2026" atau tanggal asli).
 
-## Langkah pertama sesi baru
-1. Tanyakan jawaban Ustadz: Desain_C3 sudah cocok? Tambahan mana yang dipakai (QR keaslian, kotak كشف الحضور,
-   tanggal Hijriah + Masehi, lingkaran stempel)? Lihat `desain_pondok/Desain_C3.png` dan `buat_desain.py`
-   (`desain_a(hitam_putih=True, kop_hijau=True, tanda_air=True, garis_warna=True)`).
-2. Setelah setuju: pasang desain C3 ke halaman RAPOR PONDOK di `buat_smartrapor.py` dan file Google contoh.
-3. Ingatkan PR Ustadz: tempel ulang kode tombol + coba CETAK SISWA INI (catatan kaki), coba raport pondok 1 lembar A4,
-   coba CETAK SEKELAS, periksa batas predikat/tanggal Hijriah/peringkat, tunjukkan "tulisan yang salah".
-4. Ustadz tidak bisa mengobrol pakai suara di sini; sarankan mikrofon di papan ketik HP.
+## Langkah berikutnya
+1. Ustadz membuka file baru → klik sel QR → Izinkan akses; tempel kode tombol (dokumen KODE) → Pasang tombol.
+2. Coba CETAK SISWA INI (catatan kaki), raport pondok 1 lembar A4, CETAK SEKELAS.
+3. Periksa batas predikat/tanggal Hijriah/peringkat, tunjukkan "tulisan yang salah".
 
 ## Rencana berikutnya
 - Rapikan BERANDA (tabel progres & panel cetak), uji cetak sekelas.
