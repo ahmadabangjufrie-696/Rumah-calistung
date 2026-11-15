@@ -117,7 +117,7 @@ PENGATURAN = [  # kunci, label, nilai bawaan
     ('semester', 'Semester', 'Genap'),
     ('tahun', 'Tahun pelajaran', '2025/2026'),
     ('tempat', 'Tempat penandatanganan', 'Tanjung Selor'),
-    ('tanggal', 'Tanggal raport', '20 Juni 2026'),
+    ('tanggal', 'Tanggal raport (Masehi)', ('masehi', 20, 'Juni', 2026)),
     ('wali', 'Wali kelas', 'Ahmad Jufri'),
     ('nip_wali', 'NIP wali kelas', ''),
     ('kktp', 'KKTP bawaan (nilai tuntas)', 70),
@@ -128,7 +128,7 @@ PENGATURAN = [  # kunci, label, nilai bawaan
     ('wali_arab', 'Wali kelas (tulisan Arab)', 'أحمد الجفري'),
     ('kelas_angka', 'Kelas (angka, untuk raport Arab)', 9),
     ('tempat_arab', 'Tempat (tulisan Arab)', 'تانجونج سيلور'),
-    ('hijriah', 'Tanggal Hijriah (tulisan Arab)', '٥ مُحَرَّم ١٤٤٨'),
+    ('hijriah', 'Tanggal raport (Hijriah)', ('hijri', 5, 'Muharram', 1448)),
     ('peringkat_pondok', 'Tampilkan peringkat di raport pondok (YA/TIDAK)', 'TIDAK'),
     ('keputusan', 'Kalimat keputusan (akhir catatan)',
      'Berdasarkan putusan rapat dewan guru serta memperhatikan capaian pembelajaran semester ganjil dan '
@@ -168,6 +168,50 @@ def rentang_siswa(tab, kol, awal=BARIS1):
 
 
 # ---------------------------------------------------------------- PENGATURAN
+BULAN_MASEHI = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September',
+                'Oktober', 'November', 'Desember']
+BULAN_HIJRI = [('Muharram', 'مُحَرَّم'), ('Shafar', 'صَفَر'), ('Rabiul Awal', 'رَبِيع الأَوَّل'),
+               ('Rabiul Akhir', 'رَبِيع الآخِر'), ('Jumadil Awal', 'جُمَادَى الأُولَى'),
+               ('Jumadil Akhir', 'جُمَادَى الآخِرَة'), ('Rajab', 'رَجَب'), ('Syaban', 'شَعْبَان'),
+               ('Ramadhan', 'رَمَضَان'), ('Syawal', 'شَوَّال'), ('Dzulqadah', 'ذُو القَعْدَة'),
+               ('Dzulhijjah', 'ذُو الحِجَّة')]
+
+
+def tanggal_pilih(ws, r, kunci, label, jenis, hari, bulan, tahun):
+    """Tanggal dipilih dari 3 daftar (tanggal, bulan, tahun); baris 'Hasil' dirangkai otomatis."""
+    if jenis == 'masehi':
+        daftar_bulan, maks, thn = BULAN_MASEHI, 31, range(2024, 2041)
+    else:
+        daftar_bulan, maks, thn = [a for a, _ in BULAN_HIJRI], 30, range(1445, 1466)
+    isi(ws, f'B{r}', label, size=10, bold=True, warna=HIJAU)
+    isi(ws, f'C{r}', 'pilih dari daftar ▾ (klik kotak kuning, lalu klik panah)', size=8, italic=True, warna='6C757D')
+    r += 1
+    sel = {}
+    for nama, nilai, pilihan in (('Tanggal', hari, [str(i) for i in range(1, maks + 1)]),
+                                 ('Bulan', bulan, daftar_bulan), ('Tahun', tahun, [str(t) for t in thn])):
+        isi(ws, f'B{r}', '      ' + nama, size=10, warna='495057')
+        isi(ws, f'C{r}', nilai, size=10, bold=True, latar=KUNING, border=KOTAK, h='left')
+        dv = DataValidation(type='list', formula1='"' + ','.join(pilihan) + '"', showErrorMessage=True,
+                            error='Pilih dari daftar.', allow_blank=False)
+        ws.add_data_validation(dv)
+        dv.add(f'C{r}')
+        sel[nama] = f'$C${r}'
+        r += 1
+    t, b, y = sel['Tanggal'], sel['Bulan'], sel['Tahun']
+    if jenis == 'masehi':
+        rumus = f'={t}&" "&{b}&" "&{y}'
+    else:
+        bln = b
+        for lat, ar_ in BULAN_HIJRI:
+            bln = f'SUBSTITUTE({bln},"{lat}","{ar_}")'
+        rumus = f'={arab(t)}&" "&{bln}&" "&{arab(y)}'
+    isi(ws, f'B{r}', '      Hasil (otomatis)', size=10, italic=True, warna='6C757D')
+    isi(ws, f'C{r}', rumus, size=11 if jenis == 'hijri' else 10, bold=True, latar='E9F2EC', border=KOTAK,
+        warna=HIJAU, h='right' if jenis == 'hijri' else 'left')
+    SEL[kunci] = f'PENGATURAN!$C${r}'
+    return r + 1
+
+
 def buat_pengaturan(wb):
     ws = wb.create_sheet('PENGATURAN')
     pita_judul(ws, 'Pengaturan', 'Isi sekali setiap semester. Semua halaman raport mengambil data dari sini.', 'H')
@@ -180,6 +224,9 @@ def buat_pengaturan(wb):
             ws[f'B{r}'].border = Border(bottom=Side(style='medium', color=EMAS))
             ws[f'C{r}'].border = Border(bottom=Side(style='medium', color=EMAS))
             r += 1
+            continue
+        if isinstance(nilai, tuple):          # tanggal: hari, bulan, tahun dipilih dari daftar
+            r = tanggal_pilih(ws, r, kunci, label, *nilai)
             continue
         isi(ws, f'B{r}', label, size=10, warna='495057')
         c = isi(ws, f'C{r}', nilai, size=10, bold=True, latar=KUNING, bungkus=True, border=KOTAK)
