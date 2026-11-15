@@ -34,6 +34,8 @@ var TOMBOL = {
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('SmartRapor')
     .addItem('★ Buka Panel SmartRapor', 'bukaPanel')
+    .addItem('Panel terbuka otomatis: NYALAKAN', 'panelOtomatisNyala')
+    .addItem('Panel terbuka otomatis: MATIKAN', 'panelOtomatisMati')
     .addSeparator()
     .addItem('▲ Siswa sebelumnya', 'siswaSebelumnya')
     .addItem('▼ Siswa berikutnya', 'siswaBerikutnya')
@@ -349,6 +351,38 @@ var PANEL_HTML = __PANEL_HTML__;
 function bukaPanel() {
   var html = HtmlService.createHtmlOutput(PANEL_HTML).setWidth(1240).setHeight(760);
   SpreadsheetApp.getUi().showModalDialog(html, ' ');
+}
+
+// Panel terbuka sendiri saat file dibuka. Berlaku untuk akun yang menyalakannya saja
+// (setiap guru menyalakan sendiri bila mau).
+function panelOtomatisNyala() {
+  hapusPemicuPanel_();
+  ScriptApp.newTrigger('panelSaatBuka').forSpreadsheet(SpreadsheetApp.getActive()).onOpen().create();
+  pesan_('Panel otomatis sudah NYALA.\n\nMulai sekarang, setiap kali Ustadz/Ibu membuka file ini, ' +
+    'Panel SmartRapor langsung terbuka sendiri.\n\nUntuk mematikan: menu SmartRapor › Panel terbuka otomatis: MATIKAN.');
+}
+
+function panelOtomatisMati() {
+  var n = hapusPemicuPanel_();
+  pesan_(n ? 'Panel otomatis sudah MATI.\n\nPanel bisa dibuka lewat tombol emas di BERANDA.' :
+    'Panel otomatis memang belum dinyalakan.');
+}
+
+function hapusPemicuPanel_() {
+  var n = 0;
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'panelSaatBuka') { ScriptApp.deleteTrigger(t); n++; }
+  });
+  return n;
+}
+
+function panelSaatBuka(e) {
+  try {
+    var pembuka = e && e.user ? String(e.user.getEmail ? e.user.getEmail() : e.user) : '';
+    var pemilik = Session.getEffectiveUser().getEmail();
+    if (pembuka && pemilik && pembuka !== pemilik) return;   // hanya untuk yang menyalakan
+    bukaPanel();
+  } catch (err) { /* jangan ganggu pembukaan file */ }
 }
 
 function namaRentang_(nama) {
