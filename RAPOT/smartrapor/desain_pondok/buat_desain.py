@@ -96,20 +96,23 @@ def ornamen(warna):
     return 'data:image/svg+xml;base64,' + base64.b64encode(ORNAMEN.replace('WARNA', warna).encode()).decode()
 
 
-def desain_a(hitam_putih=False, kop_hijau=False, tanda_air=None):
+def desain_a(hitam_putih=False, kop_hijau=False, tanda_air=None, garis_warna=False):
     if hitam_putih:
         H, E, MUDA, GARIS, PUTIH_TEKS, LATAR_HEAD = '#000', '#555', '#fff', '#000', '#000', '#fff'
     else:
         H, E, MUDA, GARIS, PUTIH_TEKS, LATAR_HEAD = '#0F5132', '#B8932E', '#F3F8F5', '#0F5132', '#fff', '#0F5132'
+    if garis_warna:
+        E, GARIS = '#B8932E', '#0F5132'
+    BK = '#0F5132' if (garis_warna or not hitam_putih) else H
     KOP = '#0F5132' if (kop_hijau or not hitam_putih) else H
-    orn = ornamen(E if not hitam_putih else '#333')
+    orn = ornamen(E if (garis_warna or not hitam_putih) else '#333')
     logo = b64(LOGO)
     if tanda_air is None:
         tanda_air = not hitam_putih
     wm = f'<img class="wm" src="data:image/jpeg;base64,{logo}">' if tanda_air else ''
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>{FONTS}{DASAR}
 .halaman {{ padding: 26px 30px; }}
-.bingkai {{ position: absolute; inset: 14px; border: 3px double {H}; }}
+.bingkai {{ position: absolute; inset: 14px; border: 3px double {BK}; }}
 .bingkai2 {{ position: absolute; inset: 20px; border: 1px solid {E}; }}
 .sudut {{ position: absolute; width: 38px; height: 38px; background: #fff url('{orn}') center/30px no-repeat; }}
 .s1 {{ top: 4px; right: 4px; }} .s2 {{ top: 4px; left: 4px; }} .s3 {{ bottom: 4px; right: 4px; }} .s4 {{ bottom: 4px; left: 4px; }}
@@ -253,6 +256,7 @@ h1::before, h1::after {{ content: ''; flex: 1; height: 1px; background: #cfd8d3;
 
 
 for nama, html in (('A', desain_a()), ('B', desain_b()), ('C', desain_a(hitam_putih=True)),
-                   ('C2', desain_a(hitam_putih=True, kop_hijau=True, tanda_air=True))):
+                   ('C2', desain_a(hitam_putih=True, kop_hijau=True, tanda_air=True)),
+                   ('C3', desain_a(hitam_putih=True, kop_hijau=True, tanda_air=True, garis_warna=True))):
     open(os.path.join(D, f'desain_{nama}.html'), 'w', encoding='utf-8').write(html)
 print('ok')
