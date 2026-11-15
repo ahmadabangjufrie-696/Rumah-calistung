@@ -68,6 +68,15 @@ tanggal Hijriah + Masehi, kotak stempel.
 **Pilihan (usul Ustadz Hafid Abdillah): Desain_C2** = desain C + semua tulisan kop berwarna hijau (#0F5132, latar tetap putih) + tanda air logo samar di tengah. Lalu Ustadz minta garis hijau & emas seperti desain A → **Desain_C3** (bingkai & garis tabel hijau, ornamen sudut, garis bawah kop/judul emas, kotak catatan wali kelas bergaris tipis hijau di semua sisi; ada jarak antara nama Arab dan nama Latin di kop (huruf Arab tidak menyentuh huruf Latin); latar tetap putih). **Menunggu Ustadz Ahmad setuju sebelum dipasang ke SmartRapor.**
 Belum diputuskan: QR keaslian, kotak كشف الحضور (butuh isian baru), tanggal Hijriah + Masehi, kotak stempel.
 
+## Langkah pertama sesi baru
+1. Tanyakan jawaban Ustadz: Desain_C3 sudah cocok? Tambahan mana yang dipakai (QR keaslian, kotak كشف الحضور,
+   tanggal Hijriah + Masehi, lingkaran stempel)? Lihat `desain_pondok/Desain_C3.png` dan `buat_desain.py`
+   (`desain_a(hitam_putih=True, kop_hijau=True, tanda_air=True, garis_warna=True)`).
+2. Setelah setuju: pasang desain C3 ke halaman RAPOR PONDOK di `buat_smartrapor.py` dan file Google contoh.
+3. Ingatkan PR Ustadz: tempel ulang kode tombol + coba CETAK SISWA INI (catatan kaki), coba raport pondok 1 lembar A4,
+   coba CETAK SEKELAS, periksa batas predikat/tanggal Hijriah/peringkat, tunjukkan "tulisan yang salah".
+4. Ustadz tidak bisa mengobrol pakai suara di sini; sarankan mikrofon di papan ketik HP.
+
 ## Rencana berikutnya
 - Rapikan BERANDA (tabel progres & panel cetak), uji cetak sekelas.
 - Raport SD dan MA (minta contoh raport).
