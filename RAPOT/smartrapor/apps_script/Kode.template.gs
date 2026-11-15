@@ -302,7 +302,7 @@ function teksLatin_(t) { return String(t || '').replace(/[^\x20-\x7E\xA0-\xFF]/g
 async function susunPdf_(bagian) {
   var L = pdfLib_();
   var hasil = await L.PDFDocument.create();
-  var huruf = await hasil.embedFont(L.StandardFonts.Helvetica);
+  var huruf = await hasil.embedFont(L.StandardFonts.HelveticaOblique);   // huruf miring
   var ukuran = 8;
   for (var i = 0; i < bagian.length; i++) {
     var dok = await L.PDFDocument.load(new Uint8Array(bagian[i].blob.getBytes()));
