@@ -37,7 +37,27 @@ function cekPin_(pin) {
 }
 function profil_(a) {
   return { id: a.id, nama: a.nama, peran: a.peran, mapel: a.peran === 'wali' ? SR.MAPEL_SEKOLAH.concat(SR.MAPEL_PONDOK) : (a.mapel || []),
-           p5: a.peran === 'wali' || !!a.p5 || !!a.p5n, p5n: a.p5n || null, link: !!a.link };
+           p5: a.peran === 'wali' || !!a.p5 || !!a.p5n, p5n: a.p5n || null, link: !!a.link,
+           sapaan: sapaan_(a), sapa: namaSapa_(a) };
+}
+
+// sapaan Ustadz / Ustadzah (dipilih wali kelas; bila belum, ditebak dari nama)
+function sapaan_(a) {
+  if (a.sapaan === 'Ustadz' || a.sapaan === 'Ustadzah') return a.sapaan;
+  return /^(ustadzah|ustazah|ustadzat|ibu|bu|hj)\b/i.test(String(a.nama || '')) ? 'Ustadzah' : 'Ustadz';
+}
+// "Ustadz Hasan" (tidak dobel bila nama sudah diawali sapaan)
+function namaSapa_(a) {
+  var n = String(a.nama || '').trim();
+  return /^(ustadz|ustadzah|ustaz|ustad|ustazah|ust\.?|bapak|pak|ibu|bu|prof|dr|drs|h\.|hj\.?|kh)\b/i.test(n) ? n : sapaan_(a) + ' ' + n;
+}
+// nama guru ditulis otomatis di kotak "Nama Guru" (C4) tab mapel yang dipegang
+function tulisNamaGuru_(a) {
+  var ss = SpreadsheetApp.getActive(), nm = namaSapa_(a);
+  (a.mapel || []).forEach(function (tab) {
+    var sh = jenisMapel_(tab) ? ss.getSheetByName(tab) : null;
+    if (sh && sh.getRange('C4').getDisplayValue() !== nm) sh.getRange('C4').setValue(tulisTeks_(nm, 80));
+  });
 }
 
 // ------------------------------------------------------------------ link khusus guru (tab GURU)
@@ -48,7 +68,7 @@ function guruDariKode_(kode) {
   kode = String(kode || '');
   if (kode.length < 8) return null;
   var ak = akunSemua_().filter(function (x) { return x.kode === kode && x.peran !== 'wali'; })[0];   // akun guru (aplikasi)
-  if (ak) return { id: 'k:' + kode, nama: ak.nama, peran: 'guru', mapel: ak.mapel || [], p5: !!ak.p5, link: true };
+  if (ak) return { id: 'k:' + kode, nama: ak.nama, sapaan: ak.sapaan, peran: 'guru', mapel: ak.mapel || [], p5: !!ak.p5, link: true };
   var sh = SpreadsheetApp.getActive().getSheetByName(WEB.GURU);
   if (!sh) return null;
   var v = sh.getRange(WEB.GURU1, 2, WEB.GURU_MAKS, 4).getDisplayValues();          // B nama, C HP, D mapel, E kode
@@ -148,7 +168,8 @@ function webAkun(token) {
   saya_(token, true);
   return {
     akun: akunSemua_().map(function (a) {
-      return { id: a.id, nama: a.nama, peran: a.peran, mapel: a.mapel || [], p5: !!a.p5, hp: a.hp || '', kode: a.kode || '', pin: !!a.sandi };
+      return { id: a.id, nama: a.nama, peran: a.peran, mapel: a.mapel || [], p5: !!a.p5, hp: a.hp || '', kode: a.kode || '', pin: !!a.sandi,
+               sapaan: sapaan_(a), sapa: namaSapa_(a) };
     }),
     url: urlAplikasi_(), kelas: namaRentang_('SR_KELAS'), semester: namaRentang_('SR_SEMESTER'),
     sekolah: SR.MAPEL_SEKOLAH.map(function (t) { return { tab: t, nama: MAPEL_NAMA[t] || t }; }),
@@ -178,10 +199,12 @@ function webSimpanAkun(token, o) {
     if (a.id === saya.id && peran !== 'wali') throw new Error('Ustadz/Ibu tidak bisa menurunkan akun sendiri.');
     a.nama = nama; a.peran = peran; a.mapel = mapel; a.p5 = !!o.p5;
     a.hp = teks_(o.hp, 30).replace(/[^0-9+]/g, '');
+    if (o.sapaan === 'Ustadz' || o.sapaan === 'Ustadzah') a.sapaan = o.sapaan;
     if (peran === 'guru' && !a.kode) a.kode = kodeBaru_();      // link khusus untuk dikirim lewat WA
     if (peran === 'wali') delete a.kode;
     if (o.pin) a.sandi = sandi_(cekPin_(o.pin));
     simpanAkunSemua_(semua);
+    if (peran === 'guru') tulisNamaGuru_(a);
     return webAkun(token);
   });
 }
@@ -283,7 +306,12 @@ function bacaMapel_(tab) {
            tp: umum ? sh.getRange('C8:J8').getDisplayValues()[0] : [], baris: baris };
 }
 
-function webMapel(token, tab) { bolehMapel_(saya_(token), tab); return bacaMapel_(tab); }
+function webMapel(token, tab) {
+  var a = saya_(token);
+  bolehMapel_(a, tab);
+  if (a.link && a.mapel.length) kunci_(function () { tulisNamaGuru_({ nama: a.nama, sapaan: a.sapaan, mapel: [tab] }); });
+  return bacaMapel_(tab);
+}
 
 // kirim = { guru, tp: [8], ubah: [{no, k, v}] }   k: 0-7 sumatif/tugas+lisan+semester, 8-9 non tes/tes (umum)
 function webSimpanMapel(token, tab, kirim) {
@@ -674,7 +702,7 @@ function bentukGuru_(sh) {
     no.push([i + 1]);
     var nomor = 'IF(LEFT(' + hp + ';1)="0";"62"&MID(' + hp + ';2;20);IF(LEFT(' + hp + ';1)="8";"62"&' + hp + ';' + hp + '))';
     var teks = '"Assalamu\'alaikum "&B' + r + '&"."&CHAR(10)&"Mohon bantuannya mengisi nilai *"&D' + r + '&"* kelas "&SR_KELAS&" semester "&SR_SEMESTER&" lewat link berikut:"&CHAR(10)&$C$2&"?k="&E' + r +
-      '&CHAR(10)&CHAR(10)&"Link ini khusus untuk Ustadz/Ibu, mohon tidak disebarkan. Setelah mengisi, tekan tombol Simpan. Jazakumullah khairan."';
+      '&CHAR(10)&CHAR(10)&"Link ini khusus untuk Antum, mohon tidak disebarkan. Setelah mengisi, tekan tombol Simpan. Jazakumullah khairan."';
     rumus.push([
       '=IF(OR(B' + r + '="";C' + r + '="";D' + r + '="";E' + r + '="";$C$2="");"";HYPERLINK("https://wa.me/"&' + nomor + '&"?text="&ENCODEURL(' + teks + ');"📲 Kirim ke WA"))',
       '=IF(OR(B' + r + '="";D' + r + '="";LEFT(D' + r + ';2)="P5");"";IFERROR(COUNTIF(INDIRECT("\'"&D' + r + '&"\'!M9:R48");"Lengkap")&" / "&COUNTA(SISWA!$D$5:$D$44);""))'

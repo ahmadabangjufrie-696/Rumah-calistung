@@ -435,11 +435,11 @@ function bukaLain() {
 function tutupLain() { $('lain').classList.remove('buka'); }
 function menuAkun() {
   if (SAYA.link) {
-    $('lainIsi').innerHTML = '<div style="padding:4px 10px 10px"><b style="font-size:16px">' + aman(SAYA.nama) + '</b><div style="color:#888;font-size:12.5px;margin-top:4px">Masuk lewat link khusus dari wali kelas. Hanya untuk mengisi ' +
+    $('lainIsi').innerHTML = '<div style="padding:4px 10px 10px"><b style="font-size:16px">' + aman(SAYA.sapa || SAYA.nama) + '</b><div style="color:#888;font-size:12.5px;margin-top:4px">Masuk lewat link khusus dari wali kelas. Hanya untuk mengisi ' +
       aman(SAYA.p5n ? 'P5 PROYEK ' + SAYA.p5n : SAYA.mapel.join(', ')) + '.</div></div><button class="ni" onclick="tutupLain()"><span class="i">✕</span>Tutup</button>';
     $('lain').classList.add('buka'); return;
   }
-  $('lainIsi').innerHTML = '<div style="padding:4px 10px 10px"><b style="font-size:16px">' + aman(SAYA.nama) + '</b><div style="color:#888;font-size:12.5px">' + (SAYA.peran === 'wali' ? 'Wali kelas' : 'Guru mapel') + '</div></div>' +
+  $('lainIsi').innerHTML = '<div style="padding:4px 10px 10px"><b style="font-size:16px">' + aman(SAYA.sapa || SAYA.nama) + '</b><div style="color:#888;font-size:12.5px">' + (SAYA.peran === 'wali' ? 'Wali kelas' : 'Guru mapel') + '</div></div>' +
     '<button class="ni" onclick="tutupLain();gantiPin()"><span class="i">🔑</span>Ganti PIN saya</button>' +
     '<button class="ni" onclick="keluar()"><span class="i">🚪</span>Keluar</button>';
   $('lain').classList.add('buka');
@@ -477,7 +477,7 @@ function judul(lab, jd, sub) {
 
 // =================================================================== beranda
 function halBeranda() {
-  $('isi').innerHTML = judul('Beranda', 'Assalamu\'alaikum, ' + aman(SAYA.nama.split(' ')[0] === SAYA.nama ? SAYA.nama : SAYA.nama), SAYA.peran === 'wali' ? 'Ringkasan kelas Ustadz/Ibu hari ini.' : 'Mapel yang Ustadz/Ibu pegang.') + memuat('Menghitung kemajuan nilai…');
+  $('isi').innerHTML = judul('Beranda', 'Assalamu\'alaikum, ' + aman(SAYA.sapa || SAYA.nama), SAYA.peran === 'wali' ? 'Ringkasan kelas hari ini.' : 'Mapel yang ' + SAYA.sapaan + ' pegang.') + memuat('Menghitung kemajuan nilai…');
   api('webBeranda').then(function (d) {
     var lengkap = d.mapel.filter(function (m) { return m.siswa && m.lengkap === m.siswa; }).length;
     var nilaiAda = d.mapel.filter(function (m) { return m.rata !== ''; });
@@ -489,7 +489,7 @@ function halBeranda() {
       (d.absen ? '<div class="c"><div class="k">Tidak hadir</div><div class="v">' + (d.absen[0] + d.absen[1] + d.absen[2]) + '<small> hari</small></div><div class="x">S ' + d.absen[0] + ' · I ' + d.absen[1] + ' · A ' + d.absen[2] + '</div></div>'
                : '<div class="c"><div class="k">Semester</div><div class="v" style="font-size:22px">' + aman(DEPAN.semester || '–') + '</div><div class="x">' + aman(DEPAN.tahun || '') + '</div></div>') +
       '</div>';
-    if (!d.mapel.length) h += '<div class="blok"><div class="kosong">Belum ada mapel untuk akun ini.<br>Minta wali kelas mengatur mapel Ustadz/Ibu di halaman Akun Guru.</div></div>';
+    if (!d.mapel.length) h += '<div class="blok"><div class="kosong">Belum ada mapel untuk akun ini.<br>Minta wali kelas mengatur mapel ' + SAYA.sapaan + ' di halaman Guru & Link WA.</div></div>';
     [['umum', 'Mapel sekolah'], ['pondok', 'Mapel pondok']].forEach(function (g) {
       var ms = d.mapel.filter(function (m) { return m.jenis === g[0]; });
       if (!ms.length) return;
@@ -501,7 +501,7 @@ function halBeranda() {
           '<span class="aksi"><button class="tb tbg tbk" onclick="buka(\'nilai\',\'' + aman(m.tab) + '\')">Isi</button></span></div>';
       }).join('') + '</div>';
     });
-    $('isi').innerHTML = judul('Beranda', 'Assalamu\'alaikum, ' + aman(SAYA.nama), SAYA.peran === 'wali' ? 'Ringkasan kelas hari ini.' : 'Mapel yang Ustadz/Ibu pegang.') + h;
+    $('isi').innerHTML = judul('Beranda', 'Assalamu\'alaikum, ' + aman(SAYA.sapa || SAYA.nama), SAYA.peran === 'wali' ? 'Ringkasan kelas hari ini.' : 'Mapel yang ' + SAYA.sapaan + ' pegang.') + h;
   }).catch(galatHal);
 }
 
@@ -517,7 +517,7 @@ function halNilai(tab) {
   var pilih = '<div class="pil" style="margin-bottom:14px">' + mapel.map(function (t) {
     return '<button class="pl' + (t === tab ? ' on' : '') + '" onclick="buka(\'nilai\',\'' + aman(t) + '\')">' + aman(t) + '</button>';
   }).join('') + '</div>';
-  if (SAYA.link) pilih = '<div class="sjd">Assalamu\'alaikum, <b>' + aman(SAYA.nama) + '</b>. Silakan isi nilai, lalu tekan tombol <b>💾 Simpan</b> di bawah.</div>';
+  if (SAYA.link) pilih = '<div class="sjd">Assalamu\'alaikum, <b>' + aman(SAYA.sapa || SAYA.nama) + '</b>. Silakan isi nilai, lalu tekan tombol <b>💾 Simpan</b> di bawah.</div>';
   $('isi').innerHTML = judul('Input nilai', 'Input Nilai') + pilih + '<div id="nilaiIsi">' + memuat('Membuka ' + tab + '…') + '</div>';
   api('webMapel', tab).then(function (d) { NL = d; gambarNilai(); }).catch(function (e) { $('nilaiIsi').innerHTML = '<div class="kosong" style="color:#c0392b">' + aman(e.message) + '</div>'; });
 }
@@ -536,7 +536,8 @@ function gambarNilai() {
   var d = NL, kol = kolomNilai(d), umum = d.jenis === 'umum';
   var h = '<div class="kepala"><div style="flex:2;min-width:240px"><div class="jd" style="font-size:24px">' + aman(d.nama) +
     '<span class="tag">' + (umum ? 'Mapel sekolah' : 'Mapel pondok') + '</span></div><div class="sjd" style="margin:0">KKTP (nilai tuntas): <b>' + d.kktp + '</b> · ' + d.baris.length + ' siswa</div></div>' +
-    '<div class="fl"><label>Nama guru</label><input class="in" id="nGuru" value="' + aman(d.guru) + '" oninput="ubahNilai()"></div></div>';
+    '<div class="fl"><label>Nama guru</label><input class="in" id="nGuru" value="' + aman(d.guru) + '" oninput="ubahNilai()"' +
+      (SAYA.link ? ' readonly style="background:#e9f2ec;font-weight:700" title="Terisi otomatis dari wali kelas"' : '') + '></div></div>';
   if (umum) {
     h += '<details class="tp"' + (d.tp.some(Boolean) ? '' : ' open') + '><summary>📘 Materi / Tujuan Pembelajaran (TP) — ' + d.tp.filter(Boolean).length + ' dari 8 diisi</summary><div class="tpg">' +
       d.tp.map(function (t, i) { return '<div><label>TP / Sumatif ' + (i + 1) + '</label><textarea data-tp="' + i + '" oninput="ubahNilai()">' + aman(t) + '</textarea></div>'; }).join('') +
@@ -759,7 +760,7 @@ function langkah(k, d) {
 var P5 = null, P5ubah = {};
 function halP5(n) {
   n = n || 1; HAL.arg = n;
-  $('isi').innerHTML = judul('Projek Penguatan Profil Pelajar Pancasila', 'Projek P5', SAYA.link ? 'Assalamu\'alaikum, <b>' + aman(SAYA.nama) + '</b>. Silakan isi, lalu tekan tombol <b>💾 Simpan</b>.' : '') + '<div id="p5Isi">' + memuat() + '</div>';
+  $('isi').innerHTML = judul('Projek Penguatan Profil Pelajar Pancasila', 'Projek P5', SAYA.link ? 'Assalamu\'alaikum, <b>' + aman(SAYA.sapa || SAYA.nama) + '</b>. Silakan isi, lalu tekan tombol <b>💾 Simpan</b>.' : '') + '<div id="p5Isi">' + memuat() + '</div>';
   P5ubah = {};
   api('webP5', n).then(function (d) { P5 = d; gambarP5(); }).catch(function (e) { $('p5Isi').innerHTML = '<div class="kosong" style="color:#c0392b">' + aman(e.message) + '</div>'; });
 }
@@ -1032,8 +1033,8 @@ function nomorWa(hp) {
 function linkGuru(a) { return AK.url ? AK.url + (AK.url.indexOf('?') >= 0 ? '&' : '?') + 'k=' + a.kode : ''; }
 function pesanWa(a) {
   var mp = a.mapel.join(', ') + (a.p5 ? (a.mapel.length ? ' dan ' : '') + 'Projek P5' : '');
-  return 'Assalamu\'alaikum ' + a.nama + '.\nMohon bantuannya mengisi nilai *' + mp + '* kelas ' + (AK.kelas || '') + ' semester ' + (AK.semester || '') +
-    ' lewat link berikut:\n' + linkGuru(a) + '\n\nLink ini khusus untuk Ustadz/Ibu, mohon tidak disebarkan. Setelah mengisi, tekan tombol Simpan. Jazakumullah khairan.';
+  return 'Assalamu\'alaikum ' + a.sapa + '.\nMohon bantuannya mengisi nilai *' + mp + '* kelas ' + (AK.kelas || '') + ' semester ' + (AK.semester || '') +
+    ' lewat link berikut:\n' + linkGuru(a) + '\n\nLink ini khusus untuk ' + a.sapaan + ', mohon tidak disebarkan. Setelah mengisi, tekan tombol Simpan. Jazakumullah khairan.';
 }
 function kirimWa(id) {
   var a = AK.akun.filter(function (x) { return x.id === id; })[0];
@@ -1051,7 +1052,7 @@ function gambarAkun() {
   var guru = AK.akun.filter(function (a) { return a.peran !== 'wali'; }), wali = AK.akun.filter(function (a) { return a.peran === 'wali'; });
   var baris = function (a) {
     var m = a.peran === 'wali' ? 'semua halaman' : (a.mapel.join(', ') || 'belum ada mapel') + (a.p5 ? ' · P5' : '');
-    return '<div class="akl"><span class="av">' + aman(inisial(a.nama)) + '</span><div class="nm"><b>' + aman(a.nama) + (a.peran === 'wali' ? '<span class="wali">WALI KELAS</span>' : '') + '</b><small>' +
+    return '<div class="akl"><span class="av">' + aman(inisial(a.nama)) + '</span><div class="nm"><b>' + aman(a.peran === 'wali' ? a.nama : a.sapa) + (a.peran === 'wali' ? '<span class="wali">WALI KELAS</span>' : '') + '</b><small>' +
       aman(m) + (a.hp ? ' · ' + aman(a.hp) : '') + '</small></div>' +
       (a.peran !== 'wali' ? '<button class="tb tbe tbk" onclick="kirimWa(\'' + a.id + '\')"' + (a.hp ? '' : ' disabled title="Isi nomor HP dulu"') + '>📲 Kirim WA</button>' : '') +
       '<button class="tb tbg tbk" onclick="formAkun(\'' + a.id + '\')">Ubah</button></div>';
@@ -1070,7 +1071,9 @@ function formAkun(id) {
   };
   var wali = a.peran === 'wali';
   kartu('<h3>' + (id ? 'Ubah ' + (wali ? 'wali kelas' : 'guru') : 'Tambah guru') + '</h3>' +
-    '<div class="fl"><label>Nama</label><input class="in" id="akNama" value="' + aman(a.nama) + '" placeholder="mis. Ustadz Hasan"></div>' +
+    '<div class="f" style="grid-template-columns:150px 1fr;margin-bottom:12px"><div class="fl"><label>Sapaan</label><select class="in" id="akSapaan">' +
+      ['Ustadz', 'Ustadzah'].map(function (x) { return '<option' + ((a.sapaan || 'Ustadz') === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fl"><label>Nama</label><input class="in" id="akNama" value="' + aman(a.nama) + '" placeholder="mis. Hasan Basri"></div></div>' +
     '<div class="fl"><label>No. HP (WhatsApp)</label><input class="in" id="akHp" inputmode="tel" value="' + aman(a.hp) + '" placeholder="mis. 0812 3456 7890"></div>' +
     '<div class="fl"><label>Peran</label><select class="in" id="akPeran" onchange="$(\'akMapel\').hidden=this.value===\'wali\'"><option value="guru"' + (!wali ? ' selected' : '') + '>Guru mapel</option><option value="wali"' + (wali ? ' selected' : '') + '>Wali kelas (semua halaman)</option></select></div>' +
     '<div id="akMapel"' + (wali ? ' hidden' : '') + '><div class="fl"><label>Mapel sekolah</label>' + cek(AK.sekolah) + '</div><div class="fl"><label>Mapel pondok</label>' + cek(AK.pondok) + '</div>' +
@@ -1083,7 +1086,7 @@ function formAkun(id) {
     '<button class="tb tbg" onclick="tutupKartu()">Batal</button><button class="tb tbh" id="akTb" onclick="simpanAkun(\'' + (id || '') + '\')">Simpan</button></div>');
 }
 function simpanAkun(id) {
-  var o = { id: id || null, nama: $('akNama').value, hp: $('akHp').value, pin: $('akPin').value.trim(), peran: $('akPeran').value, p5: $('akP5') ? $('akP5').checked : false,
+  var o = { id: id || null, nama: $('akNama').value, sapaan: $('akSapaan').value, hp: $('akHp').value, pin: $('akPin').value.trim(), peran: $('akPeran').value, p5: $('akP5') ? $('akP5').checked : false,
             mapel: Array.prototype.filter.call(document.querySelectorAll('.akM'), function (c) { return c.checked; }).map(function (c) { return c.value; }) };
   $('akTb').disabled = true;
   api('webSimpanAkun', o).then(function (d) {

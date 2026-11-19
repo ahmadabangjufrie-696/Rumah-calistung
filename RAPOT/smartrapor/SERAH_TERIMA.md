@@ -141,3 +141,5 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   Isian pilihan di aplikasi memakai <select> + "Tulis sendiri" (datalist dulu menyaring pilihan sehingga tampak hilang).
 - (19 Nov) Atas permintaan Ustadz, file contoh `1n2Rb2K2…` DIBUANG ke Sampah. File yang dipakai SATU-SATUNYA:
   **1fvT0Kmo0NEIoWMXLS9o8WEV6pW9ECkE3PhisTFWiCc8** (ada tab GURU, wali Wahyudi, kode aplikasi web terpasang).
+- Sapaan guru (Ustadz/Ustadzah, field `sapaan`, `namaSapa_`) dipakai di pesan WA & aplikasi; nama guru otomatis ditulis ke C4
+  tab mapel saat akun disimpan dan saat guru membuka mapel lewat link (`tulisNamaGuru_`). Kotak Nama guru terkunci bagi guru link.
