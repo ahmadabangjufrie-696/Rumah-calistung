@@ -14,3 +14,22 @@ Dilakukan **sekali** pada file SmartRapor induk. Salinan untuk tiap kelas ("Buat
 PDF tersimpan di folder **PDF SmartRapor**, di folder yang sama dengan file SmartRapor.
 
 `Kode.gs` dibuat oleh `buat_kode.py` dari `Kode.template.gs` (gambar tombol disisipkan sebagai base64).
+
+## Aplikasi web SmartRapor (dibuka lewat link, laptop & HP)
+
+Setelah kode ditempel (langkah 1–4 di atas):
+
+1. Di file SmartRapor: menu **SmartRapor → 🌐 Aplikasi web: buat / ganti PIN wali kelas**. Isi nama wali kelas lalu PIN (4–8 angka).
+2. Buka **Ekstensi → Apps Script** → tombol biru **Terapkan** (kanan atas) → **Deployment baru**.
+3. Klik ikon gerigi ⚙ di samping "Pilih jenis" → **Aplikasi web**.
+4. **Jalankan sebagai: Saya**. **Yang memiliki akses: Siapa saja**. Klik **Terapkan**, izinkan bila diminta.
+5. Salin **URL aplikasi web** (berakhiran `/exec`). Itulah link SmartRapor. Bisa juga dilihat lagi di menu
+   **SmartRapor → 🌐 Aplikasi web: buka / lihat link**.
+6. Buka link, masuk dengan nama + PIN wali kelas. Di halaman **Akun Guru**, buat akun tiap guru (nama, PIN, mapel yang dipegang).
+   Kirim link ke guru lewat WhatsApp beserta nama dan PIN masing-masing.
+
+**Setiap kali kode diganti** (tempel kode baru): Terapkan → **Kelola deployment** → ikon pensil ✎ → Versi: **Versi baru** → Terapkan.
+Linknya tetap sama.
+
+Keamanan: tanpa PIN yang benar tidak ada data yang bisa dibuka. PIN 5 kali salah → dikunci 5 menit.
+Guru hanya bisa membuka mapel yang dicentang wali kelas. Kehadiran, catatan, data siswa, pengaturan, cetak, akun = khusus wali kelas.

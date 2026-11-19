@@ -106,3 +106,17 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
 - PENGATURAN: kelas (tingkat + rombel), fase, semester, tahun, KKTP, tanggal Masehi/Hijriah, peringkat pondok = pilihan dari daftar. SISWA: L/P, agama, status keluarga, anak ke-, diterima di kelas = daftar (tidak ketat).
 - Panel terbuka otomatis: menu NYALAKAN/MATIKAN membuat/menghapus pemicu onOpen (per akun, fungsi panelSaatBuka).
 - RAPOR SEKOLAH dicetak 2 bagian (rentangCetak_): tabel nilai, lalu mulai EKSTRAKURIKULER di halaman baru; nomor halaman dihitung bersama.
+
+## Aplikasi web SmartRapor (19 Nov) — BELUM dicoba Ustadz di Google
+- Server: `apps_script/Web.template.gs` (ditambahkan di akhir Kode.gs oleh `buat_kode.py`), tampilan: `apps_script/Web.html` (WEB_HTML).
+- `doGet` → halaman satu-berkas. Masuk: nama + PIN (akun di Properti Skrip `SR_AKUN`, PIN = SHA-256 + garam `SR_GARAM`),
+  token di CacheService skrip (6 jam). Peran: `wali` (semua) / `guru` (mapel dicentang, P5 opsional).
+- Halaman: Beranda (kemajuan per mapel), Input Nilai (umum: S1–8 + Non Tes/Tes, TP; pondok: Tugas/Lisan/Semester, hitung langsung),
+  Kehadiran & Catatan (S/I/A sekelas; ekskul, prestasi, catatan, keputusan, pembiasaan & catatan pondok per siswa), Projek P5,
+  Data Siswa, Pengaturan (dibaca dari lembar PENGATURAN: kotak kuning = isian, ada validasi = pilihan, rumus = otomatis),
+  Akun Guru, Cetak (sama dengan Panel).
+- Penulisan teks memakai awalan `'` supaya NISN "00…" tidak jadi angka. Blok yang ditulis ulang diamankan (`amankan_`).
+- Fungsi panel sekarang butuh kunci (`bukaPanel` membuat kunci di cache) dan fungsi menu diberi `ui_()` supaya tidak bisa
+  dipanggil dari aplikasi web. Kemajuan cetak: cache skrip `SR_PROGRES_<id>`.
+- Uji lokal: scratchpad `web/` (palsu.js = tiruan Apps Script berisi data contoh, uji_server.js, uji_ui.js Playwright).
+- Pasang: lihat `apps_script/CARA_PASANG.md` bagian Aplikasi web (Terapkan → Aplikasi web, Jalankan sebagai Saya, akses Siapa saja).

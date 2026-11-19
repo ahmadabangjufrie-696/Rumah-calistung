@@ -166,6 +166,7 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
+var KUNCI = '__KUNCI__';
 var D = null, pilihNo = null, tab = 'sekolah', tokenPv = 0, pdfSaatIni = null;
 var NAMA_JENIS = { sekolah: 'Raport Sekolah', pondok: 'Raport Pondok', p5: 'Raport P5', cover: 'Cover',
                    identitas: 'Identitas Sekolah', diri: 'Keterangan Diri' };
@@ -182,7 +183,7 @@ function jalankan(fn) {
   var args = Array.prototype.slice.call(arguments, 1);
   return new Promise(function (ok, gagal) {
     var r = google.script.run.withSuccessHandler(ok).withFailureHandler(gagal);
-    r[fn].apply(r, args);
+    r[fn].apply(r, [KUNCI].concat(args));
   });
 }
 function $(id) { return document.getElementById(id); }
@@ -341,10 +342,10 @@ function cetak(jenis, sekelas) {
   }
   function intip() {
     if (selesai) return;
-    jalankan('progresCetak').then(tampil).catch(function () {}).then(function () { if (!selesai) setTimeout(intip, 1500); });
+    jalankan('progresCetak', id).then(tampil).catch(function () {}).then(function () { if (!selesai) setTimeout(intip, 1500); });
   }
   jalankan('cetakPanel', { id: id, jenis: jenis, sekelas: sekelas, no: pilihNo })
-    .then(function () { return jalankan('progresCetak').then(tampil); })
+    .then(function () { return jalankan('progresCetak', id).then(tampil); })
     .catch(function (e) { if (!selesai) { selesai = true; kartu('<h3>Cetak gagal</h3><p>' + aman(e.message) + '</p><button class="tbl2" onclick="tutupKartu()">Tutup</button>'); } });
   setTimeout(intip, 1500);
 }

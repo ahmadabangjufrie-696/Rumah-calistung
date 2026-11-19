@@ -45,6 +45,9 @@ function onOpen() {
     .addSeparator()
     .addItem('Rapikan tinggi baris raport', 'rapikanTinggi')
     .addItem('Pasang tombol di BERANDA', 'pasangTombol')
+    .addSeparator()
+    .addItem('🌐 Aplikasi web: buka / lihat link', 'aplikasiWeb')
+    .addItem('🌐 Aplikasi web: buat / ganti PIN wali kelas', 'aturPinWali')
     .addToUi();
 }
 
@@ -56,8 +59,8 @@ function onEdit(e) {
 }
 
 // ------------------------------------------------------------------ pindah siswa
-function siswaSebelumnya() { geser_(-1); }
-function siswaBerikutnya() { geser_(1); }
+function siswaSebelumnya() { if (ui_()) geser_(-1); }
+function siswaBerikutnya() { if (ui_()) geser_(1); }
 
 function geser_(arah) {
   var daftar = daftarSiswa_();
@@ -95,7 +98,7 @@ function pilih_(teks) {
 }
 
 // ------------------------------------------------------------------ tinggi baris raport
-function rapikanTinggi() { rapikanTinggi_(); toast_('Tinggi baris raport sudah dirapikan.'); }
+function rapikanTinggi() { if (!ui_()) return; rapikanTinggi_(); toast_('Tinggi baris raport sudah dirapikan.'); }
 
 function jumlahBaris_(teks, perBaris) {
   if (!teks) return 1;
@@ -149,6 +152,7 @@ function rapikanP5_() {
 var KAKI = { 'RAPOR SEKOLAH': 'J1', 'RAPOR P5': 'G1' };   // sel berisi teks catatan kaki
 
 function cetakSiswaIni() {
+  if (!ui_()) return;
   cetakSiswaIniProses_().catch(function (e) {
     pesan_('Cetak gagal: ' + e.message + '\n\nFoto pesan ini dan kirim ke admin.');
   });
@@ -167,6 +171,7 @@ async function cetakSiswaIniProses_() {
 // Tombol dan menu tidak bisa memanggil fungsi async secara langsung,
 // jadi tombol memanggil fungsi biasa ini, lalu proses bertahapnya berjalan di dalam.
 function cetakSekelas() {
+  if (!ui_()) return;
   cetakSekelasProses_().catch(function (e) {
     pesan_('Cetak sekelas gagal: ' + e.message + '\n\nFoto pesan ini dan kirim ke admin.');
   });
@@ -372,13 +377,18 @@ var URUT_JENIS = ['cover', 'identitas', 'diri', 'sekolah', 'pondok', 'p5'];
 var PANEL_HTML = __PANEL_HTML__;
 
 function bukaPanel() {
-  var html = HtmlService.createHtmlOutput(PANEL_HTML).setWidth(1240).setHeight(760);
+  if (!ui_()) return;
+  // kunci panel: fungsi panel hanya mau dipanggil dari panel yang dibuka dari file ini
+  var kunci = Utilities.getUuid();
+  CacheService.getScriptCache().put('SR_PANEL_' + kunci, '1', 21600);
+  var html = HtmlService.createHtmlOutput(PANEL_HTML.replace('__KUNCI__', kunci)).setWidth(1240).setHeight(760);
   SpreadsheetApp.getUi().showModalDialog(html, ' ');
 }
 
 // Panel terbuka sendiri saat file dibuka. Berlaku untuk akun yang menyalakannya saja
 // (setiap guru menyalakan sendiri bila mau).
 function panelOtomatisNyala() {
+  if (!ui_()) return;
   hapusPemicuPanel_();
   ScriptApp.newTrigger('panelSaatBuka').forSpreadsheet(SpreadsheetApp.getActive()).onOpen().create();
   pesan_('Panel otomatis sudah NYALA.\n\nMulai sekarang, setiap kali Ustadz/Ibu membuka file ini, ' +
@@ -386,6 +396,7 @@ function panelOtomatisNyala() {
 }
 
 function panelOtomatisMati() {
+  if (!ui_()) return;
   var n = hapusPemicuPanel_();
   pesan_(n ? 'Panel otomatis sudah MATI.\n\nPanel bisa dibuka lewat tombol emas di BERANDA.' :
     'Panel otomatis memang belum dinyalakan.');
@@ -400,6 +411,7 @@ function hapusPemicuPanel_() {
 }
 
 function panelSaatBuka(e) {
+  if (!e) return;
   try {
     var pembuka = e && e.user ? String(e.user.getEmail ? e.user.getEmail() : e.user) : '';
     var pemilik = Session.getEffectiveUser().getEmail();
@@ -413,7 +425,18 @@ function namaRentang_(nama) {
   return r ? r.getDisplayValue() : '';
 }
 
-function dataPanel() {
+function cekPanel_(kunci) {
+  var c = CacheService.getScriptCache();
+  if (!kunci || !c.get('SR_PANEL_' + kunci)) throw new Error('Panel sudah terlalu lama terbuka. Tutup, lalu buka lagi.');
+  c.put('SR_PANEL_' + kunci, '1', 21600);
+}
+
+function dataPanel(kunci) { cekPanel_(kunci); return dataPanel_(); }
+function pratinjau(kunci, no, jenis) { cekPanel_(kunci); return pratinjau_(no, jenis); }
+function progresCetak(kunci, id) { cekPanel_(kunci); return progres_(id); }
+function cetakPanel(kunci, o) { cekPanel_(kunci); return cetakPanel_(o); }
+
+function dataPanel_() {
   var ss = SpreadsheetApp.getActive();
   var sw = ss.getSheetByName(SR.SISWA).getRange(SR.SISWA1, 1, SR.MAKS, 5).getDisplayValues();
   var siswa = [];
@@ -468,8 +491,8 @@ function teksSiswa_(no) {
 }
 
 // gambar raport untuk panel: PDF satu halaman cetak, dikirim sebagai base64
-function pratinjau(no, jenis) {
-  var teks = teksSiswa_(no);
+function pratinjau_(no, jenis) {
+  var teks = teksSiswa_(parseInt(no, 10));
   if (teks !== pilihanSekarang_()) pilih_(teks);
   var sh = SpreadsheetApp.getActive().getSheetByName(JENIS[jenis]);
   if (!sh) throw new Error('Halaman ' + JENIS[jenis] + ' tidak ada di file ini.');
@@ -483,16 +506,16 @@ function lapor_(id, teks, persen, akhir) {
   if (!id) return;
   var isi = { id: id, teks: teks, persen: persen };
   if (akhir) for (var k in akhir) isi[k] = akhir[k];
-  CacheService.getUserCache().put('SR_PROGRES', JSON.stringify(isi), 1800);
+  CacheService.getScriptCache().put('SR_PROGRES_' + id, JSON.stringify(isi), 1800);
 }
 
-function progresCetak() {
-  var v = CacheService.getUserCache().get('SR_PROGRES');
+function progres_(id) {
+  var v = id ? CacheService.getScriptCache().get('SR_PROGRES_' + id) : null;
   return v ? JSON.parse(v) : null;
 }
 
 // Dipanggil panel. Proses cetak berjalan bertahap; panel menanyakan kemajuannya lewat progresCetak().
-function cetakPanel(o) {
+function cetakPanel_(o) {
   var halaman = URUT_JENIS.filter(function (j) { return o.jenis.indexOf(j) >= 0; })
     .map(function (j) { return JENIS[j]; })
     .filter(function (n) { return SpreadsheetApp.getActive().getSheetByName(n); });
@@ -500,7 +523,7 @@ function cetakPanel(o) {
   var daftar;
   try {
     if (!halaman.length) throw new Error('Halaman yang dipilih tidak ada di file ini.');
-    daftar = o.sekelas ? daftarSiswa_() : [teksSiswa_(o.no)];
+    daftar = o.sekelas ? daftarSiswa_() : [teksSiswa_(parseInt(o.no, 10))];
     if (!daftar.length) throw new Error('Data siswa masih kosong. Isi dulu tab SISWA.');
   } catch (e) {
     lapor_(o.id, '', 100, { selesai: true, galat: e.message });
@@ -514,6 +537,7 @@ function cetakPanel(o) {
 
 // ------------------------------------------------------------------ tombol di BERANDA
 function pasangTombol() {
+  if (!ui_()) return;
   var sh = SpreadsheetApp.getActive().getSheetByName(SR.BERANDA);
   sh.getImages().forEach(function (img) {
     if ((img.getAltTextTitle() || '').indexOf('SR_') === 0) img.remove();
@@ -532,7 +556,10 @@ function pasangTombol() {
 }
 
 // ------------------------------------------------------------------ bantu
-function toast_(teks) { SpreadsheetApp.getActive().toast(teks, 'SmartRapor', 4); }
+function toast_(teks) { try { SpreadsheetApp.getActive().toast(teks, 'SmartRapor', 4); } catch (e) { /* aplikasi web */ } }
+
+// jendela Google Sheet tersedia? (tidak tersedia saat dipanggil dari aplikasi web)
+function ui_() { try { return SpreadsheetApp.getUi(); } catch (e) { return null; } }
 
 function pesan_(teks) { SpreadsheetApp.getUi().alert('SmartRapor', teks, SpreadsheetApp.getUi().ButtonSet.OK); }
 
