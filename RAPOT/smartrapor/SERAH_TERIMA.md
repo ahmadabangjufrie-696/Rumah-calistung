@@ -143,3 +143,7 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   **1fvT0Kmo0NEIoWMXLS9o8WEV6pW9ECkE3PhisTFWiCc8** (ada tab GURU, wali Wahyudi, kode aplikasi web terpasang).
 - Sapaan guru (Ustadz/Ustadzah, field `sapaan`, `namaSapa_`) dipakai di pesan WA & aplikasi; nama guru otomatis ditulis ke C4
   tab mapel saat akun disimpan dan saat guru membuka mapel lewat link (`tulisNamaGuru_`). Kotak Nama guru terkunci bagi guru link.
+- (19 Nov) **MASTER KOSONG** `1q91Dx-G1OOS_6Vv222zvamTot_a6dvTOyQYlKi2q8lo` = salinan file Ustadz, data dikosongkan lewat API
+  (SISWA, nilai, TP, nama guru, EKSKUL, CATATAN PONDOK, P5, GURU, wali kelas & NIP & wali Arab). Untuk disalin per kelas.
+  Kode: akun ikut tersalin? → `akunSemua_` menyimpan id file (SR_FILE); di file salinan akun lama otomatis dikosongkan.
+  `aturPinWali` sekarang bisa mengganti wali kelas dengan nama baru (akun lama di file itu diganti).

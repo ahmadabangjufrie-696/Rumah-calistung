@@ -616,7 +616,12 @@ function doGet(e) {
 
 // ------------------------------------------------------------------ akun
 function akunSemua_() {
-  var v = PropertiesService.getScriptProperties().getProperty(WEB.AKUN);
+  var p = PropertiesService.getScriptProperties(), id = SpreadsheetApp.getActive().getId(), asal = p.getProperty('SR_FILE');
+  if (asal !== id) {                       // file salinan (kelas lain): akun dari file asal tidak ikut
+    if (asal) p.deleteProperty(WEB.AKUN);
+    p.setProperty('SR_FILE', id);
+  }
+  var v = p.getProperty(WEB.AKUN);
   return v ? JSON.parse(v) : [];
 }
 function simpanAkunSemua_(a) { PropertiesService.getScriptProperties().setProperty(WEB.AKUN, JSON.stringify(a)); }
@@ -1222,21 +1227,24 @@ function aturPinWali() {
   if (!ui) return;
   var semua = akunSemua_(), wali = semua.filter(function (a) { return a.peran === 'wali'; })[0];
   var nama = wali ? wali.nama : '';
-  if (!wali) {
-    var jn = ui.prompt('SmartRapor - Aplikasi web', 'Nama wali kelas (untuk masuk ke aplikasi web):', ui.ButtonSet.OK_CANCEL);
-    if (jn.getSelectedButton() !== ui.Button.OK) return;
-    nama = jn.getResponseText().trim();
-    if (!nama) { pesan_('Nama belum diisi.'); return; }
-  }
-  var jp = ui.prompt('SmartRapor - Aplikasi web', (wali ? 'PIN baru untuk ' + nama : 'PIN untuk ' + nama) +
+  var jn = ui.prompt('SmartRapor - Aplikasi web', 'Nama wali kelas untuk file ini' +
+    (wali ? '\n(sekarang: ' + wali.nama + '. Kosongkan bila hanya ingin mengganti PIN.\n' +
+      'Bila diisi nama lain, akun lama di file ini diganti semua - cocok untuk file kelas baru):' : ':'), ui.ButtonSet.OK_CANCEL);
+  if (jn.getSelectedButton() !== ui.Button.OK) return;
+  var baru = jn.getResponseText().trim();
+  if (!wali && !baru) { pesan_('Nama belum diisi.'); return; }
+  var ganti = baru && (!wali || baru !== wali.nama);
+  if (ganti) nama = baru;
+  var jp = ui.prompt('SmartRapor - Aplikasi web', 'PIN untuk ' + nama +
     '\n(angka 4 sampai 8 digit, jangan diberitahukan ke orang lain):', ui.ButtonSet.OK_CANCEL);
   if (jp.getSelectedButton() !== ui.Button.OK) return;
   var pin;
   try { pin = cekPin_(jp.getResponseText()); } catch (e) { pesan_(e.message); return; }
-  if (wali) wali.sandi = sandi_(pin);
-  else semua.push({ id: Utilities.getUuid().slice(0, 8), nama: nama, peran: 'wali', mapel: [], p5: true, sandi: sandi_(pin) });
+  if (ganti) semua = [{ id: Utilities.getUuid().slice(0, 8), nama: nama, peran: 'wali', mapel: [], p5: true, sandi: sandi_(pin) }];
+  else wali.sandi = sandi_(pin);
   simpanAkunSemua_(semua);
-  pesan_('PIN wali kelas sudah disimpan.\n\nNama: ' + nama + '\n\nLangkah berikutnya: menu SmartRapor › Aplikasi web: buka / lihat link.');
+  pesan_('PIN wali kelas sudah disimpan.\n\nNama: ' + nama + (ganti && wali ? '\nAkun lama (' + wali.nama + ' dan guru-gurunya) sudah dihapus dari file ini.' : '') +
+    '\n\nLangkah berikutnya: menu SmartRapor › Aplikasi web: buka / lihat link.');
 }
 
 function aplikasiWeb() {
