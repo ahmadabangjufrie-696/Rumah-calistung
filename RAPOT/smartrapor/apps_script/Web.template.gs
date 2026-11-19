@@ -474,26 +474,27 @@ function webSimpanSiswa(token, no, ubah) {
   return webSiswa(token);
 }
 
-// tempel banyak siswa sekaligus (disalin dari Excel / Google Sheet lain)
-// mulaiNo: nomor siswa baris pertama, mulaiKol: kolom pertama (1..26), baris: [[teks, ...], ...]
-function webTempelSiswa(token, mulaiNo, mulaiKol, baris) {
+// tempel banyak siswa sekaligus (disalin dari Excel / Google Sheet lain).
+// Kolom sudah dikenali di aplikasi: data = [[null, NIS, NISN, Nama, ...]] (indeks 1..26, null = tidak diubah).
+function webTempelSiswa(token, mulaiNo, data) {
   saya_(token, true);
-  mulaiNo = nomor_(mulaiNo); mulaiKol = parseInt(mulaiKol, 10);
-  if (!(mulaiKol >= 1 && mulaiKol <= 26)) throw new Error('Kolom awal salah.');
-  baris = (baris || []).filter(function (r) { return r && r.some(function (x) { return String(x || '').trim(); }); });
-  if (!baris.length) throw new Error('Belum ada data yang ditempel.');
-  if (mulaiNo + baris.length - 1 > SR.MAKS) throw new Error('Terlalu banyak baris: maksimal sampai siswa nomor ' + SR.MAKS + '.');
-  var lebar = Math.min(Math.max.apply(null, baris.map(function (r) { return r.length; })), 27 - mulaiKol);
-  var V = baris.map(function (r) {
-    var o = [];
-    for (var j = 0; j < lebar; j++) {
-      var x = teks_(r[j], 300).trim();
-      o.push(tulisTeks_(mulaiKol + j === 3 ? x.toUpperCase() : x, 300));
-    }
-    return o;
-  });
+  mulaiNo = nomor_(mulaiNo);
+  data = (data || []).filter(function (r) { return r && r.some(function (x) { return x != null && String(x).trim(); }); });
+  if (!data.length) throw new Error('Belum ada data yang ditempel.');
+  if (mulaiNo + data.length - 1 > SR.MAKS)
+    throw new Error(data.length + ' siswa tidak muat: mulai nomor ' + mulaiNo + ' hanya cukup sampai nomor ' + SR.MAKS + '.');
   var sh = SpreadsheetApp.getActive().getSheetByName(SR.SISWA);
-  kunci_(function () { sh.getRange(SR.SISWA1 + mulaiNo - 1, mulaiKol + 1, V.length, lebar).setValues(V); });
+  kunci_(function () {
+    var rg = sh.getRange(SR.SISWA1 + mulaiNo - 1, 2, data.length, 26), V = amankan_(rg.getValues());   // B..AA
+    data.forEach(function (r, i) {
+      for (var k = 1; k <= 26; k++) {
+        if (r[k] == null) continue;
+        var x = teks_(r[k], 300).trim();
+        V[i][k - 1] = tulisTeks_(k === 3 ? x.toUpperCase() : x, 300);
+      }
+    });
+    rg.setValues(V);
+  });
   return webSiswa(token);
 }
 
