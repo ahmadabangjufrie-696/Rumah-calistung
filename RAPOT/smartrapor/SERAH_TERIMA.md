@@ -120,6 +120,7 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   dipanggil dari aplikasi web. Kemajuan cetak: cache skrip `SR_PROGRES_<id>`.
 - Uji lokal: scratchpad `web/` (palsu.js = tiruan Apps Script berisi data contoh, uji_server.js, uji_ui.js Playwright).
 - Pasang: lihat `apps_script/CARA_PASANG.md` bagian Aplikasi web (Terapkan → Aplikasi web, Jalankan sebagai Saya, akses Siapa saja).
+- PERHATIAN: ada DUA file bernama "SmartRapor - Kelas IX B (contoh)": `1fvT0Kmo0NEIoWMXLS9o8WEV6pW9ECkE3PhisTFWiCc8` (lama, tanpa pilihan tanggal; kode web ditempel Ustadz di SINI, tab GURU, nama rentang SR_* ditambahkan lewat API 19 Nov) dan `1n2Rb2K2…` (baru). Rumus via setFormula di file id_ID harus memakai ; (`pemisahRumus_`).
 - **Link khusus guru mapel (tab GURU)**: menu SmartRapor › 📲 Siapkan tab GURU membuat tab GURU (B nama, C HP teks, D mapel/P5 PROYEK n,
   E kode acak otomatis lewat onEdit, F rumus HYPERLINK wa.me + ENCODEURL pesan, G "x / n lengkap"). Link aplikasi di GURU!C2.
   Guru membuka `URL?k=KODE` → `doGet` menyisipkan kode → `webGuruMasuk` (tanpa PIN) → hanya mapel itu, tanpa menu.

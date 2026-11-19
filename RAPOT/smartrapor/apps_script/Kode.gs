@@ -1175,9 +1175,10 @@ function bentukGuru_(sh) {
     ]);
   }
   sh.getRange(WEB.GURU1, 1, n, 1).setValues(no).setHorizontalAlignment('center');
-  // rumus ditulis dengan pemisah ; lalu diubah menjadi , (setFormulas selalu memakai koma)
+  // rumus ditulis dengan pemisah ; (file berbahasa Indonesia). Bila file memakai koma, ; diubah menjadi ,
+  var pemisah = pemisahRumus_(sh);
   sh.getRange(WEB.GURU1, 6, n, 2).setFormulas(rumus.map(function (b) {
-    return b.map(function (f) { return f.replace(/;(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ','); });
+    return b.map(function (f) { return pemisah === ';' ? f : f.replace(/;(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ','); });
   }));
   sh.getRange(WEB.GURU1, 2, n, 3).setBackground('#fff4cc');
   sh.getRange(WEB.GURU1, 3, n, 1).setNumberFormat('@');
@@ -1202,4 +1203,14 @@ function isiKodeGuru_(sh, baris, jumlah) {
     return [r[3]];
   });
   if (ubah) sh.getRange(r1, 5, kode.length, 1).setValues(kode);
+}
+
+// pemisah rumus file ini: coba tulis =SUM(1;2) lalu lihat hasilnya
+function pemisahRumus_(sh) {
+  var sel = sh.getRange('H1');
+  sel.setFormula('=SUM(1;2)');
+  SpreadsheetApp.flush();
+  var ok = sel.getValue() === 3;
+  sel.clearContent();
+  return ok ? ';' : ',';
 }
