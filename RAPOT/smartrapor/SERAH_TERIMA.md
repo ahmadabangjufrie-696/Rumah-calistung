@@ -139,3 +139,5 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   kelas angka otomatis) + nama rentang SR_*. Rumus raport sudah ikut bergeser (dicek: raport pondok ٩ / الثاني, tanggal benar).
   Stempel (gambar 50x50) dihapus oleh kode `hapusStempel_` saat file dibuka / Panel / cetak (sekali, tanda di DocumentProperties).
   Isian pilihan di aplikasi memakai <select> + "Tulis sendiri" (datalist dulu menyaring pilihan sehingga tampak hilang).
+- (19 Nov) Atas permintaan Ustadz, file contoh `1n2Rb2K2…` DIBUANG ke Sampah. File yang dipakai SATU-SATUNYA:
+  **1fvT0Kmo0NEIoWMXLS9o8WEV6pW9ECkE3PhisTFWiCc8** (ada tab GURU, wali Wahyudi, kode aplikasi web terpasang).
