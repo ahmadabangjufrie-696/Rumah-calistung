@@ -322,7 +322,7 @@ function toast(t, gagal) {
   var e = $('toast'); e.textContent = t; e.className = 'toast buka' + (gagal ? ' gagal' : '');
   clearTimeout(toast.w); toast.w = setTimeout(function () { e.className = 'toast'; }, gagal ? 5000 : 2600);
 }
-function kartu(html) { $('kartu').innerHTML = html; $('lapis').classList.add('buka'); }
+function kartu(html) { $('kartu').style.maxWidth = ''; $('kartu').innerHTML = html; $('lapis').classList.add('buka'); }
 function tutupKartu() { $('lapis').classList.remove('buka'); }
 function memuat(t) { return '<div class="muat"><div class="putar"></div>' + aman(t || 'Memuat…') + '</div>'; }
 function galatHal(e) { $('isi').innerHTML = '<div class="kosong" style="color:#c0392b">Gagal: ' + aman(e.message) + '<br><br><button class="tb tbg" onclick="buka(HAL.id, HAL.arg)">Coba lagi</button></div>'; }
@@ -394,7 +394,7 @@ var MENU = [
   { id: 'p5', i: '🌱', t: 'Projek P5', p5: 1, p: 'P5' },
   { id: 'siswa', i: '👨‍🎓', t: 'Data Siswa', w: 1 },
   { id: 'atur', i: '⚙️', t: 'Pengaturan', w: 1 },
-  { id: 'akun', i: '👥', t: 'Akun Guru', w: 1 }
+  { id: 'akun', i: '👥', t: 'Guru & Link WA', w: 1 }
 ];
 function menuSaya() { return MENU.filter(function (m) { return (!m.w || SAYA.peran === 'wali') && (!m.p5 || SAYA.p5); }); }
 
@@ -405,8 +405,9 @@ function masukBerhasil(saya) {
   $('chips').innerHTML = [DEPAN.kelas && 'Kelas ' + DEPAN.kelas, DEPAN.semester && 'Semester ' + DEPAN.semester, DEPAN.tahun]
     .filter(Boolean).map(function (t) { return '<span class="chip">' + aman(t) + '</span>'; }).join('');
   $('avSaya').textContent = inisial(saya.nama); $('nmSaya').textContent = saya.nama;
-  $('layarApp').classList.toggle('link', !!saya.link);
-  if (saya.link) { buka(saya.p5n ? 'p5' : 'nilai', saya.p5n || saya.mapel[0]); return; }
+  var satu = saya.link && saya.mapel.length + (saya.p5 ? 1 : 0) <= 1;
+  $('layarApp').classList.toggle('link', satu);
+  if (satu) { buka(saya.p5n ? 'p5' : 'nilai', saya.p5n || saya.mapel[0]); return; }
   var m = menuSaya();
   $('nav').innerHTML = '<div class="lab">Menu</div>' + m.map(function (x) {
     return '<button class="ni" data-id="' + x.id + '" onclick="buka(\'' + x.id + '\')"><span class="i">' + x.i + '</span>' + x.t + '</button>';
@@ -785,7 +786,8 @@ var SW = null, SWpilih = null, SWubah = {};
 var GRUP_SISWA = [['Identitas', [1, 2, 3, 4, 5]], ['Kelahiran & keluarga', [6, 7, 8, 9, 10]], ['Alamat & sekolah asal', [11, 12, 13, 14, 15]],
                   ['Orang tua', [16, 17, 18, 19, 20, 21, 22]], ['Wali', [23, 24, 25, 26]]];
 function halSiswa() {
-  $('isi').innerHTML = judul('Wali kelas', 'Data Siswa', 'Urutan siswa di sini dipakai di semua halaman raport.') + '<div id="swIsi">' + memuat() + '</div>';
+  $('isi').innerHTML = judul('Wali kelas', 'Data Siswa', 'Urutan siswa di sini dipakai di semua halaman raport.') +
+    '<div class="pil" style="margin-bottom:14px"><button class="tb tbe" onclick="formTempel()">📋 Tempel banyak siswa dari Excel / Sheet</button></div><div id="swIsi">' + memuat() + '</div>';
   SWubah = {};
   api('webSiswa').then(function (d) { SW = d; gambarSiswa(); }).catch(function (e) { $('swIsi').innerHTML = '<div class="kosong" style="color:#c0392b">' + aman(e.message) + '</div>'; });
 }
@@ -813,6 +815,38 @@ function gambarSiswa(no) {
   });
   h += '</div></div></div>';
   $('swIsi').innerHTML = h;
+}
+function formTempel() {
+  if (!SW) return;
+  var kosong = SW.siswa.filter(function (s) { return !s.isi[3]; })[0];
+  kartu('<h3>Tempel banyak siswa</h3><p>1. Di Excel / Google Sheet lama, blok datanya (boleh banyak baris dan kolom), lalu tekan <b>Ctrl + C</b>.<br>' +
+    '2. Pilih kolom pertama yang disalin, lalu klik kotak di bawah dan tekan <b>Ctrl + V</b>.</p>' +
+    '<div class="f" style="margin-bottom:10px"><div class="fl"><label>Kolom pertama yang disalin</label><select class="in" id="tpKol" onchange="pratinjauTempel()">' +
+    SW.kolom.slice(1, 27).map(function (k, i) { return '<option value="' + (i + 1) + '"' + (i + 1 === 3 ? ' selected' : '') + '>' + aman(k) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="fl"><label>Mulai dari siswa nomor</label><input class="in" id="tpNo" inputmode="numeric" value="' + (kosong && kosong.no > 1 ? kosong.no : 1) + '" oninput="pratinjauTempel()"></div></div>' +
+    '<textarea class="in" id="tpData" style="min-height:120px;font-size:12.5px;white-space:pre" placeholder="Tempel di sini (Ctrl + V)" oninput="pratinjauTempel()"></textarea>' +
+    '<div id="tpLihat" style="font-size:12.5px;color:#555;margin-top:8px"></div><p class="salah" id="tpSalah"></p>' +
+    '<div class="aksi"><button class="tb tbg" onclick="tutupKartu()">Batal</button><button class="tb tbh" id="tpTb" onclick="simpanTempel()">Simpan</button></div>');
+  $('kartu').style.maxWidth = '640px';
+}
+function bacaTempel() {
+  return $('tpData').value.replace(/\r/g, '').split('\n').filter(function (b) { return b.trim(); }).map(function (b) { return b.split('\t'); });
+}
+function pratinjauTempel() {
+  var b = bacaTempel(), kol = +$('tpKol').value, no = parseInt($('tpNo').value, 10) || 1;
+  if (!b.length) { $('tpLihat').innerHTML = ''; return; }
+  var lebar = Math.min(Math.max.apply(null, b.map(function (r) { return r.length; })), 27 - kol);
+  var timpa = SW.siswa.slice(no - 1, no - 1 + b.length).filter(function (s) { return s.isi[3]; }).length;
+  $('tpLihat').innerHTML = '<b>' + b.length + ' siswa</b> (nomor ' + no + '–' + (no + b.length - 1) + '), kolom <b>' + aman(SW.kolom[kol]) + '</b> sampai <b>' + aman(SW.kolom[kol + lebar - 1]) + '</b>.' +
+    '<br>Contoh baris pertama: ' + aman(b[0].slice(0, 4).join(' · ')) + (timpa ? '<br><span style="color:#c0392b">⚠ ' + timpa + ' siswa yang sudah ada akan ditimpa.</span>' : '');
+}
+function simpanTempel() {
+  var b = bacaTempel();
+  if (!b.length) { $('tpSalah').textContent = 'Belum ada data yang ditempel.'; return; }
+  $('tpTb').disabled = true; $('tpTb').textContent = 'Menyimpan…';
+  api('webTempelSiswa', parseInt($('tpNo').value, 10) || 1, +$('tpKol').value, b).then(function (d) {
+    SW = d; SWubah = {}; tutupKartu(); $('kartu').style.maxWidth = ''; gambarSiswa(); DATA_CETAK = null; toast(b.length + ' siswa tersimpan ✓');
+  }).catch(function (e) { $('tpSalah').textContent = e.message; $('tpTb').disabled = false; $('tpTb').textContent = 'Simpan'; });
 }
 function ubahSiswa(k, v) { SWubah[k] = v; setKotor(simpanSiswa, 'Data siswa belum disimpan'); }
 function simpanSiswa() {
@@ -861,48 +895,87 @@ function masukUlangKepala() {
     .filter(Boolean).map(function (t) { return '<span class="chip">' + aman(t) + '</span>'; }).join('');
 }
 
-// =================================================================== akun guru
+// =================================================================== guru & link WA
 var AK = null;
 function halAkun() {
-  $('isi').innerHTML = judul('Wali kelas', 'Akun Guru', 'Buat akun untuk setiap guru. Guru hanya bisa membuka mapel yang dicentang.') + '<div id="akIsi">' + memuat() + '</div>';
+  $('isi').innerHTML = judul('Wali kelas', 'Guru & Link WA', 'Satu guru = satu akun. Guru menerima link khusus lewat WhatsApp dan hanya bisa mengisi mapel yang dicentang.') + '<div id="akIsi">' + memuat() + '</div>';
   api('webAkun').then(function (d) { AK = d; gambarAkun(); }).catch(function (e) { $('akIsi').innerHTML = '<div class="kosong" style="color:#c0392b">' + aman(e.message) + '</div>'; });
 }
+function nomorWa(hp) {
+  var n = String(hp || '').replace(/[^0-9]/g, '');
+  if (n.charAt(0) === '0') n = '62' + n.slice(1); else if (n.charAt(0) === '8') n = '62' + n;
+  return n;
+}
+function linkGuru(a) { return AK.url ? AK.url + (AK.url.indexOf('?') >= 0 ? '&' : '?') + 'k=' + a.kode : ''; }
+function pesanWa(a) {
+  var mp = a.mapel.join(', ') + (a.p5 ? (a.mapel.length ? ' dan ' : '') + 'Projek P5' : '');
+  return 'Assalamu\'alaikum ' + a.nama + '.\nMohon bantuannya mengisi nilai *' + mp + '* kelas ' + (AK.kelas || '') + ' semester ' + (AK.semester || '') +
+    ' lewat link berikut:\n' + linkGuru(a) + '\n\nLink ini khusus untuk Ustadz/Ibu, mohon tidak disebarkan. Setelah mengisi, tekan tombol Simpan. Jazakumullah khairan.';
+}
+function kirimWa(id) {
+  var a = AK.akun.filter(function (x) { return x.id === id; })[0];
+  if (!AK.url) { kartu('<h3>Link aplikasi belum ada</h3><p>Aplikasi web belum diterbitkan (Terapkan › Deployment baru › Aplikasi web).</p><div class="aksi"><button class="tb tbg" onclick="tutupKartu()">Tutup</button></div>'); return; }
+  if (!a.mapel.length && !a.p5) { toast('Centang dulu mapel guru ini (tombol Ubah).', true); return; }
+  var no = nomorWa(a.hp);
+  window.open('https://wa.me/' + no + '?text=' + encodeURIComponent(pesanWa(a)), '_blank');
+}
+function salinLink(id) {
+  var a = AK.akun.filter(function (x) { return x.id === id; })[0], t = pesanWa(a);
+  kartu('<h3>Pesan untuk ' + aman(a.nama) + '</h3><p>Salin pesan ini bila ingin dikirim lewat aplikasi lain.</p><textarea class="in" id="psn" style="min-height:170px;font-size:13px">' + aman(t) + '</textarea>' +
+    '<div class="aksi"><button class="tb tbg" onclick="tutupKartu()">Tutup</button><button class="tb tbh" onclick="$(\'psn\').select();document.execCommand(\'copy\');toast(\'Pesan disalin ✓\')">Salin</button></div>');
+}
 function gambarAkun() {
-  $('akIsi').innerHTML = '<div class="blok" style="max-width:760px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="margin:0">' + AK.akun.length + ' akun</h3>' +
-    '<button class="tb tbh" onclick="formAkun()">＋ Tambah guru</button></div>' + AK.akun.map(function (a) {
-      var m = a.peran === 'wali' ? 'semua mapel' : (a.mapel.join(', ') || 'belum ada mapel') + (a.p5 ? ' · P5' : '');
-      return '<div class="akl"><span class="av">' + aman(inisial(a.nama)) + '</span><div class="nm"><b>' + aman(a.nama) + (a.peran === 'wali' ? '<span class="wali">WALI KELAS</span>' : '') + '</b><small>' + aman(m) + '</small></div>' +
-        '<button class="tb tbg tbk" onclick="formAkun(\'' + a.id + '\')">Ubah</button></div>';
-    }).join('') + '</div><div class="ket" style="max-width:760px"><span>Kirim link aplikasi ini ke guru lewat WhatsApp, lalu beri tahu nama dan PIN masing-masing.</span></div>';
+  var guru = AK.akun.filter(function (a) { return a.peran !== 'wali'; }), wali = AK.akun.filter(function (a) { return a.peran === 'wali'; });
+  var baris = function (a) {
+    var m = a.peran === 'wali' ? 'semua halaman' : (a.mapel.join(', ') || 'belum ada mapel') + (a.p5 ? ' · P5' : '');
+    return '<div class="akl"><span class="av">' + aman(inisial(a.nama)) + '</span><div class="nm"><b>' + aman(a.nama) + (a.peran === 'wali' ? '<span class="wali">WALI KELAS</span>' : '') + '</b><small>' +
+      aman(m) + (a.hp ? ' · ' + aman(a.hp) : '') + '</small></div>' +
+      (a.peran !== 'wali' ? '<button class="tb tbe tbk" onclick="kirimWa(\'' + a.id + '\')"' + (a.hp ? '' : ' disabled title="Isi nomor HP dulu"') + '>📲 Kirim WA</button>' : '') +
+      '<button class="tb tbg tbk" onclick="formAkun(\'' + a.id + '\')">Ubah</button></div>';
+  };
+  $('akIsi').innerHTML = '<div class="blok" style="max-width:820px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:10px;flex-wrap:wrap"><h3 style="margin:0">Guru mapel · ' + guru.length + ' akun</h3>' +
+    '<button class="tb tbh" onclick="formAkun()">＋ Tambah guru</button></div>' + (guru.map(baris).join('') || '<div class="kosong">Belum ada guru. Klik ＋ Tambah guru.</div>') + '</div>' +
+    '<div class="blok" style="max-width:820px"><h3>Wali kelas</h3>' + wali.map(baris).join('') + '</div>' +
+    '<div class="ket" style="max-width:820px"><span>📲 Kirim WA membuka WhatsApp dengan pesan + link khusus guru itu. Guru tidak perlu PIN, dan hanya bisa mengisi mapelnya sendiri.</span></div>';
 }
 function formAkun(id) {
-  var a = id ? AK.akun.filter(function (x) { return x.id === id; })[0] : { nama: '', peran: 'guru', mapel: [], p5: false };
+  var a = id ? AK.akun.filter(function (x) { return x.id === id; })[0] : { nama: '', peran: 'guru', mapel: [], p5: false, hp: '' };
   var cek = function (daftar) {
     return '<div class="cek">' + daftar.map(function (m) {
       return '<label title="' + aman(m.nama) + '"><input type="checkbox" class="akM" value="' + aman(m.tab) + '"' + (a.mapel.indexOf(m.tab) >= 0 ? ' checked' : '') + '>' + aman(m.tab) + '</label>';
     }).join('') + '</div>';
   };
-  kartu('<h3>' + (id ? 'Ubah akun' : 'Tambah guru') + '</h3>' +
-    '<div class="fl"><label>Nama (yang tampil saat masuk)</label><input class="in" id="akNama" value="' + aman(a.nama) + '" placeholder="mis. Ustadz Hasan"></div>' +
-    '<div class="fl"><label>' + (id ? 'PIN baru (kosongkan bila tidak diganti)' : 'PIN (4–8 angka)') + '</label><input class="in" id="akPin" inputmode="numeric" maxlength="8" placeholder="' + (id ? '••••' : 'mis. 1234') + '"></div>' +
-    '<div class="fl"><label>Peran</label><select class="in" id="akPeran" onchange="$(\'akMapel\').hidden=this.value===\'wali\'"><option value="guru"' + (a.peran !== 'wali' ? ' selected' : '') + '>Guru mapel</option><option value="wali"' + (a.peran === 'wali' ? ' selected' : '') + '>Wali kelas (semua halaman)</option></select></div>' +
-    '<div id="akMapel"' + (a.peran === 'wali' ? ' hidden' : '') + '><div class="fl"><label>Mapel sekolah</label>' + cek(AK.sekolah) + '</div><div class="fl"><label>Mapel pondok</label>' + cek(AK.pondok) + '</div>' +
+  var wali = a.peran === 'wali';
+  kartu('<h3>' + (id ? 'Ubah ' + (wali ? 'wali kelas' : 'guru') : 'Tambah guru') + '</h3>' +
+    '<div class="fl"><label>Nama</label><input class="in" id="akNama" value="' + aman(a.nama) + '" placeholder="mis. Ustadz Hasan"></div>' +
+    '<div class="fl"><label>No. HP (WhatsApp)</label><input class="in" id="akHp" inputmode="tel" value="' + aman(a.hp) + '" placeholder="mis. 0812 3456 7890"></div>' +
+    '<div class="fl"><label>Peran</label><select class="in" id="akPeran" onchange="$(\'akMapel\').hidden=this.value===\'wali\'"><option value="guru"' + (!wali ? ' selected' : '') + '>Guru mapel</option><option value="wali"' + (wali ? ' selected' : '') + '>Wali kelas (semua halaman)</option></select></div>' +
+    '<div id="akMapel"' + (wali ? ' hidden' : '') + '><div class="fl"><label>Mapel sekolah</label>' + cek(AK.sekolah) + '</div><div class="fl"><label>Mapel pondok</label>' + cek(AK.pondok) + '</div>' +
     '<div class="fl"><label>Lainnya</label><div class="cek"><label><input type="checkbox" id="akP5"' + (a.p5 ? ' checked' : '') + '>Boleh mengisi Projek P5</label></div></div></div>' +
+    '<details style="margin:4px 0 6px"><summary style="cursor:pointer;font-size:12.5px;color:#888;font-weight:600">PIN & link (pilihan)</summary><div style="padding-top:10px">' +
+    '<div class="fl"><label>' + (wali ? 'PIN baru (kosongkan bila tidak diganti)' : 'PIN (tidak wajib: untuk masuk lewat halaman depan)') + '</label><input class="in" id="akPin" inputmode="numeric" maxlength="8" placeholder="' + (a.pin ? '•••• (sudah ada)' : '4–8 angka') + '"></div>' +
+    (id && !wali ? '<button class="tb tbg tbk" onclick="linkBaru(\'' + id + '\')">🔄 Buat link baru (link lama tidak berlaku)</button> <button class="tb tbg tbk" onclick="tutupKartu();salinLink(\'' + id + '\')">📋 Lihat / salin pesan</button>' : '') +
+    '</div></details>' +
     '<p class="salah" id="akSalah"></p><div class="aksi">' + (id && id !== SAYA.id ? '<button class="tb tbm" style="margin-right:auto" onclick="hapusAkun(\'' + id + '\')">Hapus</button>' : '') +
     '<button class="tb tbg" onclick="tutupKartu()">Batal</button><button class="tb tbh" id="akTb" onclick="simpanAkun(\'' + (id || '') + '\')">Simpan</button></div>');
 }
 function simpanAkun(id) {
-  var o = { id: id || null, nama: $('akNama').value, pin: $('akPin').value.trim(), peran: $('akPeran').value, p5: $('akP5') ? $('akP5').checked : false,
+  var o = { id: id || null, nama: $('akNama').value, hp: $('akHp').value, pin: $('akPin').value.trim(), peran: $('akPeran').value, p5: $('akP5') ? $('akP5').checked : false,
             mapel: Array.prototype.filter.call(document.querySelectorAll('.akM'), function (c) { return c.checked; }).map(function (c) { return c.value; }) };
   $('akTb').disabled = true;
   api('webSimpanAkun', o).then(function (d) {
-    AK = d; tutupKartu(); gambarAkun(); toast('Akun tersimpan ✓');
+    AK = d; tutupKartu(); gambarAkun(); toast('Tersimpan ✓');
     panggil('webDepan').then(function (x) { DEPAN = x; });
     if (id === SAYA.id) api('webSaya').then(function (s) { SAYA = s; });
   }).catch(function (e) { $('akSalah').textContent = e.message; $('akTb').disabled = false; });
 }
+function linkBaru(id) {
+  if (!confirm('Buat link baru? Link lama guru ini langsung tidak berlaku. Setelah itu kirim lagi lewat WA.')) return;
+  api('webLinkBaru', id).then(function (d) { AK = d; tutupKartu(); gambarAkun(); toast('Link baru dibuat. Kirim lagi lewat WA.'); })
+    .catch(function (e) { $('akSalah').textContent = e.message; });
+}
 function hapusAkun(id) {
-  if (!confirm('Hapus akun ini? Guru tersebut tidak bisa masuk lagi.')) return;
+  if (!confirm('Hapus akun ini? Linknya langsung tidak berlaku.')) return;
   api('webHapusAkun', id).then(function (d) { AK = d; tutupKartu(); gambarAkun(); toast('Akun dihapus'); })
     .catch(function (e) { $('akSalah').textContent = e.message; });
 }

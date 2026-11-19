@@ -126,3 +126,8 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   Guru membuka `URL?k=KODE` → `doGet` menyisipkan kode → `webGuruMasuk` (tanpa PIN) → hanya mapel itu, tanpa menu.
   Hapus kode = link mati. Ustadz minta ini (19 Nov): guru tidak boleh melihat nilai lain/akun wali; data siswa cukup ditempel di Sheet.
 - SISWA kolom B, C, M, U, Z diformat Teks (file Google sudah diubah lewat API, juga di generator) supaya 0 di depan tidak hilang saat tempel.
+- (19 Nov, lanjutan) Ustadz mau SEMUA di aplikasi web: halaman **Guru & Link WA** (akun guru di Properti Skrip, field `hp`, `kode`;
+  tombol 📲 Kirim WA membuka wa.me dengan pesan + `URL?k=kode`; 🔄 link baru = kode baru). PIN guru tidak wajib (hanya wali).
+  Data Siswa: tombol **Tempel banyak siswa** (`webTempelSiswa`: pilih kolom pertama + nomor awal, tempel teks dari Excel/Sheet).
+  Tab GURU di Sheet tetap berfungsi (cadangan), tapi jalur utama sekarang aplikasi.
+- Ide jual: 1 guru 1 akun → nanti perlu kode lisensi (batas jumlah akun per sekolah). BELUM dibuat.

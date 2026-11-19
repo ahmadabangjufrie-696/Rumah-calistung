@@ -42,9 +42,13 @@ function profil_(a) {
 
 // ------------------------------------------------------------------ link khusus guru (tab GURU)
 // Satu baris = satu guru + satu mapel. Kode diisi otomatis; hapus kode = link lama tidak berlaku.
+function kodeBaru_() { return Utilities.getUuid().replace(/-/g, '').slice(0, 14); }
+
 function guruDariKode_(kode) {
   kode = String(kode || '');
   if (kode.length < 8) return null;
+  var ak = akunSemua_().filter(function (x) { return x.kode === kode && x.peran !== 'wali'; })[0];   // akun guru (aplikasi)
+  if (ak) return { id: 'k:' + kode, nama: ak.nama, peran: 'guru', mapel: ak.mapel || [], p5: !!ak.p5, link: true };
   var sh = SpreadsheetApp.getActive().getSheetByName(WEB.GURU);
   if (!sh) return null;
   var v = sh.getRange(WEB.GURU1, 2, WEB.GURU_MAKS, 4).getDisplayValues();          // B nama, C HP, D mapel, E kode
@@ -105,7 +109,7 @@ function webDepan() {
   return {
     sekolah: namaRentang_('SR_SEKOLAH'), kelas: namaRentang_('SR_KELAS'), semester: namaRentang_('SR_SEMESTER'),
     tahun: namaRentang_('SR_TAHUN'),
-    akun: akunSemua_().map(function (a) { return { id: a.id, nama: a.nama, peran: a.peran }; })
+    akun: akunSemua_().filter(function (a) { return a.sandi; }).map(function (a) { return { id: a.id, nama: a.nama, peran: a.peran }; })
   };
 }
 
@@ -143,7 +147,10 @@ function webGantiPin(token, lama, baru) {
 function webAkun(token) {
   saya_(token, true);
   return {
-    akun: akunSemua_().map(function (a) { return { id: a.id, nama: a.nama, peran: a.peran, mapel: a.mapel || [], p5: !!a.p5 }; }),
+    akun: akunSemua_().map(function (a) {
+      return { id: a.id, nama: a.nama, peran: a.peran, mapel: a.mapel || [], p5: !!a.p5, hp: a.hp || '', kode: a.kode || '', pin: !!a.sandi };
+    }),
+    url: urlAplikasi_(), kelas: namaRentang_('SR_KELAS'), semester: namaRentang_('SR_SEMESTER'),
     sekolah: SR.MAPEL_SEKOLAH.map(function (t) { return { tab: t, nama: MAPEL_NAMA[t] || t }; }),
     pondok: SR.MAPEL_PONDOK.map(function (t) { return { tab: t, nama: MAPEL_NAMA[t] || t }; })
   };
@@ -164,15 +171,37 @@ function webSimpanAkun(token, o) {
     if (o.id && !a) throw new Error('Akun tidak ditemukan.');
     if (!a) {
       a = { id: Utilities.getUuid().slice(0, 8) };
-      if (!o.pin) throw new Error('PIN wajib diisi untuk akun baru.');
+      if (!o.pin && peran === 'wali') throw new Error('PIN wajib diisi untuk wali kelas.');
       semua.push(a);
     }
+    if (peran === 'wali' && !a.sandi && !o.pin) throw new Error('Wali kelas wajib punya PIN.');
     if (a.id === saya.id && peran !== 'wali') throw new Error('Ustadz/Ibu tidak bisa menurunkan akun sendiri.');
     a.nama = nama; a.peran = peran; a.mapel = mapel; a.p5 = !!o.p5;
+    a.hp = teks_(o.hp, 30).replace(/[^0-9+]/g, '');
+    if (peran === 'guru' && !a.kode) a.kode = kodeBaru_();      // link khusus untuk dikirim lewat WA
+    if (peran === 'wali') delete a.kode;
     if (o.pin) a.sandi = sandi_(cekPin_(o.pin));
     simpanAkunSemua_(semua);
     return webAkun(token);
   });
+}
+
+// link lama dimatikan, dibuat link baru
+function webLinkBaru(token, id) {
+  saya_(token, true);
+  return kunci_(function () {
+    var semua = akunSemua_(), a = semua.filter(function (x) { return x.id === id && x.peran !== 'wali'; })[0];
+    if (!a) throw new Error('Akun guru tidak ditemukan.');
+    a.kode = kodeBaru_();
+    simpanAkunSemua_(semua);
+    return webAkun(token);
+  });
+}
+
+function urlAplikasi_() {
+  var u = urlWeb_();
+  if (!u) { var g = SpreadsheetApp.getActive().getSheetByName(WEB.GURU); if (g) u = g.getRange('C2').getDisplayValue(); }
+  return u;
 }
 
 function webHapusAkun(token, id) {
@@ -442,6 +471,29 @@ function webSimpanSiswa(token, no, ubah) {
       sh.getRange(baris, i + 1).setValue(tulisTeks_(i === 3 ? x.toUpperCase() : x, 300));   // nama huruf besar
     });
   });
+  return webSiswa(token);
+}
+
+// tempel banyak siswa sekaligus (disalin dari Excel / Google Sheet lain)
+// mulaiNo: nomor siswa baris pertama, mulaiKol: kolom pertama (1..26), baris: [[teks, ...], ...]
+function webTempelSiswa(token, mulaiNo, mulaiKol, baris) {
+  saya_(token, true);
+  mulaiNo = nomor_(mulaiNo); mulaiKol = parseInt(mulaiKol, 10);
+  if (!(mulaiKol >= 1 && mulaiKol <= 26)) throw new Error('Kolom awal salah.');
+  baris = (baris || []).filter(function (r) { return r && r.some(function (x) { return String(x || '').trim(); }); });
+  if (!baris.length) throw new Error('Belum ada data yang ditempel.');
+  if (mulaiNo + baris.length - 1 > SR.MAKS) throw new Error('Terlalu banyak baris: maksimal sampai siswa nomor ' + SR.MAKS + '.');
+  var lebar = Math.min(Math.max.apply(null, baris.map(function (r) { return r.length; })), 27 - mulaiKol);
+  var V = baris.map(function (r) {
+    var o = [];
+    for (var j = 0; j < lebar; j++) {
+      var x = teks_(r[j], 300).trim();
+      o.push(tulisTeks_(mulaiKol + j === 3 ? x.toUpperCase() : x, 300));
+    }
+    return o;
+  });
+  var sh = SpreadsheetApp.getActive().getSheetByName(SR.SISWA);
+  kunci_(function () { sh.getRange(SR.SISWA1 + mulaiNo - 1, mulaiKol + 1, V.length, lebar).setValues(V); });
   return webSiswa(token);
 }
 
