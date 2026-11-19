@@ -15,7 +15,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
     id `1n2Rb2K2Kyf85mdZp2SblroglMmSz-QCK0NbSlRZxfLo` (10 siswa buatan). Kode tombol **belum** ditempel.
   - 15 Nov atas permintaan Ustadz dibuang ke Sampah: file contoh lama `1RrOsB1w...`, percobaan C3 pertama `1ZBBI_k1...`,
     dokumen KODE lama 11 Nov `1OAb9Me4...`. Hanya ada SATU file raport contoh dan SATU dokumen KODE.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1vgwa1jpfG7-3-dETlSaoDeGx1POZ2iIZm34dclR1Roc` (15 Nov sore: catatan kaki huruf miring).
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1ar_NGuBgub_ypMaYCzVWkVdGQ7SCPx1k8cnNR21sOgo` (19 Nov: + aplikasi web; dokumen lama 1vgwa1jp… dibuang).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
 ## Berkas
