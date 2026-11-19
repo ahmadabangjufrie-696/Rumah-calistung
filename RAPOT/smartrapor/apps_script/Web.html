@@ -57,6 +57,12 @@ main{flex:1;min-width:0;padding:22px 26px 110px}
 .sjd{color:#777;font-size:13.5px;font-weight:500;margin-bottom:16px}
 .orn{height:2px;background:linear-gradient(90deg,var(--e),rgba(184,147,46,0));margin:12px 0 18px}
 .navhp{display:none}
+.duo{display:flex;gap:6px;margin-top:6px}
+.duo>div{flex:1;min-width:0}
+.duo small{display:block;font-size:9.5px;color:#a9a08a;font-weight:700;letter-spacing:.8px;text-transform:uppercase;white-space:nowrap}
+.duo b{display:block;font-family:'Playfair Display',serif;font-weight:800;font-size:25px;color:var(--h);line-height:1.15;white-space:nowrap}
+.duo b i{font-style:normal;font-family:Poppins,sans-serif;font-size:11px;font-weight:600;color:#999}
+.duo>div+div{border-left:1.5px solid #f0ead8;padding-left:8px}
 .app.link .nav,.app.link .navhp{display:none!important}
 /* ------------------------------------------------ kartu & tombol */
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -803,7 +809,8 @@ function gambarSiswa(no) {
   var h = '<div class="dua"><div class="daftar"><input class="in cari" placeholder="🔍 Cari nama…" oninput="saringDaftar(this)"><div class="isi">' +
     daftarSiswaHtml(terisi.map(function (x) { return { no: x.no, nama: x.isi[3] }; }), SWpilih, 'gambarSiswa') +
     (kosong ? '<button class="s" style="color:var(--h)" onclick="gambarSiswa(' + kosong.no + ')"><span class="nu"></span><span class="av" style="background:var(--e);color:#fff">+</span><span class="nmm">Tambah siswa (no. ' + kosong.no + ')</span></button>' : '') +
-    '</div></div><div class="blok" style="margin:0"><div class="hdr"><div class="nmb">' + aman(s.isi[3] || 'Siswa baru · no. ' + s.no) + (s.isi[4] ? '<small>' + aman(s.isi[4]) + '</small>' : '') + '</div></div><div class="f">';
+    '</div></div><div class="blok" style="margin:0"><div class="hdr"><div class="nmb">' + aman(s.isi[3] || 'Siswa baru · no. ' + s.no) + (s.isi[4] ? '<small>' + aman(s.isi[4]) + '</small>' : '') + '</div>' +
+    (s.isi[3] ? '<button class="tb tbm tbk" onclick="hapusSiswa(' + s.no + ')">🗑 Hapus siswa</button>' : '') + '</div><div class="f">';
   GRUP_SISWA.forEach(function (g) {
     h += '<div class="gj">' + g[0] + '</div>' + g[1].map(function (k) {
       var lab = SW.kolom[k], v = SWubah[k] != null ? SWubah[k] : s.isi[k], p = SW.pilihan[k], arab = /Arab/.test(lab);
@@ -815,6 +822,19 @@ function gambarSiswa(no) {
   });
   h += '</div></div></div>';
   $('swIsi').innerHTML = h;
+}
+function hapusSiswa(no) {
+  var s = SW.siswa[no - 1], nama = s.isi[3];
+  kartu('<h3>Hapus ' + aman(nama) + '?</h3><p>Dipakai bila siswa <b>pindah / keluar</b>. Data diri, <b>semua nilai</b>, kehadiran, catatan, dan P5 siswa ini ikut dihapus. ' +
+    'Siswa sesudahnya naik satu nomor.<br><br>Ketik <b>HAPUS</b> untuk memastikan:</p><input class="in" id="hpsYa" placeholder="HAPUS" autocomplete="off">' +
+    '<p class="salah" id="hpsSalah"></p><div class="aksi"><button class="tb tbg" onclick="tutupKartu()">Batal</button><button class="tb tbm" id="hpsTb">🗑 Hapus</button></div>');
+  $('hpsTb').onclick = function () {
+    if ($('hpsYa').value.trim().toUpperCase() !== 'HAPUS') { $('hpsSalah').textContent = 'Ketik HAPUS dulu.'; return; }
+    $('hpsTb').disabled = true; $('hpsTb').textContent = 'Menghapus… (± 30 detik)';
+    api('webHapusSiswa', no, nama).then(function (d) {
+      SW = d; SWubah = {}; SWpilih = null; setKotor(null); tutupKartu(); gambarSiswa(); DATA_CETAK = null; toast(nama + ' sudah dihapus');
+    }).catch(function (e) { $('hpsSalah').textContent = e.message; $('hpsTb').disabled = false; $('hpsTb').textContent = '🗑 Hapus'; });
+  };
 }
 // ---------------- tempel seluruh tabel: kolom dikenali dari judulnya
 var SINONIM = {
@@ -1119,9 +1139,10 @@ function pilihCetak(no) {
   $('ckInfo').innerHTML = '<div class="lab">Siswa terpilih</div><div class="jd" style="font-size:26px">' + aman(s.nama) + '</div>' +
     (s.arab ? '<div class="ar" style="font-size:19px;color:#a8822a;font-weight:700;text-align:left">' + aman(s.arab) + '</div>' : '') +
     '<div class="sjd" style="margin:2px 0 12px">' + aman([s.nisn && 'NISN ' + s.nisn, s.nis && 'NIS ' + s.nis].filter(Boolean).join(' · ')) + '</div>' +
-    '<div class="grid4"><div class="c"><div class="k">Rata-rata</div><div class="v">' + angka(s.rata, 1) + '</div><div class="x">' + (s.pondok === '' ? '&nbsp;' : 'pondok: ' + angka(s.pondok, 0)) + '</div></div>' +
-    '<div class="c"><div class="k">Peringkat</div><div class="v">' + (s.peringkat ? s.peringkat + '<small> / ' + d.jumlahDinilai + '</small>' : '–') + '</div><div class="x">raport sekolah</div></div>' +
-    '<div class="c"><div class="k">Tidak hadir</div><div class="v">' + tot + '<small> hari</small></div><div class="x">S ' + (s.sakit || 0) + ' · I ' + (s.izin || 0) + ' · A ' + (s.alpa || 0) + '</div></div>' +
+    '<div class="grid4"><div class="c"><div class="k">Rata-rata</div><div class="duo"><div><small>Sekolah</small><b>' + angka(s.rata, 1) + '</b></div><div><small>Pondok</small><b>' + angka(s.pondok, 0) + '</b></div></div></div>' +
+    '<div class="c"><div class="k">Peringkat</div><div class="duo"><div><small>Sekolah</small><b>' + (s.peringkat ? s.peringkat + '<i> / ' + d.jumlahDinilai + '</i>' : '–') + '</b></div>' +
+      '<div><small>Pondok</small><b>' + (s.peringkatPondok ? s.peringkatPondok + '<i> / ' + d.jumlahPondok + '</i>' : '–') + '</b></div></div></div>' +
+    '<div class="c"><div class="k">Tidak hadir · ' + tot + ' hari</div><div class="duo"><div><small>Sakit</small><b>' + (s.sakit || 0) + '</b></div><div><small>Izin</small><b>' + (s.izin || 0) + '</b></div><div><small>Alpa</small><b>' + (s.alpa || 0) + '</b></div></div></div>' +
     '<div class="c"><div class="k">Status nilai</div><div class="v" style="font-family:Poppins;font-size:16px;margin-top:8px;color:' + (s.kurang.length ? '#c0392b' : '#2e8b57') + '">' + (s.kurang.length ? '✗ Belum lengkap' : '✓ Lengkap') + '</div>' +
     '<div class="x" title="' + aman(s.kurang.join(', ')) + '" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (s.kurang.length ? 'kosong: ' + aman(s.kurang.join(', ')) : '&nbsp;') + '</div></div></div>';
   pratinjauCetak();

@@ -474,15 +474,18 @@ function dataPanel_() {
     delete s._s; delete s._p;
   });
   var dinilai = siswa.filter(function (s) { return s.rata !== ''; });
+  var dinilaiP = siswa.filter(function (s) { return s.pondok !== ''; });
   siswa.forEach(function (s) {
     s.peringkat = s.rata === '' ? '' : 1 + dinilai.filter(function (t) { return t.rata > s.rata + 1e-9; }).length;
+    // peringkat pondok: rata-rata pondok dibulatkan (sama dengan CATATAN PONDOK)
+    s.peringkatPondok = s.pondok === '' ? '' : 1 + dinilaiP.filter(function (t) { return Math.round(t.pondok) > Math.round(s.pondok); }).length;
   });
   var pilihan = pilihanSekarang_();
   var dipilih = pilihan ? parseInt(pilihan, 10) : null;
   var tingkat = namaRentang_('SR_TINGKAT'), semester = namaRentang_('SR_SEMESTER');
   return {
     sekolah: namaRentang_('SR_SEKOLAH'), kelas: namaRentang_('SR_KELAS'), semester: semester,
-    tahun: namaRentang_('SR_TAHUN'), siswa: siswa, jumlahDinilai: dinilai.length,
+    tahun: namaRentang_('SR_TAHUN'), siswa: siswa, jumlahDinilai: dinilai.length, jumlahPondok: dinilaiP.length,
     dipilih: siswa.some(function (s) { return s.no === dipilih; }) ? dipilih : null,
     saranCover: /^VII \(/.test(tingkat) && semester === 'Ganjil'
   };

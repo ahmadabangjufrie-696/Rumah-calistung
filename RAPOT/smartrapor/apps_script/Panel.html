@@ -16,6 +16,12 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .chip{background:rgba(255,255,255,.08);border:1px solid rgba(232,198,106,.7);color:#f6e7bd;border-radius:22px;padding:6px 14px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .bd{flex:1;display:flex;min-height:0}
 .lab{font-size:11.5px;letter-spacing:2.5px;color:var(--e);font-weight:700;text-transform:uppercase}
+.duo{display:flex;gap:6px;margin-top:6px}
+.duo>div{flex:1;min-width:0}
+.duo small{display:block;font-size:9.5px;color:#a9a08a;font-weight:700;letter-spacing:.8px;text-transform:uppercase;white-space:nowrap}
+.duo b{display:block;font-family:'Playfair Display',serif;font-weight:800;font-size:22px;color:var(--h);line-height:1.15;white-space:nowrap}
+.duo b i{font-style:normal;font-family:Poppins,sans-serif;font-size:11px;font-weight:600;color:#999}
+.duo>div+div{border-left:1.5px solid #f0ead8;padding-left:8px}
 /* kiri */
 .kiri{width:320px;flex:none;border-right:1px solid var(--garis);display:flex;flex-direction:column;background:#fff}
 .lh{padding:18px 18px 6px}
@@ -118,9 +124,9 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
     <div class="meta" id="meta">&nbsp;</div>
     <div class="orn"></div>
     <div class="stat">
-      <div class="c"><div class="k">Rata-rata</div><div class="v" id="rata">–</div><div class="x" id="rataP">&nbsp;</div></div>
-      <div class="c"><div class="k">Peringkat</div><div class="v" id="rank">–</div><div class="x">raport sekolah</div></div>
-      <div class="c"><div class="k">Tidak hadir</div><div class="v" id="absen">–</div><div class="x" id="absenX">&nbsp;</div></div>
+      <div class="c"><div class="k">Rata-rata</div><div class="duo"><div><small>Sekolah</small><b id="rata">–</b></div><div><small>Pondok</small><b id="rataP">–</b></div></div></div>
+      <div class="c"><div class="k">Peringkat</div><div class="duo"><div><small>Sekolah</small><b id="rank">–</b></div><div><small>Pondok</small><b id="rankP">–</b></div></div></div>
+      <div class="c"><div class="k" id="absenK">Tidak hadir</div><div class="duo"><div><small>Sakit</small><b id="absS">0</b></div><div><small>Izin</small><b id="absI">0</b></div><div><small>Alpa</small><b id="absA">0</b></div></div></div>
       <div class="c" id="kStatus"><div class="k">Status nilai</div><div class="v" id="status">–</div><div class="x" id="kurang">&nbsp;</div></div>
     </div>
     <div class="sec">Cetak siswa ini</div>
@@ -229,11 +235,12 @@ function pilihSiswa(no) {
   $('arab').textContent = s.arab || '';
   $('meta').textContent = [s.nisn && 'NISN ' + s.nisn, s.nis && 'NIS ' + s.nis].filter(Boolean).join('  ·  ') || ' ';
   $('rata').textContent = angka(s.rata, 1);
-  $('rataP').textContent = s.pondok === '' ? ' ' : 'pondok: ' + angka(s.pondok, 0);
-  $('rank').innerHTML = s.peringkat ? s.peringkat + '<small> / ' + D.jumlahDinilai + '</small>' : '–';
+  $('rataP').textContent = angka(s.pondok, 0);
+  $('rank').innerHTML = s.peringkat ? s.peringkat + '<i> / ' + D.jumlahDinilai + '</i>' : '–';
+  $('rankP').innerHTML = s.peringkatPondok ? s.peringkatPondok + '<i> / ' + D.jumlahPondok + '</i>' : '–';
   var tot = (+s.sakit || 0) + (+s.izin || 0) + (+s.alpa || 0);
-  $('absen').innerHTML = tot + '<small> hari</small>';
-  $('absenX').textContent = 'S ' + (s.sakit || 0) + ' · I ' + (s.izin || 0) + ' · A ' + (s.alpa || 0);
+  $('absenK').textContent = 'Tidak hadir · ' + tot + ' hari';
+  $('absS').textContent = s.sakit || 0; $('absI').textContent = s.izin || 0; $('absA').textContent = s.alpa || 0;
   $('kStatus').className = 'c ' + (s.kurang.length ? 'bl' : 'ok');
   $('status').textContent = s.kurang.length ? '✗ Belum lengkap' : '✓ Lengkap';
   $('kurang').textContent = s.kurang.length ? 'kosong: ' + s.kurang.join(', ') : ' ';

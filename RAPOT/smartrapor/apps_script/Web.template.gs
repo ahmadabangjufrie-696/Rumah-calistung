@@ -498,6 +498,38 @@ function webTempelSiswa(token, mulaiNo, data) {
   return webSiswa(token);
 }
 
+// hapus siswa (pindah sekolah): baris siswa di SISWA dan semua isian nilainya dibuang,
+// siswa sesudahnya naik satu nomor supaya urutan di semua halaman tetap cocok.
+function webHapusSiswa(token, no, nama) {
+  saya_(token, true);
+  no = nomor_(no);
+  var ss = SpreadsheetApp.getActive(), sw = ss.getSheetByName(SR.SISWA);
+  var sekarang = sw.getRange(SR.SISWA1 + no - 1, 4).getDisplayValue();
+  if (String(nama || '') !== sekarang) throw new Error('Data siswa sudah berubah. Muat ulang halaman, lalu coba lagi.');
+  var bagian = [[SR.SISWA, SR.SISWA1, 2, 26], [SR.EKSKUL, SR.EKS1, 3, 14], [WEB.CP, SR.BARIS_MAPEL, 3, 5]];
+  SR.MAPEL_SEKOLAH.forEach(function (t) { bagian.push([t, SR.BARIS_MAPEL, 3, 8], [t, SR.BARIS_MAPEL, 13, 2]); });
+  SR.MAPEL_PONDOK.forEach(function (t) { bagian.push([t, SR.BARIS_MAPEL, 3, 8]); });
+  for (var k = 1; k <= 3; k++) bagian.push([WEB.P5 + k, SR.BARIS_MAPEL, 3, WEB.ASPEK + 1]);
+  kunci_(function () {
+    bagian.forEach(function (b) {
+      var sh = ss.getSheetByName(b[0]);
+      if (!sh) return;
+      var rg = sh.getRange(b[1], b[2], SR.MAKS, b[3]), V = rg.getValues();
+      var sisa = V.slice(no - 1).some(function (r) { return r.some(function (x) { return x !== ''; }); });
+      if (!sisa) return;                                     // tidak ada isian dari siswa ini ke bawah
+      V = amankan_(V);
+      V.splice(no - 1, 1);
+      V.push(V[0].map(function () { return ''; }));
+      rg.setValues(V);
+    });
+  });
+  SpreadsheetApp.flush();
+  var daftar = daftarSiswa_();                               // pilihan siswa di BERANDA
+  var pilihan = ss.getSheetByName(SR.BERANDA).getRange(SR.PILIH);
+  if (daftar.length && !pilihan.getFormulas()[0][0]) pilihan.setValue(daftar[0]);
+  return webSiswa(token);
+}
+
 // ------------------------------------------------------------------ pengaturan
 // Dibaca dari lembar PENGATURAN apa adanya: kotak kuning = boleh diisi, berdaftar = dipilih.
 function webPengaturan(token) {

@@ -131,3 +131,6 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   Data Siswa: tombol **Tempel data siswa sekaligus**: tempel seluruh tabel + judul; kolom dikenali dari judul (SINONIM di Web.html), L/P dinormalkan, TTL dipisah, kolom No dilewati; `webTempelSiswa(token, mulaiNo, data[[null,..26]])` hanya menulis kolom yang ditempel.
   Tab GURU di Sheet tetap berfungsi (cadangan), tapi jalur utama sekarang aplikasi.
 - Ide jual: 1 guru 1 akun → nanti perlu kode lisensi (batas jumlah akun per sekolah). BELUM dibuat.
+- (19 Nov sore) Hapus siswa di aplikasi (`webHapusSiswa`: geser naik isian SISWA, mapel, EKSKUL, CATATAN PONDOK, P5; ketik HAPUS).
+  Kartu cetak (aplikasi & Panel): rata-rata Sekolah|Pondok, peringkat Sekolah|Pondok (`peringkatPondok`, dari rata pondok dibulatkan),
+  tidak hadir Sakit|Izin|Alpa. Ustadz pakai file LAMA 1fvT0K (masih ada stempel = gambar, PENGATURAN tanpa pilihan) → disarankan pindah ke 1n2Rb.
