@@ -32,6 +32,7 @@ var TOMBOL = {
 
 // ------------------------------------------------------------------ menu
 function onOpen() {
+  try { hapusStempel_(); } catch (e) { /* dicoba lagi saat Panel / cetak dibuka */ }
   SpreadsheetApp.getUi().createMenu('SmartRapor')
     .addItem('★ Buka Panel SmartRapor', 'bukaPanel')
     .addItem('Panel terbuka otomatis: NYALAKAN', 'panelOtomatisNyala')
@@ -50,6 +51,21 @@ function onOpen() {
     .addItem('🌐 Aplikasi web: buat / ganti PIN wali kelas', 'aturPinWali')
     .addItem('📲 Siapkan tab GURU (kirim link isi nilai lewat WA)', 'siapkanGuru')
     .addToUi();
+}
+
+// Lingkaran STEMPEL (gambar ±50x50 px di raport pondok, file versi lama) dihapus sekali saja.
+// Gambar lain (kop 600+ px, tanda air 330 px, hiasan sudut 22 px) tidak tersentuh.
+function hapusStempel_() {
+  var p = PropertiesService.getDocumentProperties();
+  if (p.getProperty('SR_STEMPEL')) return 0;
+  var sh = SpreadsheetApp.getActive().getSheetByName('RAPOR PONDOK'), n = 0;
+  if (!sh) return 0;
+  sh.getImages().forEach(function (img) {
+    var w = img.getWidth(), h = img.getHeight();
+    if (w >= 35 && w <= 70 && h >= 35 && h <= 70 && Math.abs(w - h) <= 6) { img.remove(); n++; }
+  });
+  p.setProperty('SR_STEMPEL', 'sudah');
+  return n;
 }
 
 // pilihan siswa diganti lewat daftar: rapikan tinggi baris raport
@@ -441,6 +457,7 @@ function progresCetak(kunci, id) { cekPanel_(kunci); return progres_(id); }
 function cetakPanel(kunci, o) { cekPanel_(kunci); return cetakPanel_(o); }
 
 function dataPanel_() {
+  try { hapusStempel_(); } catch (e) { /* abaikan */ }
   var ss = SpreadsheetApp.getActive();
   var sw = ss.getSheetByName(SR.SISWA).getRange(SR.SISWA1, 1, SR.MAKS, 5).getDisplayValues();
   var siswa = [];

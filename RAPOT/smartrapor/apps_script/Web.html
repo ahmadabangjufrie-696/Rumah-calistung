@@ -685,6 +685,31 @@ function saringDaftar(inp) {
   var q = inp.value.trim().toUpperCase();
   inp.parentNode.querySelectorAll('.s').forEach(function (b) { b.hidden = q && b.querySelector('.nmm').textContent.toUpperCase().indexOf(q) < 0; });
 }
+// kotak pilihan yang selalu menampilkan SEMUA pilihan (+ tulis sendiri)
+// aksi: 'ek|no|kunci|idx' (ekskul & catatan) atau 'sw|kolom' (data siswa)
+function pilihan(nilai, daftar, aksi, kosong) {
+  nilai = nilai == null ? '' : String(nilai);
+  var lain = nilai && daftar.indexOf(nilai) < 0;
+  return '<select class="in" data-aksi="' + aman(aksi) + '" data-lama="' + aman(nilai) + '" onchange="pilihUbah(this)">' +
+    '<option value="">' + aman(kosong || '— pilih —') + '</option>' +
+    daftar.map(function (x) { return '<option value="' + aman(x) + '"' + (x === nilai ? ' selected' : '') + '>' + aman(x) + '</option>'; }).join('') +
+    (lain ? '<option value="' + aman(nilai) + '" selected>' + aman(nilai) + '</option>' : '') +
+    '<option value="__tulis">✎ Tulis sendiri…</option></select>';
+}
+function pilihUbah(sel) {
+  var v = sel.value;
+  if (v === '__tulis') {
+    v = prompt('Tulis sendiri:', sel.dataset.lama || '');
+    if (v === null) { sel.value = sel.dataset.lama || ''; return; }
+    v = v.trim();
+    var o = document.createElement('option'); o.value = o.textContent = v;
+    sel.insertBefore(o, sel.lastChild); sel.value = v;
+  }
+  sel.dataset.lama = v;
+  var a = sel.dataset.aksi.split('|');
+  if (a[0] === 'ek') ubahEk(+a[1], a[2], v, a[3] === '' ? null : +a[3]);
+  else if (a[0] === 'sw') ubahSiswa(+a[1], v);
+}
 function datalist(id, arr) { return '<datalist id="' + id + '">' + arr.map(function (x) { return '<option value="' + aman(x) + '">'; }).join('') + '</datalist>'; }
 
 function gambarEkSiswa(no) {
@@ -703,13 +728,13 @@ function gambarEkSiswa(no) {
       return '<div class="c"><div class="k">' + x[1] + '</div><div class="stp"><button onclick="langkah(\'' + x[0] + '\',-1)">−</button><input class="in" id="ek_' + x[0] + '" inputmode="numeric" value="' + aman(s[x[0]]) + '" oninput="ubahEk(' + EKpilih + ',\'' + x[0] + '\',this.value)"><button onclick="langkah(\'' + x[0] + '\',1)">+</button></div></div>';
     }).join('') + '</div><div class="gj">Ekstrakurikuler</div>';
   for (var i = 0; i < 4; i++) {
-    h += '<div class="fl"><label>Kegiatan ' + (i + 1) + '</label><input class="in" list="dlKeg" value="' + aman(s.eks[i * 2]) + '" placeholder="pilih / ketik" oninput="ubahEk(' + EKpilih + ',\'eks\',this.value,' + (i * 2) + ')"></div>' +
-      '<div class="fl"><label>Keterangan ' + (i + 1) + '</label><input class="in" list="dlKet" value="' + aman(s.eks[i * 2 + 1]) + '" placeholder="pilih / ketik" oninput="ubahEk(' + EKpilih + ',\'eks\',this.value,' + (i * 2 + 1) + ')"></div>';
+    h += '<div class="fl"><label>Kegiatan ' + (i + 1) + '</label>' + pilihan(s.eks[i * 2], P.kegiatan, 'ek|' + EKpilih + '|eks|' + (i * 2), '— tidak ada —') + '</div>' +
+      '<div class="fl"><label>Keterangan ' + (i + 1) + '</label>' + pilihan(s.eks[i * 2 + 1], P.ket, 'ek|' + EKpilih + '|eks|' + (i * 2 + 1), '— tidak ada —') + '</div>';
   }
   h += '<div class="gj">Prestasi & catatan wali kelas</div>' +
     '<div class="fl pn"><label>Prestasi yang pernah diraih</label><input class="in" value="' + aman(s.prestasi) + '" oninput="ubahEk(' + EKpilih + ',\'prestasi\',this.value)"></div>' +
     '<div class="fl pn"><label>Catatan wali kelas</label><textarea class="in" oninput="ubahEk(' + EKpilih + ',\'catatan\',this.value)">' + aman(s.catatan) + '</textarea></div>' +
-    '<div class="fl"><label>Keputusan</label><input class="in" list="dlKep" value="' + aman(s.keputusan) + '" placeholder="pilih" oninput="ubahEk(' + EKpilih + ',\'keputusan\',this.value)"></div><div></div>';
+    '<div class="fl"><label>Keputusan (naik kelas / lulus)</label>' + pilihan(s.keputusan, P.keputusan.length ? P.keputusan : ['-', 'naik kelas VIII', 'naik kelas IX', 'LULUS', 'belum bisa naik kelas'], 'ek|' + EKpilih + '|keputusan|', '— belum dipilih —') + '</div><div></div>';
   if (EK.adaPondok) {
     h += '<div class="gj">Catatan pondok (pembiasaan diri)</div><div class="pbm">' + [0, 1, 2, 3].map(function (k) {
       var v = s.pb[k], lain = v && P.perlu.indexOf(v) < 0;
@@ -722,7 +747,7 @@ function gambarEkSiswa(no) {
         return '<option value="' + aman(p) + '"' + (s.cpondok === p ? ' selected' : '') + '>' + aman(p) + '</option>';
       }).join('') + '</select></div>';
   }
-  h += '</div></div></div>' + datalist('dlKeg', P.kegiatan) + datalist('dlKet', P.ket) + datalist('dlKep', P.keputusan);
+  h += '</div></div></div>';
   $('ekIsi').innerHTML = h;
 }
 function langkah(k, d) {
@@ -814,7 +839,7 @@ function gambarSiswa(no) {
   GRUP_SISWA.forEach(function (g) {
     h += '<div class="gj">' + g[0] + '</div>' + g[1].map(function (k) {
       var lab = SW.kolom[k], v = SWubah[k] != null ? SWubah[k] : s.isi[k], p = SW.pilihan[k], arab = /Arab/.test(lab);
-      var ctrl = p ? '<input class="in" list="dlS' + k + '" value="' + aman(v) + '" oninput="ubahSiswa(' + k + ',this.value)" placeholder="pilih / ketik">' + datalist('dlS' + k, p)
+      var ctrl = p ? pilihan(v, p, 'sw|' + k)
         : '<input class="in' + (arab ? ' ar' : '') + '"' + (arab ? ' dir="rtl" style="font-size:17px"' : '') + ' value="' + aman(v) + '" oninput="ubahSiswa(' + k + ',this.value)"' +
           (/Tanggal|Diterima Tanggal/.test(lab) ? ' placeholder="hh/bb/tttt"' : '') + (/Telepon|NIS/.test(lab) ? ' inputmode="tel"' : '') + '>';
       return '<div class="fl' + (k === 3 || k === 11 ? ' pn' : '') + '"><label>' + aman(lab) + (k === 3 ? ' *' : '') + '</label>' + ctrl + '</div>';

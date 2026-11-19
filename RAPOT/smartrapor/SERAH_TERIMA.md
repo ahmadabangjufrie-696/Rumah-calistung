@@ -134,3 +134,8 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
 - (19 Nov sore) Hapus siswa di aplikasi (`webHapusSiswa`: geser naik isian SISWA, mapel, EKSKUL, CATATAN PONDOK, P5; ketik HAPUS).
   Kartu cetak (aplikasi & Panel): rata-rata Sekolah|Pondok, peringkat Sekolah|Pondok (`peringkatPondok`, dari rata pondok dibulatkan),
   tidak hadir Sakit|Izin|Alpa. Ustadz pakai file LAMA 1fvT0K (masih ada stempel = gambar, PENGATURAN tanpa pilihan) → disarankan pindah ke 1n2Rb.
+- (19 Nov malam) File LAMA 1fvT0K (yang dipakai Ustadz, sudah berisi data asli: wali Wahyudi) di-upgrade lewat API: PENGATURAN
+  sekarang sama dengan file baru (Tingkat/Rombel, Masehi & Hijriah 3 pilihan, Fase/Semester/Tahun/KKTP/Peringkat pilihan,
+  kelas angka otomatis) + nama rentang SR_*. Rumus raport sudah ikut bergeser (dicek: raport pondok ٩ / الثاني, tanggal benar).
+  Stempel (gambar 50x50) dihapus oleh kode `hapusStempel_` saat file dibuka / Panel / cetak (sekali, tanda di DocumentProperties).
+  Isian pilihan di aplikasi memakai <select> + "Tulis sendiri" (datalist dulu menyaring pilihan sehingga tampak hilang).
