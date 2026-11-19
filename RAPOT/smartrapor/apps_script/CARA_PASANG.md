@@ -33,3 +33,13 @@ Linknya tetap sama.
 
 Keamanan: tanpa PIN yang benar tidak ada data yang bisa dibuka. PIN 5 kali salah → dikunci 5 menit.
 Guru hanya bisa membuka mapel yang dicentang wali kelas. Kehadiran, catatan, data siswa, pengaturan, cetak, akun = khusus wali kelas.
+
+## Kirim link isi nilai ke guru mapel lewat WhatsApp (tanpa PIN)
+
+1. Menu **SmartRapor → 📲 Siapkan tab GURU**. Tab **GURU** dibuat (sekali saja).
+2. Pastikan link aplikasi web ada di kotak kuning **C2** (bila kosong, tempel linknya).
+3. Isi per baris: **Nama guru**, **No. HP** (08…), pilih **Mapel**. Satu baris = satu mapel (guru 2 mapel = 2 baris).
+4. Kode terisi sendiri. Klik **📲 Kirim ke WA** → klik linknya → WhatsApp terbuka dengan pesan siap kirim → Kirim.
+5. Guru membuka link: langsung ke halaman nilai mapel itu saja, tanpa PIN, tanpa melihat mapel lain atau raport.
+6. Mematikan link (misal guru berganti): hapus kodenya di kolom E. Kode baru dibuat otomatis, kirim lagi.
+Kolom **Nilai lengkap** menunjukkan berapa siswa yang sudah lengkap nilainya.

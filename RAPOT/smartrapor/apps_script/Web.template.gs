@@ -5,10 +5,12 @@
 var WEB_HTML = __WEB_HTML__;
 var MAPEL_NAMA = __MAPEL_NAMA__;
 var WEB = { AKUN: 'SR_AKUN', GARAM: 'SR_GARAM', JAM: 21600, CP: 'CATATAN PONDOK', P5: 'P5 PROYEK ',
-            ATUR: 'PENGATURAN', KUNING: '#fff4cc', ASPEK: 7 };
+            ATUR: 'PENGATURAN', KUNING: '#fff4cc', ASPEK: 7, GURU: 'GURU', GURU1: 5, GURU_MAKS: 60 };
 
-function doGet() {
-  return HtmlService.createHtmlOutput(WEB_HTML)
+// ?k=KODE = link khusus guru mapel (dari tab GURU), tanpa PIN, hanya mapel itu
+function doGet(e) {
+  var k = e && e.parameter && e.parameter.k ? String(e.parameter.k).replace(/[^A-Za-z0-9]/g, '').slice(0, 40) : '';
+  return HtmlService.createHtmlOutput(WEB_HTML.replace('__KODE__', k))
     .setTitle('SmartRapor')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover');
 }
@@ -35,13 +37,39 @@ function cekPin_(pin) {
 }
 function profil_(a) {
   return { id: a.id, nama: a.nama, peran: a.peran, mapel: a.peran === 'wali' ? SR.MAPEL_SEKOLAH.concat(SR.MAPEL_PONDOK) : (a.mapel || []),
-           p5: a.peran === 'wali' || !!a.p5 };
+           p5: a.peran === 'wali' || !!a.p5 || !!a.p5n, p5n: a.p5n || null, link: !!a.link };
+}
+
+// ------------------------------------------------------------------ link khusus guru (tab GURU)
+// Satu baris = satu guru + satu mapel. Kode diisi otomatis; hapus kode = link lama tidak berlaku.
+function guruDariKode_(kode) {
+  kode = String(kode || '');
+  if (kode.length < 8) return null;
+  var sh = SpreadsheetApp.getActive().getSheetByName(WEB.GURU);
+  if (!sh) return null;
+  var v = sh.getRange(WEB.GURU1, 2, WEB.GURU_MAKS, 4).getDisplayValues();          // B nama, C HP, D mapel, E kode
+  for (var i = 0; i < v.length; i++) {
+    if (v[i][3] !== kode || !v[i][0] || !v[i][2]) continue;
+    var m = v[i][2].trim(), p5 = m.match(/^P5 PROYEK (\d)$/);
+    if (!p5 && !jenisMapel_(m)) return null;
+    return { id: 'k:' + kode, nama: v[i][0], peran: 'guru', mapel: p5 ? [] : [m], p5n: p5 ? +p5[1] : null, link: true };
+  }
+  return null;
+}
+
+function webGuruMasuk(kode) {
+  var a = guruDariKode_(kode);
+  if (!a) throw new Error('Link ini sudah tidak berlaku. Silakan minta link baru ke wali kelas.');
+  var token = Utilities.getUuid();
+  CacheService.getScriptCache().put('SR_T_' + token, a.id, WEB.JAM);
+  return { token: token, saya: profil_(a) };
 }
 
 // token masuk berlaku 6 jam sejak dipakai terakhir
 function saya_(token, wali) {
   var c = CacheService.getScriptCache(), id = token ? c.get('SR_T_' + token) : null;
-  var a = id ? akunSemua_().filter(function (x) { return x.id === id; })[0] : null;
+  var a = !id ? null : id.indexOf('k:') === 0 ? guruDariKode_(id.slice(2))
+        : akunSemua_().filter(function (x) { return x.id === id; })[0];
   if (!a) throw new Error('SESI_HABIS');
   c.put('SR_T_' + token, id, WEB.JAM);
   if (wali && a.peran !== 'wali') throw new Error('Halaman ini khusus wali kelas.');
@@ -334,13 +362,15 @@ function lembarP5_(n) {
   if (!sh) throw new Error('Tab P5 PROYEK ' + n + ' tidak ada.');
   return sh;
 }
-function bolehP5_(token) {
+function bolehP5_(token, n) {
   var a = saya_(token);
-  if (a.peran !== 'wali' && !a.p5) throw new Error('Ustadz/Ibu belum diberi akses P5. Minta ke wali kelas.');
+  if (a.peran !== 'wali' && !a.p5 && !a.p5n) throw new Error('Ustadz/Ibu belum diberi akses P5. Minta ke wali kelas.');
+  if (a.p5n && parseInt(n, 10) !== a.p5n) throw new Error('Link ini hanya untuk P5 PROYEK ' + a.p5n + '.');
+  return a;
 }
 
 function webP5(token, n) {
-  bolehP5_(token);
+  var saya = bolehP5_(token, n);
   var sh = lembarP5_(n), A = WEB.ASPEK;
   var kepala = sh.getRange(7, 3, 2, A).getDisplayValues();
   var v = sh.getRange(SR.BARIS_MAPEL, 2, SR.MAKS, A + 2).getDisplayValues();      // B..J
@@ -349,7 +379,7 @@ function webP5(token, n) {
   var proyek = [];
   for (var k = 1; k <= 3; k++) {
     var s = SpreadsheetApp.getActive().getSheetByName(WEB.P5 + k);
-    if (s) proyek.push({ n: k, judul: s.getRange('C4').getDisplayValue() });
+    if (s && (!saya.p5n || saya.p5n === k)) proyek.push({ n: k, judul: s.getRange('C4').getDisplayValue() });
   }
   return { n: parseInt(n, 10), judul: sh.getRange('C4').getDisplayValue(), desk: sh.getRange('C5').getDisplayValue(),
            dimensi: kepala[0], sub: kepala[1], siswa: siswa, proyek: proyek };
@@ -357,7 +387,7 @@ function webP5(token, n) {
 
 // kirim = { judul, desk, dimensi:[7], sub:[7], ubah:[{no, k (0-6 aspek, 7 catatan), v}] }
 function webSimpanP5(token, n, kirim) {
-  bolehP5_(token);
+  bolehP5_(token, n);
   var sh = lembarP5_(n), A = WEB.ASPEK, BOLEH = ['', 'BB', 'MB', 'BSH', 'SB'];
   kunci_(function () {
     if (kirim.judul != null) sh.getRange('C4').setValue(tulisTeks_(kirim.judul, 200));
@@ -499,7 +529,9 @@ function aturPinWali() {
 
 function aplikasiWeb() {
   if (!ui_()) return;
-  var url = urlWeb_(), adaWali = akunSemua_().some(function (a) { return a.peran === 'wali'; });
+  var url = urlWeb_(), g = SpreadsheetApp.getActive().getSheetByName(WEB.GURU);
+  if (url && g && !g.getRange('C2').getDisplayValue()) g.getRange('C2').setValue(url);
+  var adaWali = akunSemua_().some(function (a) { return a.peran === 'wali'; });
   var langkah = '<ol style="margin:6px 0 0 18px;padding:0;line-height:1.6">' +
     '<li>Buka <b>Ekstensi › Apps Script</b>.</li>' +
     '<li>Klik tombol biru <b>Terapkan</b> (kanan atas) › <b>Deployment baru</b>.</li>' +
@@ -514,8 +546,81 @@ function aplikasiWeb() {
       '<p style="margin:12px 0"><a href="' + url + '" target="_blank" style="background:#0F5132;color:#fff;padding:10px 18px;' +
       'border-radius:10px;text-decoration:none;font-weight:600">Buka aplikasi web</a></p>' +
       '<p style="margin:0;font-size:12px;color:#6c757d">Kirim link ini ke guru lewat WhatsApp. Guru masuk dengan nama + PIN ' +
-      'yang dibuat wali kelas di halaman <b>Akun Guru</b>.<br>Setiap kali kode diganti, lakukan <b>Terapkan › Kelola deployment › ✎ › Versi: Versi baru</b>.</p>'
+      'atau lewat link khusus dari tab <b>GURU</b> (menu SmartRapor › 📲 Siapkan tab GURU).<br>Setiap kali kode diganti, lakukan <b>Terapkan › Kelola deployment › ✎ › Versi: Versi baru</b>.</p>'
       : '<p style="margin:0">Aplikasi web belum diterbitkan. Caranya (cukup sekali):</p>' + langkah) + '</div>';
   SpreadsheetApp.getUi().showModalDialog(HtmlService.createHtmlOutput(isi).setWidth(460).setHeight(url ? 300 : 330),
     'SmartRapor - Aplikasi web');
+}
+
+// ------------------------------------------------------------------ tab GURU: kirim link lewat WhatsApp
+var GURU_HP = 'SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(C{r}&"";" ";"");"-";"");"+";"");".";"")';
+
+function siapkanGuru() {
+  if (!ui_()) return;
+  var ss = SpreadsheetApp.getActive(), sh = ss.getSheetByName(WEB.GURU), baru = !sh;
+  if (baru) {
+    sh = ss.insertSheet(WEB.GURU, Math.min(3, ss.getSheets().length));
+    bentukGuru_(sh);
+  }
+  var url = urlWeb_();
+  if (url && !sh.getRange('C2').getDisplayValue()) sh.getRange('C2').setValue(url);
+  isiKodeGuru_(sh, WEB.GURU1, WEB.GURU_MAKS);
+  sh.activate();
+  pesan_((baru ? 'Tab GURU sudah dibuat.\n\n' : '') +
+    'Cara pakai:\n1. Isi nama guru, nomor HP (WhatsApp), dan pilih mapel. Satu baris = satu mapel.\n' +
+    '2. Klik "📲 Kirim ke WA" di baris itu, lalu klik linknya. WhatsApp terbuka dengan pesan siap kirim.\n\n' +
+    'Guru membuka link tanpa PIN dan hanya bisa mengisi mapel itu.\nHapus kode di kolom E bila link lama harus dimatikan (kode baru dibuat otomatis).' +
+    (sh.getRange('C2').getDisplayValue() ? '' : '\n\nPENTING: link aplikasi web belum ada di kotak C2. Terbitkan dulu aplikasi web, lalu tempel linknya di C2.'));
+}
+
+function bentukGuru_(sh) {
+  var HIJAU = '#0F5132', akhir = WEB.GURU1 + WEB.GURU_MAKS - 1;
+  sh.getRange('A1').setValue('Guru Mapel · Kirim Link Isi Nilai').setFontSize(16).setFontWeight('bold').setFontColor(HIJAU);
+  sh.getRange('A2').setValue('Link aplikasi web:').setFontWeight('bold');
+  sh.getRange('C2:E2').merge().setBackground('#fff4cc').setFontSize(9);
+  sh.getRange('A3').setValue('Isi nama, nomor HP, pilih mapel (satu baris = satu mapel). Kode dibuat otomatis. ' +
+    'Klik "📲 Kirim ke WA" lalu klik linknya. Hapus kode = link lama tidak berlaku.').setFontSize(9).setFontColor('#6c757d');
+  var kepala = ['No', 'Nama Guru', 'No. HP (WhatsApp)', 'Mapel', 'Kode (otomatis)', 'Kirim link', 'Nilai lengkap'];
+  sh.getRange(4, 1, 1, 7).setValues([kepala]).setFontWeight('bold').setFontColor('#ffffff').setBackground(HIJAU)
+    .setHorizontalAlignment('center');
+  var n = WEB.GURU_MAKS, no = [], rumus = [];
+  for (var i = 0; i < n; i++) {
+    var r = WEB.GURU1 + i, hp = GURU_HP.replace(/\{r\}/g, r);
+    no.push([i + 1]);
+    var nomor = 'IF(LEFT(' + hp + ';1)="0";"62"&MID(' + hp + ';2;20);IF(LEFT(' + hp + ';1)="8";"62"&' + hp + ';' + hp + '))';
+    var teks = '"Assalamu\'alaikum "&B' + r + '&"."&CHAR(10)&"Mohon bantuannya mengisi nilai *"&D' + r + '&"* kelas "&SR_KELAS&" semester "&SR_SEMESTER&" lewat link berikut:"&CHAR(10)&$C$2&"?k="&E' + r +
+      '&CHAR(10)&CHAR(10)&"Link ini khusus untuk Ustadz/Ibu, mohon tidak disebarkan. Setelah mengisi, tekan tombol Simpan. Jazakumullah khairan."';
+    rumus.push([
+      '=IF(OR(B' + r + '="";C' + r + '="";D' + r + '="";E' + r + '="";$C$2="");"";HYPERLINK("https://wa.me/"&' + nomor + '&"?text="&ENCODEURL(' + teks + ');"📲 Kirim ke WA"))',
+      '=IF(OR(B' + r + '="";D' + r + '="";LEFT(D' + r + ';2)="P5");"";IFERROR(COUNTIF(INDIRECT("\'"&D' + r + '&"\'!M9:R48");"Lengkap")&" / "&COUNTA(SISWA!$D$5:$D$44);""))'
+    ]);
+  }
+  sh.getRange(WEB.GURU1, 1, n, 1).setValues(no).setHorizontalAlignment('center');
+  // rumus ditulis dengan pemisah ; lalu diubah menjadi , (setFormulas selalu memakai koma)
+  sh.getRange(WEB.GURU1, 6, n, 2).setFormulas(rumus.map(function (b) {
+    return b.map(function (f) { return f.replace(/;(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ','); });
+  }));
+  sh.getRange(WEB.GURU1, 2, n, 3).setBackground('#fff4cc');
+  sh.getRange(WEB.GURU1, 3, n, 1).setNumberFormat('@');
+  sh.getRange(WEB.GURU1, 5, n, 1).setFontColor('#9b8f6c').setFontSize(8);
+  sh.getRange(WEB.GURU1, 6, n, 2).setHorizontalAlignment('center');
+  var pilihan = SR.MAPEL_SEKOLAH.concat(SR.MAPEL_PONDOK, ['P5 PROYEK 1', 'P5 PROYEK 2', 'P5 PROYEK 3']);
+  sh.getRange(WEB.GURU1, 4, n, 1).setDataValidation(SpreadsheetApp.newDataValidation()
+    .requireValueInList(pilihan, true).setAllowInvalid(false).build());
+  sh.getRange(4, 1, n + 1, 7).setBorder(true, true, true, true, true, true, '#d9d2bd', SpreadsheetApp.BorderStyle.SOLID);
+  [5, 26, 18, 16, 14, 16, 13].forEach(function (w, i) { sh.setColumnWidth(i + 1, w * 7); });
+  sh.setFrozenRows(4);
+  sh.setTabColor('#B8932E');
+}
+
+// beri kode acak untuk baris yang sudah ada nama + mapel (dipanggil juga dari onEdit)
+function isiKodeGuru_(sh, baris, jumlah) {
+  var r1 = Math.max(baris, WEB.GURU1), r2 = Math.min(baris + jumlah - 1, WEB.GURU1 + WEB.GURU_MAKS - 1);
+  if (r2 < r1) return;
+  var rg = sh.getRange(r1, 2, r2 - r1 + 1, 4), v = rg.getDisplayValues(), ubah = false;
+  var kode = v.map(function (r) {
+    if (r[0] && r[2] && !r[3]) { ubah = true; return [Utilities.getUuid().replace(/-/g, '').slice(0, 14)]; }
+    return [r[3]];
+  });
+  if (ubah) sh.getRange(r1, 5, kode.length, 1).setValues(kode);
 }

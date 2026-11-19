@@ -57,6 +57,7 @@ main{flex:1;min-width:0;padding:22px 26px 110px}
 .sjd{color:#777;font-size:13.5px;font-weight:500;margin-bottom:16px}
 .orn{height:2px;background:linear-gradient(90deg,var(--e),rgba(184,147,46,0));margin:12px 0 18px}
 .navhp{display:none}
+.app.link .nav,.app.link .navhp{display:none!important}
 /* ------------------------------------------------ kartu & tombol */
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .c{background:#fff;border:1.5px solid #ece4cc;border-radius:16px;padding:13px 15px}
@@ -222,7 +223,8 @@ table.tn{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
   .navhp button .i{font-size:19px;width:44px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center}
   .navhp button.on{color:var(--h)}
   .navhp button.on .i{background:var(--muda)}
-  .simpan{bottom:calc(76px + env(safe-area-inset-bottom))}
+  .simpan{bottom:calc(76px + env(safe-area-inset-bottom));font-size:12.5px;white-space:nowrap}
+  .app.link~.simpan{bottom:calc(16px + env(safe-area-inset-bottom))}
   main{padding:16px 14px 150px}
   .hd{height:60px;padding:0 12px}
   .hd img{width:36px;height:36px}
@@ -290,6 +292,7 @@ table.tn{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 // =================================================================== dasar
+var KODE_GURU = '__KODE__'; if (KODE_GURU.indexOf('__') === 0) KODE_GURU = '';
 var TOKEN = null, SAYA = null, DEPAN = null, HAL = null, KOTOR = null, CACHE = {};
 var NAMA_JENIS = { sekolah: 'Raport Sekolah', pondok: 'Raport Pondok', p5: 'Raport P5', cover: 'Cover',
                    identitas: 'Identitas Sekolah', diri: 'Keterangan Diri' };
@@ -329,6 +332,10 @@ function mulai() {
   panggil('webDepan').then(function (d) {
     DEPAN = d;
     $('mkSekolah').textContent = [d.sekolah, d.kelas && 'Kelas ' + d.kelas].filter(Boolean).join(' · ') || ' ';
+    if (KODE_GURU) {                       // link khusus guru mapel: tanpa PIN
+      return panggil('webGuruMasuk', KODE_GURU).then(function (h) { TOKEN = h.token; masukBerhasil(h.saya); })
+        .catch(function (e) { $('mkIsi').innerHTML = '<p class="salah" style="font-size:14.5px;line-height:1.6">' + aman(e.message) + '</p>'; });
+    }
     var t = ambilLokal('sr_token');
     if (t) {
       TOKEN = t;
@@ -367,6 +374,7 @@ function masuk() {
 }
 
 function sesiHabis() {
+  if (KODE_GURU) { TOKEN = null; panggil('webGuruMasuk', KODE_GURU).then(function (h) { TOKEN = h.token; toast('Sambungan diperbarui. Silakan tekan Simpan lagi.'); }).catch(function (e) { toast(e.message, true); }); return; }
   TOKEN = null; SAYA = null; simpanLokal('sr_token', null); KOTOR = null; $('barSimpan').hidden = true;
   if (DEPAN) formMasuk('Sesi sudah habis. Silakan masuk lagi.');
 }
@@ -397,6 +405,8 @@ function masukBerhasil(saya) {
   $('chips').innerHTML = [DEPAN.kelas && 'Kelas ' + DEPAN.kelas, DEPAN.semester && 'Semester ' + DEPAN.semester, DEPAN.tahun]
     .filter(Boolean).map(function (t) { return '<span class="chip">' + aman(t) + '</span>'; }).join('');
   $('avSaya').textContent = inisial(saya.nama); $('nmSaya').textContent = saya.nama;
+  $('layarApp').classList.toggle('link', !!saya.link);
+  if (saya.link) { buka(saya.p5n ? 'p5' : 'nilai', saya.p5n || saya.mapel[0]); return; }
   var m = menuSaya();
   $('nav').innerHTML = '<div class="lab">Menu</div>' + m.map(function (x) {
     return '<button class="ni" data-id="' + x.id + '" onclick="buka(\'' + x.id + '\')"><span class="i">' + x.i + '</span>' + x.t + '</button>';
@@ -417,6 +427,11 @@ function bukaLain() {
 }
 function tutupLain() { $('lain').classList.remove('buka'); }
 function menuAkun() {
+  if (SAYA.link) {
+    $('lainIsi').innerHTML = '<div style="padding:4px 10px 10px"><b style="font-size:16px">' + aman(SAYA.nama) + '</b><div style="color:#888;font-size:12.5px;margin-top:4px">Masuk lewat link khusus dari wali kelas. Hanya untuk mengisi ' +
+      aman(SAYA.p5n ? 'P5 PROYEK ' + SAYA.p5n : SAYA.mapel.join(', ')) + '.</div></div><button class="ni" onclick="tutupLain()"><span class="i">✕</span>Tutup</button>';
+    $('lain').classList.add('buka'); return;
+  }
   $('lainIsi').innerHTML = '<div style="padding:4px 10px 10px"><b style="font-size:16px">' + aman(SAYA.nama) + '</b><div style="color:#888;font-size:12.5px">' + (SAYA.peran === 'wali' ? 'Wali kelas' : 'Guru mapel') + '</div></div>' +
     '<button class="ni" onclick="tutupLain();gantiPin()"><span class="i">🔑</span>Ganti PIN saya</button>' +
     '<button class="ni" onclick="keluar()"><span class="i">🚪</span>Keluar</button>';
@@ -495,6 +510,7 @@ function halNilai(tab) {
   var pilih = '<div class="pil" style="margin-bottom:14px">' + mapel.map(function (t) {
     return '<button class="pl' + (t === tab ? ' on' : '') + '" onclick="buka(\'nilai\',\'' + aman(t) + '\')">' + aman(t) + '</button>';
   }).join('') + '</div>';
+  if (SAYA.link) pilih = '<div class="sjd">Assalamu\'alaikum, <b>' + aman(SAYA.nama) + '</b>. Silakan isi nilai, lalu tekan tombol <b>💾 Simpan</b> di bawah.</div>';
   $('isi').innerHTML = judul('Input nilai', 'Input Nilai') + pilih + '<div id="nilaiIsi">' + memuat('Membuka ' + tab + '…') + '</div>';
   api('webMapel', tab).then(function (d) { NL = d; gambarNilai(); }).catch(function (e) { $('nilaiIsi').innerHTML = '<div class="kosong" style="color:#c0392b">' + aman(e.message) + '</div>'; });
 }
@@ -711,7 +727,7 @@ function langkah(k, d) {
 var P5 = null, P5ubah = {};
 function halP5(n) {
   n = n || 1; HAL.arg = n;
-  $('isi').innerHTML = judul('Projek Penguatan Profil Pelajar Pancasila', 'Projek P5') + '<div id="p5Isi">' + memuat() + '</div>';
+  $('isi').innerHTML = judul('Projek Penguatan Profil Pelajar Pancasila', 'Projek P5', SAYA.link ? 'Assalamu\'alaikum, <b>' + aman(SAYA.nama) + '</b>. Silakan isi, lalu tekan tombol <b>💾 Simpan</b>.' : '') + '<div id="p5Isi">' + memuat() + '</div>';
   P5ubah = {};
   api('webP5', n).then(function (d) { P5 = d; gambarP5(); }).catch(function (e) { $('p5Isi').innerHTML = '<div class="kosong" style="color:#c0392b">' + aman(e.message) + '</div>'; });
 }

@@ -15,7 +15,7 @@ satu file per kelas. Guru mengisi nilai di tab mapel, raport terisi otomatis lew
     id `1n2Rb2K2Kyf85mdZp2SblroglMmSz-QCK0NbSlRZxfLo` (10 siswa buatan). Kode tombol **belum** ditempel.
   - 15 Nov atas permintaan Ustadz dibuang ke Sampah: file contoh lama `1RrOsB1w...`, percobaan C3 pertama `1ZBBI_k1...`,
     dokumen KODE lama 11 Nov `1OAb9Me4...`. Hanya ada SATU file raport contoh dan SATU dokumen KODE.
-  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1ar_NGuBgub_ypMaYCzVWkVdGQ7SCPx1k8cnNR21sOgo` (19 Nov: + aplikasi web; dokumen lama 1vgwa1jp… dibuang).
+  - Dokumen kode tombol: **KODE SmartRapor (salin semua ke Apps Script)** id `1nfsMeFqd80gZsSTmJ4qI3T-IJv_Xa9XBtgtD3uYypyY` (19 Nov: + aplikasi web + tab GURU link WA; dokumen lama dibuang).
 - Nanti TU menyalin ke **Drive sekolah** (Ustadz tidak mau memakai Drive pribadi untuk dipakai sekolah).
 
 ## Berkas
@@ -120,3 +120,8 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   dipanggil dari aplikasi web. Kemajuan cetak: cache skrip `SR_PROGRES_<id>`.
 - Uji lokal: scratchpad `web/` (palsu.js = tiruan Apps Script berisi data contoh, uji_server.js, uji_ui.js Playwright).
 - Pasang: lihat `apps_script/CARA_PASANG.md` bagian Aplikasi web (Terapkan → Aplikasi web, Jalankan sebagai Saya, akses Siapa saja).
+- **Link khusus guru mapel (tab GURU)**: menu SmartRapor › 📲 Siapkan tab GURU membuat tab GURU (B nama, C HP teks, D mapel/P5 PROYEK n,
+  E kode acak otomatis lewat onEdit, F rumus HYPERLINK wa.me + ENCODEURL pesan, G "x / n lengkap"). Link aplikasi di GURU!C2.
+  Guru membuka `URL?k=KODE` → `doGet` menyisipkan kode → `webGuruMasuk` (tanpa PIN) → hanya mapel itu, tanpa menu.
+  Hapus kode = link mati. Ustadz minta ini (19 Nov): guru tidak boleh melihat nilai lain/akun wali; data siswa cukup ditempel di Sheet.
+- SISWA kolom B, C, M, U, Z diformat Teks (file Google sudah diubah lewat API, juga di generator) supaya 0 di depan tidak hilang saat tempel.

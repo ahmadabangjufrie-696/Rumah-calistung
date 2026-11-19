@@ -359,6 +359,10 @@ def buat_siswa(wb):
                             allow_blank=True)
         ws.add_data_validation(dv)
         dv.add(f'{c}{SISWA1}:{c}{SISWA1 + MAKS - 1}')
+    # NIS, NISN, telepon: format teks supaya angka 0 di depan tidak hilang saat ditempel
+    for kol in ('NIS', 'NISN', 'No. Telepon', 'Telepon Orang Tua', 'Telepon Wali'):
+        for i in range(MAKS):
+            ws[f'{KS[kol]}{SISWA1 + i}'].number_format = '@'
     # daftar pilihan "No - Nama" untuk BERANDA (kolom AB disembunyikan)
     for i in range(MAKS):
         r = SISWA1 + i

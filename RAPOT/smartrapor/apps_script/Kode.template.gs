@@ -48,6 +48,7 @@ function onOpen() {
     .addSeparator()
     .addItem('🌐 Aplikasi web: buka / lihat link', 'aplikasiWeb')
     .addItem('🌐 Aplikasi web: buat / ganti PIN wali kelas', 'aturPinWali')
+    .addItem('📲 Siapkan tab GURU (kirim link isi nilai lewat WA)', 'siapkanGuru')
     .addToUi();
 }
 
@@ -56,6 +57,9 @@ function onEdit(e) {
   if (!e || !e.range) return;
   var sh = e.range.getSheet();
   if (sh.getName() === SR.BERANDA && e.range.getA1Notation() === SR.PILIH) rapikanTinggi_();
+  if (sh.getName() === 'GURU' && e.range.getRow() + e.range.getNumRows() > 4) {
+    try { isiKodeGuru_(sh, e.range.getRow(), e.range.getNumRows()); } catch (err) { /* abaikan */ }
+  }
 }
 
 // ------------------------------------------------------------------ pindah siswa
