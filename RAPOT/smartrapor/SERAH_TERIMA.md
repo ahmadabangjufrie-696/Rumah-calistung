@@ -147,3 +147,8 @@ Versi lama (Excel + makro): `isi_raport.py`, `gsdata.py`, `excel/AmbilNilai.bas`
   (SISWA, nilai, TP, nama guru, EKSKUL, CATATAN PONDOK, P5, GURU, wali kelas & NIP & wali Arab). Untuk disalin per kelas.
   Kode: akun ikut tersalin? → `akunSemua_` menyimpan id file (SR_FILE); di file salinan akun lama otomatis dikosongkan.
   `aturPinWali` sekarang bisa mengganti wali kelas dengan nama baru (akun lama di file itu diganti).
+- (19 Nov) File per kelas dibuat dari MASTER (Tingkat/Rombel diisi, Ganjil 2026/2027, 20 Des 2026 / 11 Rajab 1448):
+  VII A `1nGfWq6BvSPLkBOGUc3i-jQFzLxxqlnC8HMHzkklzYgE`, VII B `1yzmrHRA_xdBi4gatYvDD71OSdLz2NPa5D7ubZ9sXTDQ`,
+  VIII (tanpa rombel) `1vBQ8E4lMZEezik11sZNvAMwySWyKPAOXhSfdNEgcwmY`, IX A `18wdCRthJYxNPrNVVXMkQhSyti5cOPELdWwPINlFM_Z8`,
+  IX B `1-RuvukLTzaKoAXilz83dljpnIOqBt_mESlb_VOIORHk`. Tiap file: wali kelas isi nama+PIN (menu), lalu Terapkan → Deployment baru.
+  Kode di salinan = kode di file Ustadz saat disalin (mungkin belum terbaru) → tempel KODE terbaru di tiap file.
